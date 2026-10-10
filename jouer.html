@@ -76,6 +76,9 @@ button{font:inherit}
 .sig{position:fixed;right:calc(8px + env(safe-area-inset-right, 0px));bottom:calc(5px + env(safe-area-inset-bottom, 0px));z-index:95;pointer-events:none;font-size:.7rem;font-weight:700;letter-spacing:.02em;color:var(--ink);background:rgba(255,253,247,.72);border-radius:6px;padding:1px 7px;opacity:.85}
 .foot-credit{margin:0;text-align:center;font-weight:800;font-size:.9rem;color:var(--muted);padding:0 18px 14px}
 .dl-box{background:#e9ffe9;border-color:var(--go)}
+.wipe-box{background:#fff0f0;border-color:var(--x)}
+.save-row{display:flex;gap:12px;align-items:end;flex-wrap:wrap}
+.save-row .fld{flex:1;min-width:220px}
 .form{padding:22px clamp(16px,3vw,28px) 26px;display:grid;gap:16px;min-width:0}
 .h2{font-family:var(--f-display);font-size:2rem;margin:0}
 .stepper{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-weight:800;font-size:1.1rem}
@@ -428,14 +431,14 @@ textarea.in{resize:vertical;line-height:1.3}
       <label class="fld" for="dur"><span class="fld-l">Durée de la partie (minutes)</span><input class="in" id="dur" type="number" min="5" max="120" inputmode="numeric"></label>
       <p class="qcount" id="qCount"></p>
       <div class="empty-box" id="emptyBox" hidden="">
-        <p><b>Aucune question pour l'instant.</b> Ouvre le mode prof pour charger un fichier de questions (.txt) ou en écrire avec la touche +.</p>
-        <button type="button" class="btn violet" id="btnEmptyProf">Ouvrir le mode prof</button>
+        <p><b>Aucune question pour l'instant.</b> Ouvre un cours (fichier .txt) ou écris tes questions dans le mode prof avec la touche +.</p>
+        <button type="button" class="btn violet" id="btnEmptyProf">📂 Ouvrir un cours</button>
       </div>
       <div class="mode-box" id="modeBox">
         <span class="fld-l">Mode de jeu</span>
         <div class="mode-btns" role="radiogroup" aria-label="Mode de jeu">
           <button type="button" class="mode-btn on" id="modeSans" role="radio" aria-checked="true"><b>🖥️ Sans manettes</b><small>Tout se joue au tableau</small></button>
-          <button type="button" class="mode-btn" id="modeAvec" role="radio" aria-checked="false"><b>📱 Avec manettes</b><small>Téléphones ou tablettes (internet)</small></button>
+          <button type="button" class="mode-btn" id="modeAvec" role="radio" aria-checked="false"><b>📱 Avec manettes</b><small>Tablettes de la classe (internet)</small></button>
         </div>
         <div id="manetteZone"></div>
       </div>
@@ -769,7 +772,7 @@ function say(t){ if (G){ G.msg = t; const m = $('#msg'); if (m) m.textContent = 
 /* ================= SETUP SCREEN ================= */
 let nPlayers = 7;
 const APP_VERSION = '1.1';
-const BUILD = '20261011';
+const BUILD = '20261011b';
 const AUTHOR = 'Manderlier Jérôme';
 const COPYRIGHT = '© 2026 Manderlier Jérôme. Classe Party est sous licence Creative Commons BY-NC-ND 4.0 : utilisation gratuite en classe, toute utilisation commerciale ou revente interdite sans accord écrit de l\'auteur.';
 function gameTitle(){ return String(bank.settings.title || '').trim() || DEFAULT_BANK.settings.title; }
@@ -1833,7 +1836,7 @@ Object.assign(TUTO_IMG, {
     + sPhone(164, 12, 66, 126, sTxt(197, 34, '🤫 Mime', 9.5, TK.ink, 'middle', true)
       + `<rect x="170" y="44" width="54" height="40" rx="6" fill="#fff" stroke="${TK.m}" stroke-width="2.5"/>` + sTxt(197, 62, 'Un', 11, TK.ink, 'middle', true) + sTxt(197, 77, 'robot', 11, TK.ink, 'middle', true)
       + sBtn(170, 98, 54, 20, TK.q, 'Chrono', 9)),
-    'Sur le téléphone : lancer les dés, répondre, voir le mot à mimer'),
+    'Sur la tablette : lancer les dés, répondre, voir le mot à mimer'),
   manAll: () => sFrame(
     `<rect x="12" y="14" width="132" height="58" rx="8" fill="${TK.crumb}" stroke="${TK.ink}" stroke-width="3"/>`
     + sTxt(78, 36, '✅ Ali a répondu !', 10.5, TK.ink, 'middle', true) + sTxt(78, 56, '⏳ Encore 8 s…', 11, TK.v, 'middle', true)
@@ -1846,15 +1849,15 @@ Object.assign(TUTO_IMG, {
 const TUTO = [
   {part:'Avant le cours : préparer le jeu'},
   {img:'prof', title:'Ouvrir le mode prof', text:['Clique sur le bouton violet « Mode prof », en haut à droite.', 'Le code de départ est 1234. Change-le tout de suite dans l\'onglet Réglages, pour que les élèves ne puissent pas modifier le jeu.']},
-  {img:'title', title:'Choisir le thème du jeu', text:['Dans l\'onglet Réglages, écris le titre et le sous-titre de ton jeu.', 'Ils s\'affichent sur l\'accueil, en haut de l\'écran, au centre du plateau, et donnent son nom au fichier téléchargé.', 'Pour repartir de zéro sur un autre thème : onglet Sauvegarde, « Tout vider pour un nouveau thème ».']},
+  {img:'title', title:'Choisir le thème du jeu', text:['Dans l\'onglet Réglages, écris le titre et le sous-titre de ton jeu.', 'Ils s\'affichent sur l\'accueil, en haut de l\'écran, au centre du plateau, et donnent son nom au fichier téléchargé.', 'Pour repartir de zéro : onglet « Ouvrir / Enregistrer », « Effacer le questionnaire » (il faut écrire « oui » pour confirmer).']},
   {img:'plus', title:'Ajouter des questions', text:['Choisis un onglet : Quiz, Vrai / Faux, Actions, Mimes, Chance ou Malchance.', 'Clique sur la grosse touche verte + en bas à droite. Une fiche vide apparaît en haut de la liste, entourée de vert.', 'Pour enlever une fiche, clique sur « Supprimer ».']},
   {img:'fill', title:'Remplir une question de quiz', text:['Écris la question, puis 2 à 4 réponses.', 'Coche le rond devant la bonne réponse.', 'L\'explication est facultative : elle s\'affiche après la réponse et aide à corriger devant la classe.']},
   {img:'tips', title:'Écrire de bonnes questions', text:['Fais des phrases courtes : elles doivent se lire de loin, au tableau.', 'Une seule bonne réponse, sans discussion possible.', 'Pour les Vrai / Faux, mélange des vrais et des faux, sinon les élèves devinent.', 'Pour les Actions, écris la réponse attendue : elle reste cachée, elle est pour toi.']},
   {img:'count', title:'Combien de questions ?', text:['Il n\'y a pas de minimum : le jeu fonctionne même avec quelques questions. Quand tout a été posé, elles sont remélangées et reviennent dans un autre ordre.', 'Pas de vrai/faux, pas d\'actions ou pas de mimes ? Pas de souci : sur ces cases, le jeu propose une question d\'une autre catégorie.', 'Pour une partie bien variée de 40 minutes, une dizaine de quiz et de vrai/faux est confortable, mais ce n\'est pas obligatoire.']},
   {img:'settings', title:'Régler la partie', text:['Dans Réglages, choisis la durée de la partie, la durée du coup de feu et les bonus du mime et des étoiles.', 'Grand groupe : à partir de 15 joueurs, les cases gagnées et perdues comptent double, pour que le classement bouge plus. Tu peux changer le seuil et le multiplicateur.', 'Pour un cours de 50 minutes, compte 40 minutes de jeu : il reste le temps de s\'installer et de faire le podium.']},
   {img:'save', title:'Enregistrer', text:['Après chaque modification, clique sur « Enregistrer » en bas à droite.', 'Le message « Enregistré » confirme. Si tu fermes sans enregistrer, tes changements sont perdus.']},
-  {img:'txt', title:'Un fichier de questions par cours', text:['Onglet Sauvegarde : écris le nom du cours et clique sur « Télécharger les questions (.txt) ». Fais-le pour chaque cours.', 'Pour changer de cours, clique sur « Charger un fichier de questions », choisis le fichier, puis « Remplacer mes questions ». Le titre change aussi.', 'Le matin les maths, l\'après-midi la géographie : quelques secondes, sans rien retaper.', 'Le fichier .txt s\'ouvre dans le Bloc-notes : tu peux y écrire des questions directement en suivant le modèle en haut du fichier.']},
-  {img:'file', title:'Garder une copie du jeu', text:['Dans l\'onglet Sauvegarde, clique sur « Télécharger le jeu (fichier) ».', 'Mets le fichier sur une clé USB ou dans ton drive. Il s\'ouvre d\'un double-clic, même sans internet, avec toutes tes questions.', 'Après de grosses modifications, télécharge-le à nouveau.']},
+  {img:'txt', title:'Un fichier de questions par cours', text:['Onglet « Ouvrir / Enregistrer » : écris le nom du cours et clique sur « Télécharger les questions (.txt) ». Fais-le pour chaque cours.', 'Pour changer de cours, clique sur « Charger un fichier de questions », choisis le fichier, puis « Remplacer mes questions ». Le titre change aussi.', 'Le matin les maths, l\'après-midi la géographie : quelques secondes, sans rien retaper.', 'Le fichier .txt s\'ouvre dans le Bloc-notes : tu peux y écrire des questions directement en suivant le modèle en haut du fichier.']},
+  {img:'file', title:'Garder une copie du jeu', text:['Dans l\'onglet « Ouvrir / Enregistrer », clique sur « Télécharger le jeu (fichier) ».', 'Mets le fichier sur une clé USB ou dans ton drive. Il s\'ouvre d\'un double-clic, même sans internet, avec toutes tes questions.', 'Après de grosses modifications, télécharge-le à nouveau.']},
   {part:'En classe : lancer la partie'},
   {img:'room', title:'Installer le jeu', text:['Branche le projecteur et ouvre le jeu.', 'Appuie sur F11 pour passer en plein écran (F11 à nouveau pour en sortir).', 'Vérifie le son avec le bouton « Son », en haut.']},
   {img:'players', title:'Entrer les joueurs', text:['Choisis le nombre de joueurs avec – et +, ou tape le nombre (de 2 à 30), puis écris les prénoms.', 'Plus de 10 élèves ? Formez des équipes de 3 ou 4 et écris le nom des équipes : chacun joue plus souvent et la classe reste active.', 'Chaque élève reçoit une couleur de pion. Clique sur « C\'EST PARTI ! ».']},
@@ -1862,11 +1865,11 @@ const TUTO = [
   {img:'mime', title:'Le mime', text:['Le mot est caché. Tourne l\'écran vers le mimeur ou coupe un instant le projecteur, puis clique sur « Montrer le mot ».', 'Lance le chrono d\'une minute. L\'élève qui refuse de mimer recule d\'une case : c\'est doux, personne n\'est forcé.']},
   {img:'shop', title:'Les pièces et la boutique', text:['Les cartes Chance font gagner des pièces, les cartes Malchance en font perdre.', 'À chaque tour complet, le joueur reçoit 3 pièces de salaire et la boutique s\'ouvre.', 'Dé bonus : un dé de plus au prochain lancer. Canne à pêche : voler 1 tour au joueur choisi. Glue : un joueur choisi lance un dé de moins à son prochain lancer.', 'Les effets ne durent qu\'un seul lancer. Les prix se règlent dans Réglages.']},
   {img:'end', title:'La fin de la partie', text:['À la sonnerie, le tour en cours se termine.', 'Clique sur « Révéler » pour chaque étoile bonus : fais durer le suspense !', 'Le podium s\'affiche ensuite. « Nouvelle partie » ramène à l\'accueil.', 'Le bouton « Le bilan » montre la réussite par catégorie, les questions à revoir (avec les réponses données) et les résultats de chaque joueur. Télécharge-le en Word (.docx) ou en texte (.txt). Le dernier bilan reste disponible sur l\'écran d\'accueil.']},
-  {part:'Avec les manettes : les élèves jouent sur téléphone'},
-  {img:'manJoin', title:'Choisir le mode « Avec manettes »', text:['Sur l\'écran d\'accueil, dans « Mode de jeu », clique sur « Avec manettes ». Il faut une connexion à internet.', 'Un QR code et un code à 5 chiffres s\'affichent. Les élèves scannent le QR code, ou vont sur classeparty.github.io/manette.html et tapent le code.', 'Chacun touche son prénom (ou le nom de son équipe : plusieurs téléphones peuvent prendre le même nom). Le nombre de manettes connectées s\'affiche.', 'Pas de téléphones ni de tablettes dans la classe ? Choisis « Sans manettes » : tout se joue au tableau, comme d\'habitude.']},
-  {img:'manPlay', title:'Jouer avec les manettes', text:['Le plateau reste au tableau. Quand c\'est son tour, l\'élève lance les dés depuis son téléphone.', 'Quiz et vrai ou faux : il répond sur son écran. Il valide aussi les cartes Chance, Malchance et Prison.', 'Boutique : il fait ses achats sur son téléphone (dé bonus, canne à pêche, glue).', 'Mime : le mot s\'affiche seulement sur le téléphone du mimeur. Il peut lancer le chrono ou refuser discrètement. C\'est toujours toi qui valides « Mime réussi » ou « Pas trouvé ».', 'Un élève arrive en retard ? Le bouton violet 📱 en haut de l\'écran réaffiche le QR code.']},
-  {img:'manAll', title:'Toute la classe répond', text:['Option cochée au départ : à chaque quiz et vrai ou faux, toute la classe répond sur son téléphone. Seul le joueur du tour avance ; les autres gagnent 1 pièce s\'ils ont juste.', 'Quand le joueur a répondu, les autres ont encore quelques secondes (10 par défaut, réglable) : personne ne doit se précipiter. La correction arrive dès que tout le monde a répondu, ou avec « Corriger maintenant ».', 'Comme tout le monde gagne plus de pièces, les prix de la boutique augmentent automatiquement (réglable).', 'Toutes les réponses vont dans le bilan : tu vois ce que chaque élève a répondu.']},
-  {tip:'Manettes : fais un essai avec ton propre téléphone avant le cours, pour vérifier le réseau de l\'école. Les prénoms passent par internet le temps de la partie mais ne sont jamais enregistrés ; tu peux aussi utiliser des pseudos.'},
+  {part:'Avec les manettes : les élèves jouent sur tablette'},
+  {img:'manJoin', title:'Choisir le mode « Avec manettes »', text:['Sur l\'écran d\'accueil, dans « Mode de jeu », clique sur « Avec manettes ». Il faut une connexion à internet.', 'Un QR code et un code à 5 chiffres s\'affichent. Les élèves scannent le QR code, ou vont sur classeparty.github.io/manette.html et tapent le code.', 'Chacun touche son prénom (ou le nom de son équipe : plusieurs tablettes peuvent prendre le même nom). Le nombre de manettes connectées s\'affiche.', 'Pas de tablettes dans la classe ? Choisis « Sans manettes » : tout se joue au tableau, comme d\'habitude.']},
+  {img:'manPlay', title:'Jouer avec les manettes', text:['Le plateau reste au tableau. Quand c\'est son tour, l\'élève lance les dés depuis sa tablette.', 'Quiz et vrai ou faux : il répond sur son écran. Il valide aussi les cartes Chance, Malchance et Prison.', 'Boutique : il fait ses achats sur sa tablette (dé bonus, canne à pêche, glue).', 'Mime : le mot s\'affiche seulement sur la tablette du mimeur. Il peut lancer le chrono ou refuser discrètement. C\'est toujours toi qui valides « Mime réussi » ou « Pas trouvé ».', 'Un élève arrive en retard ? Le bouton violet 📱 en haut de l\'écran réaffiche le QR code.']},
+  {img:'manAll', title:'Toute la classe répond', text:['Option cochée au départ : à chaque quiz et vrai ou faux, toute la classe répond sur sa tablette. Seul le joueur du tour avance ; les autres gagnent 1 pièce s\'ils ont juste.', 'Quand le joueur a répondu, les autres ont encore quelques secondes (10 par défaut, réglable) : personne ne doit se précipiter. La correction arrive dès que tout le monde a répondu, ou avec « Corriger maintenant ».', 'Comme tout le monde gagne plus de pièces, les prix de la boutique augmentent automatiquement (réglable).', 'Toutes les réponses vont dans le bilan : tu vois ce que chaque élève a répondu.']},
+  {tip:'Manettes : fais un essai avec une tablette avant le cours, pour vérifier le réseau de l\'école. Les prénoms passent par internet le temps de la partie mais ne sont jamais enregistrés ; tu peux aussi utiliser des pseudos.'},
   {tip:'Astuce : avant le cours, fais une partie d\'essai à 2 joueurs avec 6 minutes de jeu. Tu verras le coup de feu, les étoiles et le podium en quelques minutes.'}
 ];
 function fillTuto(body){
@@ -1901,7 +1904,7 @@ function bankToTxt(b, course){
   L.push('# =====================================================================');
   L.push('# FICHIER DE QUESTIONS : ' + oneLine(course));
   L.push(`# Créé le ${date} avec le jeu de plateau de ${AUTHOR} (v${APP_VERSION})`);
-  L.push('# Pour le charger : Mode prof > Sauvegarde > Charger un fichier de questions');
+  L.push('# Pour le charger : Mode prof > Ouvrir / Enregistrer > Charger un fichier de questions');
   L.push('# =====================================================================');
   L.push('#');
   L.push('# Tu peux modifier ce fichier dans le Bloc-notes. Règles :');
@@ -2095,9 +2098,8 @@ function fillBackupTab(body){
       btn('Annuler', 'grey', () => { impMsg.hidden = true; })),
       h('p', {class:'admin-intro'}, '« Remplacer » met ce cours à la place de toutes les questions, actions et mimes actuels, et change le titre. Les cartes Chance et Malchance actuelles sont gardées si le fichier n\'en contient pas. « Ajouter » garde tout et ajoute le contenu du fichier.'));
   };
-  /* --- other tools --- */
-  const resetBtn = btn('Remettre les cartes d\'origine', 'small red', e => arm(e.currentTarget, 'Remettre les cartes d\'origine', () => { ['chance','malchance'].forEach(k => { draft[k] = clone(DEFAULT_BANK[k]); }); markDirty(); renderAdmin(); }));
-  const emptyBtn = btn('Tout vider pour un nouveau thème', 'small red', e => arm(e.currentTarget, 'Tout vider pour un nouveau thème', () => { LISTS.forEach(k => { draft[k] = []; }); adminTab = 'settings'; markDirty(); renderAdmin(); $('#adminStatus').textContent = 'Tout est vidé. Change le titre, ajoute tes questions avec +, puis Enregistre.'; }));
+  /* --- autres outils --- */
+  const wipeBtn = btn('Effacer le questionnaire…', 'small red', () => confirmWipe());
   const dlMsg = h('p', {class:'admin-intro'});
   const dlBtn = btn('Télécharger le jeu (fichier)', 'small go', () => {
     if (dirty){ dlMsg.textContent = 'Clique d\'abord sur Enregistrer : le fichier contient les questions enregistrées.'; dlMsg.style.color = 'var(--x)'; return; }
@@ -2105,21 +2107,56 @@ function fillBackupTab(body){
   });
   body.append(
     h('div', {class:'arow txt-box'},
-      h('h3', {class:'box-h'}, 'Mes cours en fichiers texte'),
-      h('p', {class:'admin-intro'}, 'Garde un fichier de questions par cours, puis change de cours en quelques secondes : le matin les maths, l\'après-midi la géographie, sans rien retaper.'),
-      h('div', {class:'two'},
-        h('div', {class:'step-box'}, h('p', {class:'step-t'}, '1. Sauvegarder ce cours'), fld('Nom du cours', courseIn), h('div', {}, exBtn), exMsg),
-        h('div', {class:'step-box'}, h('p', {class:'step-t'}, '2. Charger un autre cours'), h('p', {class:'admin-intro'}, 'Choisis un fichier .txt de questions enregistré avant.'), h('div', {}, pickBtn), fileIn)),
-      impMsg,
-      h('p', {class:'admin-intro small-note'}, 'Astuce : le fichier .txt s\'ouvre dans le Bloc-notes. Tu peux y écrire de nouvelles questions directement, en suivant le modèle expliqué en haut du fichier, puis le recharger ici.')),
-    h('div', {class:'arow dl-box'}, h('p', {class:'admin-intro'}, h('b', {}, 'Le jeu en fichier. '), 'Télécharge le jeu complet avec les questions enregistrées. Il s\'ouvre d\'un double-clic dans Chrome, Edge ou Firefox, même sans internet.'), h('div', {}, dlBtn), dlMsg),
-    h('div', {class:'arow'}, h('p', {class:'admin-intro'}, h('b', {}, 'Nouveau thème. '), 'Vide toutes les questions, actions, mimes et cartes. Tes réglages et ton titre sont gardés. Conseil : télécharge d\'abord les questions actuelles en .txt.'), h('div', {}, emptyBtn)),
-    h('div', {class:'arow'}, h('p', {class:'admin-intro'}, 'Remet les cartes Chance et Malchance de départ (tes questions et tes réglages sont gardés).'), h('div', {}, resetBtn)));
+      h('h3', {class:'box-h'}, '📂 Ouvrir un cours'),
+      h('p', {class:'admin-intro'}, 'Charge un fichier de questions (.txt) : un de tes cours, un cours de la bibliothèque du site ou celui d\'un collègue.'),
+      h('div', {}, pickBtn), fileIn, impMsg),
+    h('div', {class:'arow'},
+      h('h3', {class:'box-h'}, '💾 Enregistrer ce cours'),
+      h('p', {class:'admin-intro'}, 'Garde un fichier .txt par cours, puis change de cours en quelques secondes : le matin les maths, l\'après-midi la géographie. Le fichier s\'ouvre dans le Bloc-notes : tu peux y écrire de nouvelles questions en suivant le modèle en haut du fichier.'),
+      h('div', {class:'save-row'}, fld('Nom du cours', courseIn), h('div', {}, exBtn)), exMsg),
+    h('div', {class:'arow wipe-box'},
+      h('h3', {class:'box-h'}, '🗑️ Repartir d\'un questionnaire vierge'),
+      h('p', {class:'admin-intro'}, 'Efface le questionnaire chargé (quiz, vrai ou faux, actions, mimes) et remet le titre et les cartes Chance et Malchance de départ. Tes réglages (code, durée, prix) sont gardés. Conseil : enregistre d\'abord ce cours en .txt.'),
+      h('div', {}, wipeBtn)),
+    h('div', {class:'arow dl-box'},
+      h('h3', {class:'box-h'}, '🎮 Copie du jeu complet'),
+      h('p', {class:'admin-intro'}, 'Télécharge le jeu avec les questions enregistrées : un fichier qui s\'ouvre d\'un double-clic dans Chrome, Edge ou Firefox, même sans internet. Pratique sur une clé USB.'),
+      h('div', {}, dlBtn), dlMsg));
+}
+/* confirmation « écris oui » avant d'effacer le questionnaire */
+function confirmWipe(){
+  const n = ['quiz','vf','actions','mimes'].reduce((t, k) => t + draft[k].length, 0);
+  const field = h('input', {class:'in', type:'text', autocomplete:'off', 'aria-label':'Écris oui pour confirmer', placeholder:'oui'});
+  const go = btn('EFFACER', 'big red', null); go.disabled = true;
+  const ov = h('div', {class:'overlay wipe-ov', style:'z-index:75'});
+  const close = () => ov.remove();
+  field.addEventListener('input', () => { go.disabled = field.value.trim().toLowerCase() !== 'oui'; });
+  field.addEventListener('keydown', e => { if (e.key === 'Enter' && !go.disabled) go.click(); if (e.key === 'Escape') close(); });
+  go.addEventListener('click', async () => {
+    if (field.value.trim().toLowerCase() !== 'oui') return;
+    ['quiz','vf','actions','mimes'].forEach(k => { draft[k] = []; });
+    ['chance','malchance'].forEach(k => { draft[k] = clone(DEFAULT_BANK[k]); });
+    ['title','subtitle','bestStar','course'].forEach(k => { draft.settings[k] = DEFAULT_BANK.settings[k]; });
+    if (G) G.used = {};
+    close(); dirty = true; await saveAdmin();
+    applyBranding(); renderLegend(); renderSetup();
+    const st = $('#adminStatus'); if (st && !st.classList.contains('err')){ st.className = 'status'; st.textContent = 'Questionnaire effacé : le jeu est vierge. Ouvre un cours ou ajoute tes questions.'; }
+  });
+  ov.append(h('div', {class:'card', style:'--hc:var(--x);width:min(100%,520px)', role:'dialog', 'aria-modal':'true', 'aria-label':'Effacer le questionnaire'},
+    h('div', {class:'card-head'}, h('div', {class:'card-title outline'}, 'ATTENTION')),
+    h('div', {class:'card-body'},
+      h('p', {class:'qtext', style:'font-size:1.3rem'}, 'Es-tu sûr de vouloir supprimer le questionnaire chargé ?'),
+      h('p', {class:'rule'}, `${n} ${plural(n, 'question sera effacée', 'questions seront effacées')} (quiz, vrai ou faux, actions et mimes). On ne peut pas revenir en arrière.`),
+      fld('Pour confirmer, écris « oui » :', field)),
+    h('div', {class:'card-foot'}, btn('Annuler', 'big grey', close), go)));
+  ov.addEventListener('click', e => { if (e.target === ov) close(); });
+  document.body.append(ov);
+  setTimeout(() => { try { field.focus(); } catch (e) {} }, 60);
 }
 
 /* ================= ADMIN ================= */
 let draft = null, adminTab = lsGet('classeparty-tuto-seen') ? 'quiz' : 'tuto', dirty = false, pausedByAdmin = false;
-const TABS = [['tuto','Tuto'], ['quiz','Quiz'], ['vf','Vrai / Faux'], ['actions','Actions'], ['mimes','Mimes'], ['chance','Chance'], ['malchance','Malchance'], ['settings','Réglages'], ['backup','Sauvegarde']];
+const TABS = [['tuto','Tuto'], ['backup','📂 Ouvrir / Enregistrer'], ['quiz','Quiz'], ['vf','Vrai / Faux'], ['actions','Actions'], ['mimes','Mimes'], ['chance','Chance'], ['malchance','Malchance'], ['settings','Réglages']];
 function openAdmin(){
   draft = clone(bank); dirty = false;
   if (G && !G.over && !G.paused){ G.paused = true; pausedByAdmin = true; renderAll(); } else pausedByAdmin = false;
@@ -2239,6 +2276,8 @@ function fillAdminBody(body){
         fld('Texte de la carte', txa(`${adminTab}-${i}-t`, it.text, v => { it.text = v; })),
         h('div', {class:'two'}, fld('Effet', sel), numF)));
     });
+    body.append(h('div', {class:'add-row'}, btn('Remettre les cartes d\'origine', 'small grey', e => arm(e.currentTarget, 'Remettre les cartes d\'origine', () => { ['chance','malchance'].forEach(k => { draft[k] = clone(DEFAULT_BANK[k]); }); markDirty(); renderAdmin(); })),
+      h('p', {class:'admin-intro', style:'flex:1;min-width:200px'}, 'Remet les cartes Chance et Malchance de départ. Tes questions et tes réglages sont gardés.')));
   } else if (adminTab === 'settings'){
     const s = draft.settings;
     const num = (key, label, min, max) => fld(label, inp('set-' + key, s[key], v => { s[key] = parseInt(v, 10); }, {type:'number', min:String(min), max:String(max), inputmode:'numeric'}));
@@ -2338,7 +2377,7 @@ const TOUR = [
   {sel:'.stepper', title:'Le nombre de joueurs', text:'De 2 à 30. Au-delà de 10 élèves, joue en équipes de 3 ou 4 : chacun participe plus souvent. À partir de 15 joueurs, les cases gagnées et perdues comptent double.'},
   {sel:'#names', title:'Les prénoms ou les équipes', text:'Écris le prénom de chaque élève ou le nom de chaque équipe. Chacun reçoit une couleur de pion.'},
   {sel:'#dur', title:'La durée de la partie', text:'40 minutes conviennent bien pour un cours de 50 minutes. Les 5 dernières minutes, c\'est le « coup de feu » : tout compte double.'},
-  {sel:'#modeBox', title:'Avec ou sans manettes', text:'Sans manettes : tout se joue au tableau. Avec manettes : les élèves rejoignent avec un QR code et jouent sur leur téléphone ou une tablette (internet nécessaire). Le tuto du mode prof explique tout.'},
+  {sel:'#modeBox', title:'Avec ou sans manettes', text:'Sans manettes : tout se joue au tableau. Avec manettes : les élèves rejoignent avec un QR code et jouent sur une tablette (internet nécessaire). Le tuto du mode prof explique tout.'},
   {sel:'#btnStart', title:'Lancer la partie', text:'Quand tout est prêt, clique ici. Astuce : appuie sur F11 pour passer en plein écran au projecteur.'},
   {sel:'.tb-audio', title:'Musique et sons', text:'Le bouton Musique ouvre un menu : 5 airs d\'ambiance à choisir, ou « Enchaîner les 5 » pour changer d\'air toutes les 2 à 3 minutes, et le volume. Le bouton Sons coupe les bruitages. La musique accélère pendant le coup de feu !'},
   {title:'Pendant la partie', text:'Clique sur les dés : le pion avance tout seul. Pour un quiz ou un vrai/faux, clique sur la réponse de l\'élève. Pour une action ou un mime, c\'est toi qui valides avec « Réussi » ou « Raté ».', img:'play'},
@@ -2419,7 +2458,7 @@ function importFromSite(){
     setTimeout(() => bigToast('COURS CHARGÉ !', 'gold'), 700);
   } catch (e) {}
 }
-/* ================= MANETTES (téléphones des élèves) =================
+/* ================= MANETTES (tablettes des élèves) =================
    Mode optionnel : les élèves rejoignent la partie avec un QR code.
    Les fichiers sont chargés depuis le site Classe Party (internet nécessaire). */
 const SITE_URL = 'https://classeparty.github.io/';

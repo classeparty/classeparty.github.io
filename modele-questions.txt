@@ -2,7 +2,7 @@
 # MODÈLE DE FICHIER DE QUESTIONS  -  Classe Party v1.1
 # Remplis ce fichier dans le Bloc-notes, enregistre-le sous un nouveau
 # nom (ex. : Questions-Geographie.txt), puis charge-le dans le jeu :
-# Mode prof > Sauvegarde > Charger un fichier de questions
+# Mode prof > Ouvrir / Enregistrer > Charger un fichier de questions
 # =====================================================================
 #
 # Règles :

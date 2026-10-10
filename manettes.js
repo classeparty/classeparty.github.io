@@ -1,5 +1,5 @@
 /* =====================================================================
-   Classe Party - MANETTES (téléphones / tablettes des élèves)
+   Classe Party - MANETTES (tablettes des élèves)
    Côté ordinateur du prof. Chargé par le jeu quand on choisit
    « Avec manettes » sur l'écran d'accueil (internet nécessaire).
    © 2026 Jérôme Manderlier - Licence CC BY-NC-ND 4.0
@@ -264,7 +264,7 @@
     const line = document.getElementById('labCount');
     if (line && LAB.q && !LAB.q.revealed) {
       const n = LAB.sideAns.size;
-      line.textContent = `📱 Toute la classe répond sur son téléphone : ${n} réponse${n > 1 ? 's' : ''} reçue${n > 1 ? 's' : ''}`;
+      line.textContent = `📱 Toute la classe répond sur sa tablette : ${n} réponse${n > 1 ? 's' : ''} reçue${n > 1 ? 's' : ''}`;
     }
     const chip = document.getElementById('labChip');
     if (chip) chip.textContent = `📱 ${LAB.code} · ${nPhones()}`;
@@ -289,7 +289,7 @@
     const toggle = row && row.querySelector('.btn');
     if (toggle) { toggle.textContent = 'Montrer ici quand même'; toggle.classList.remove('pink'); toggle.classList.add('grey', 'small'); }
     const info = document.createElement('p'); info.className = 'lab-count';
-    info.textContent = `📱 Le mot à mimer s'affiche uniquement sur le téléphone de ${G.players[G.turn].name}.`;
+    info.textContent = `📱 Le mot à mimer s'affiche uniquement sur la tablette de ${G.players[G.turn].name}.`;
     if (hint) hint.replaceWith(info); else if (row) row.before(info);
     const chronoBtn = row && row.querySelectorAll('.btn')[1];
     if (chronoBtn) chronoBtn.addEventListener('click', () => push());

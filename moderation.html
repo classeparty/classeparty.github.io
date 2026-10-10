@@ -7,7 +7,7 @@
 <meta name="description" content="Espace de modération réservé aux administrateurs de Classe Party.">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="style.css?v=20261011a">
+<link rel="stylesheet" href="style.css?v=20261011b">
 </head>
 <body>
 <header id="site-head"></header>
@@ -19,7 +19,7 @@
 <script src="config.js"></script>
 <script src="format.js"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261011a"></script>
+<script src="app.js?v=20261011b"></script>
 <script>
 (async () => {
   await CP.init('moderation.html');
@@ -39,7 +39,7 @@
       el('p', {class: 'muted'}, 'Les fonctions en test. Personne d\'autre ne les voit : elles ne sont liées nulle part sur le site et ne s\'activent que pour un compte administrateur.'),
       el('div', {class: 'paper stack', style: 'align-content:start'},
         el('h3', {}, 'Aucune fonction en test pour le moment'),
-        el('p', {}, '✅ Les manettes (téléphones des élèves) sont sorties du labo : elles sont ouvertes à tous depuis la version 1.1, avec le choix « Avec manettes » sur l\'écran d\'accueil du jeu.'),
+        el('p', {}, '✅ Les manettes (tablettes des élèves) sont sorties du labo : elles sont ouvertes à tous depuis la version 1.1, avec le choix « Avec manettes » sur l\'écran d\'accueil du jeu.'),
         el('div', {class: 'btn-row'}, el('a', {class: 'btn small violet', href: 'jouer.html', target: '_blank', rel: 'noopener'}, 'Ouvrir le jeu'), el('a', {class: 'btn small grey', href: 'manette.html', target: '_blank', rel: 'noopener'}, 'Ouvrir une manette')))));
   showDone.addEventListener('change', load);
   async function open(r){
