@@ -208,3 +208,8 @@ textarea.in{resize:vertical;line-height:1.35}
 .mk-check{background:#fff;border:3px solid var(--ink);border-radius:14px;padding:10px 12px;display:grid;gap:6px;font-weight:700;font-size:.85rem;box-shadow:0 5px 0 var(--ink)}
 .mk-check .ok{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--go);color:#fff;border:2px solid var(--ink);margin-right:6px;font-size:.75rem}
 .mk-import{background:#fff1b8;border:3px dashed var(--ink-2);border-radius:14px;padding:12px;font-weight:600;font-size:.9rem;box-shadow:0 5px 0 rgba(58,29,14,.25)}
+
+/* ---------- nouveautés ---------- */
+.news{display:flex;align-items:center;gap:14px;flex-wrap:wrap;text-decoration:none;color:var(--ink);border-color:var(--v)}
+.news:hover{background:#f6efff;color:var(--ink)}
+.news-txt{flex:1;min-width:240px;font-weight:600;line-height:1.4}

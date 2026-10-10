@@ -7,7 +7,7 @@
 <meta name="description" content="Quelles données Classe Party utilise, pourquoi, où elles sont stockées et comment exercer tes droits.">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="style.css?v=20261010e">
+<link rel="stylesheet" href="style.css?v=20261011a">
 </head>
 <body>
 <header id="site-head"></header>
@@ -15,8 +15,8 @@
 <article class="panel">
   <div class="prose">
     <h1 class="outline">Confidentialité</h1>
-    <p class="lead">En résumé : jouer ne demande aucune donnée personnelle. Le compte de prof ne contient que le strict nécessaire. Les données des élèves ne quittent jamais l'ordinateur de la classe.</p>
-    <p class="small muted">Version du 10 octobre 2026. Ce texte respecte le Règlement général sur la protection des données (RGPD).</p>
+    <p class="lead">En résumé : jouer ne demande aucune donnée personnelle. Le compte de prof ne contient que le strict nécessaire. Les données des élèves ne sont jamais enregistrées sur nos serveurs.</p>
+    <p class="small muted">Version du 11 octobre 2026. Ce texte respecte le Règlement général sur la protection des données (RGPD).</p>
 
     <h2>Qui est responsable ?</h2>
     <p>Le site Classe Party est édité par Jérôme Manderlier, enseignant, à titre personnel. Contact : <span id="contact" class="todo">[adresse mail de contact à compléter dans config.js]</span>.</p>
@@ -26,6 +26,14 @@
       <li>Le jeu fonctionne entièrement dans ton navigateur. <b>Aucun compte n'est nécessaire.</b></li>
       <li>Les prénoms des élèves, les parties en cours, les questions que tu écris dans le mode prof et les bilans sont enregistrés <b>uniquement dans ton navigateur</b>, sur ton ordinateur. Ils ne sont jamais envoyés sur nos serveurs.</li>
       <li>Ce stockage local sert seulement au fonctionnement du jeu. Il n'y a ni publicité ni outil de mesure d'audience.</li>
+    </ul>
+
+    <h2>Quand tu joues avec les manettes</h2>
+    <ul>
+      <li>Le mode « Avec manettes » est facultatif. Les élèves rejoignent la partie avec un code, <b>sans créer de compte</b> et sans donner d'adresse mail.</li>
+      <li>Pendant la partie, les prénoms (ou pseudos) affichés au tableau, les questions et les réponses passent par internet, via le service temps réel de Supabase (Union européenne), pour aller de l'ordinateur du prof aux téléphones.</li>
+      <li>Ces informations ne font que transiter : <b>elles ne sont jamais enregistrées</b> dans notre base de données et disparaissent à la fin de la partie.</li>
+      <li>Conseil : tu peux utiliser des pseudos ou des noms d'équipe à la place des prénoms.</li>
     </ul>
 
     <h2>Quand tu crées un compte</h2>
@@ -64,7 +72,7 @@
 <script src="config.js"></script>
 <script src="format.js"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261010e"></script>
+<script src="app.js?v=20261011a"></script>
 <script>
 CP.init('confidentialite.html').then(() => {
   const c = (window.CP_CONFIG || {}).CONTACT_EMAIL;

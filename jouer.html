@@ -122,6 +122,16 @@ button{font:inherit}
 .imp-err ul{margin:6px 0 0;padding-left:1.2em;color:var(--ink);font-weight:600;font-size:.92rem;display:grid;gap:2px}
 .imp-btns{display:flex;flex-wrap:wrap;gap:10px}
 .qcount{margin:0;font-weight:700;color:var(--ink-2);background:var(--white);border:2px solid var(--ink-2);border-radius:12px;padding:6px 12px}
+.mode-box{display:grid;gap:8px}
+.mode-btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mode-btn{display:grid;gap:2px;text-align:left;font:inherit;color:var(--ink);background:var(--white);border:3px solid var(--ink);border-radius:14px;padding:8px 12px;box-shadow:0 4px 0 var(--ink);cursor:pointer}
+.mode-btn b{font-family:var(--f-display);font-weight:400;font-size:1.1rem;letter-spacing:.02em}
+.mode-btn small{font-weight:700;font-size:.82rem;color:var(--muted);line-height:1.2}
+.mode-btn.on{background:#efe6ff;border-color:var(--v);box-shadow:0 4px 0 var(--v);outline:3px solid var(--v);outline-offset:-6px}
+.mode-btn:focus-visible{outline:4px solid var(--white);outline-offset:3px}
+.man-msg{margin:0;font-weight:700;line-height:1.35}
+.man-msg.err{color:var(--x)}
+@media (max-width:420px){.mode-btns{grid-template-columns:minmax(0,1fr)}}
 .empty-box{display:grid;gap:10px;justify-items:start;background:#ffe1e1;border:3px dashed var(--x);border-radius:14px;padding:12px 14px}
 .empty-box p{margin:0;font-weight:600;line-height:1.35}
 .tb-audio{display:inline-flex;gap:10px;flex-wrap:wrap}
@@ -420,6 +430,14 @@ textarea.in{resize:vertical;line-height:1.3}
       <div class="empty-box" id="emptyBox" hidden="">
         <p><b>Aucune question pour l'instant.</b> Ouvre le mode prof pour charger un fichier de questions (.txt) ou en écrire avec la touche +.</p>
         <button type="button" class="btn violet" id="btnEmptyProf">Ouvrir le mode prof</button>
+      </div>
+      <div class="mode-box" id="modeBox">
+        <span class="fld-l">Mode de jeu</span>
+        <div class="mode-btns" role="radiogroup" aria-label="Mode de jeu">
+          <button type="button" class="mode-btn on" id="modeSans" role="radio" aria-checked="true"><b>🖥️ Sans manettes</b><small>Tout se joue au tableau</small></button>
+          <button type="button" class="mode-btn" id="modeAvec" role="radio" aria-checked="false"><b>📱 Avec manettes</b><small>Téléphones ou tablettes (internet)</small></button>
+        </div>
+        <div id="manetteZone"></div>
       </div>
       <div class="form-btns">
         <button type="button" class="btn big go" id="btnStart">C'EST PARTI !</button>
@@ -751,6 +769,7 @@ function say(t){ if (G){ G.msg = t; const m = $('#msg'); if (m) m.textContent = 
 /* ================= SETUP SCREEN ================= */
 let nPlayers = 7;
 const APP_VERSION = '1.1';
+const BUILD = '20261011';
 const AUTHOR = 'Manderlier Jérôme';
 const COPYRIGHT = '© 2026 Manderlier Jérôme. Classe Party est sous licence Creative Commons BY-NC-ND 4.0 : utilisation gratuite en classe, toute utilisation commerciale ou revente interdite sans accord écrit de l\'auteur.';
 function gameTitle(){ return String(bank.settings.title || '').trim() || DEFAULT_BANK.settings.title; }
@@ -1097,19 +1116,25 @@ function playKind(p, kind){
   if (k === 'quiz' || k === 'vf') return askQuestion(p, k, false);
   return k === 'actions' ? doAction(p) : doMime(p);
 }
+/* Tirage sans doublon : chaque question est posée une fois avant qu'une autre ne revienne.
+   On retient le texte des questions déjà posées (et pas leur numéro) : ça reste juste même si
+   le prof modifie ou recharge ses questions pendant la partie, et deux questions identiques
+   dans le fichier ne comptent que pour une. */
+function drawKey(it){ return String(typeof it === 'string' ? it : (it.q || it.text || JSON.stringify(it))).trim().toLowerCase(); }
 function draw(kind){
   const list = bank[kind]; if (!list || !list.length) return null;
-  G.decks = G.decks || {}; G.lastDraw = G.lastDraw || {};
-  for (let attempt = 0; attempt < 2; attempt++){
-    let d = G.decks[kind];
-    if (!d || !d.length){
-      d = shuffle([...list.keys()]);
-      if (d.length > 1 && d[d.length - 1] === G.lastDraw[kind]) [d[0], d[d.length - 1]] = [d[d.length - 1], d[0]];
-      G.decks[kind] = d;
-    }
-    while (d.length){ const idx = d.pop(); if (idx < list.length){ G.lastDraw[kind] = idx; return list[idx]; } }
+  G.used = G.used || {}; G.lastKey = G.lastKey || {};
+  const used = new Set(G.used[kind] || []);
+  let pool = list.filter(it => !used.has(drawKey(it)));
+  if (!pool.length){
+    used.clear();
+    pool = list.filter(it => drawKey(it) !== G.lastKey[kind]);
+    if (!pool.length) pool = list.slice();
   }
-  return list[Math.floor(Math.random() * list.length)];
+  const it = pool[Math.floor(Math.random() * pool.length)];
+  const k = drawKey(it);
+  used.add(k); G.used[kind] = [...used]; G.lastKey[kind] = k;
+  return it;
 }
 
 /* ================= MODAL ================= */
@@ -1782,6 +1807,42 @@ const TUTO_IMG = {
     return sFrame(s, 'Les étoiles bonus et le podium final');
   }
 };
+/* --- images du tuto « manettes » --- */
+function sPhone(x, y, w, hh, inner){ return `<rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="9" fill="${TK.ink}"/><rect x="${x + 4}" y="${y + 8}" width="${w - 8}" height="${hh - 16}" rx="4" fill="${TK.white}"/><rect x="${x + w / 2 - 7}" y="${y + 3}" width="14" height="2.5" rx="1.25" fill="${TK.grey}"/>` + inner; }
+function sQr(x, y, s){
+  let o = `<rect x="${x}" y="${y}" width="${s}" height="${s}" fill="#fff" stroke="${TK.ink}" stroke-width="2"/>`;
+  const c = s / 9, pat = ['111101111','100100001','101011101','111010111','001101100','110010011','111001001','100110101','111011101'];
+  pat.forEach((row, r) => [...row].forEach((v, k) => { if (v === '1') o += `<rect x="${(x + k * c).toFixed(1)}" y="${(y + r * c).toFixed(1)}" width="${c.toFixed(1)}" height="${c.toFixed(1)}" fill="${TK.ink}"/>`; }));
+  return o;
+}
+Object.assign(TUTO_IMG, {
+  manJoin: () => sFrame(
+    `<rect x="12" y="14" width="120" height="84" rx="8" fill="${TK.crumb}" stroke="${TK.ink}" stroke-width="3"/>` + sQr(20, 24, 50)
+    + sTxt(100, 42, 'Code', 10, TK.brown, 'middle') + sTxt(100, 62, '48343', 17, TK.ink, 'middle', true)
+    + sBtn(22, 80, 100, 13, TK.v, 'Avec manettes', 8.5)
+    + `<path d="M138 56 h18" stroke="${TK.ink}" stroke-width="3" stroke-linecap="round"/><path d="M152 50 l7 6 l-7 6" fill="none" stroke="${TK.ink}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`
+    + sPhone(164, 16, 64, 118, sTxt(196, 40, 'Qui es-tu ?', 9.5, TK.ink, 'middle', true)
+      + [['Ali', TK.x], ['Béa', TK.q], ['Chloé', TK.go]].map(([n, col], i) => `<rect x="171" y="${48 + i * 22}" width="50" height="17" rx="5" fill="#fff" stroke="${TK.ink}" stroke-width="1.8"/><circle cx="179" cy="${56.5 + i * 22}" r="4.5" fill="${col}" stroke="${TK.ink}" stroke-width="1.5"/>` + sTxt(187, 60 + i * 22, n, 8.5, TK.ink)).join('')
+      + sCursor(204, 54))
+    + sTxt(72, 118, 'Scanne et choisis ton nom', 10, TK.ink, 'middle', true),
+    'Les élèves scannent le QR code et choisissent leur prénom'),
+  manPlay: () => sFrame(
+    sPhone(10, 12, 66, 126, sTxt(43, 36, 'À toi !', 9.5, TK.ink, 'middle', true) + sDie(23, 44, 26, 5) + sBtn(16, 98, 54, 22, TK.go, 'LANCE !', 9))
+    + sPhone(87, 12, 66, 126, sTxt(120, 34, 'Quiz', 9.5, TK.ink, 'middle', true)
+      + [['A', '#e8413b'], ['B', '#2f8fe0'], ['C', '#e8a412'], ['D', '#3aa83a']].map(([l, col], i) => `<rect x="93" y="${42 + i * 22}" width="54" height="17" rx="5" fill="${col}" stroke="${TK.ink}" stroke-width="1.8"/>` + sTxt(120, 54.5 + i * 22, l, 10, '#fff', 'middle', true)).join(''))
+    + sPhone(164, 12, 66, 126, sTxt(197, 34, '🤫 Mime', 9.5, TK.ink, 'middle', true)
+      + `<rect x="170" y="44" width="54" height="40" rx="6" fill="#fff" stroke="${TK.m}" stroke-width="2.5"/>` + sTxt(197, 62, 'Un', 11, TK.ink, 'middle', true) + sTxt(197, 77, 'robot', 11, TK.ink, 'middle', true)
+      + sBtn(170, 98, 54, 20, TK.q, 'Chrono', 9)),
+    'Sur le téléphone : lancer les dés, répondre, voir le mot à mimer'),
+  manAll: () => sFrame(
+    `<rect x="12" y="14" width="132" height="58" rx="8" fill="${TK.crumb}" stroke="${TK.ink}" stroke-width="3"/>`
+    + sTxt(78, 36, '✅ Ali a répondu !', 10.5, TK.ink, 'middle', true) + sTxt(78, 56, '⏳ Encore 8 s…', 11, TK.v, 'middle', true)
+    + `<rect x="12" y="84" width="132" height="44" rx="8" fill="${TK.crumb}" stroke="${TK.ink}" stroke-width="3"/>`
+    + sTxt(78, 104, 'La classe : 9 sur 14', 10.5, TK.ink, 'middle', true) + sTxt(78, 120, '+1 pièce chacun !', 10, TK.go, 'middle', true)
+    + sPhone(158, 14, 72, 120, sTxt(194, 40, 'BONNE', 11, TK.go, 'middle', true) + sTxt(194, 54, 'RÉPONSE !', 11, TK.go, 'middle', true)
+      + `<circle cx="186" cy="82" r="11" fill="${TK.c}" stroke="${TK.ink}" stroke-width="2.5"/><rect x="184.5" y="76" width="3" height="12" rx="1.5" fill="#e09a00"/>` + sTxt(206, 87, '+1', 12, TK.ink, 'middle', true)),
+    'Toute la classe répond, avec quelques secondes après le joueur')
+});
 const TUTO = [
   {part:'Avant le cours : préparer le jeu'},
   {img:'prof', title:'Ouvrir le mode prof', text:['Clique sur le bouton violet « Mode prof », en haut à droite.', 'Le code de départ est 1234. Change-le tout de suite dans l\'onglet Réglages, pour que les élèves ne puissent pas modifier le jeu.']},
@@ -1801,6 +1862,11 @@ const TUTO = [
   {img:'mime', title:'Le mime', text:['Le mot est caché. Tourne l\'écran vers le mimeur ou coupe un instant le projecteur, puis clique sur « Montrer le mot ».', 'Lance le chrono d\'une minute. L\'élève qui refuse de mimer recule d\'une case : c\'est doux, personne n\'est forcé.']},
   {img:'shop', title:'Les pièces et la boutique', text:['Les cartes Chance font gagner des pièces, les cartes Malchance en font perdre.', 'À chaque tour complet, le joueur reçoit 3 pièces de salaire et la boutique s\'ouvre.', 'Dé bonus : un dé de plus au prochain lancer. Canne à pêche : voler 1 tour au joueur choisi. Glue : un joueur choisi lance un dé de moins à son prochain lancer.', 'Les effets ne durent qu\'un seul lancer. Les prix se règlent dans Réglages.']},
   {img:'end', title:'La fin de la partie', text:['À la sonnerie, le tour en cours se termine.', 'Clique sur « Révéler » pour chaque étoile bonus : fais durer le suspense !', 'Le podium s\'affiche ensuite. « Nouvelle partie » ramène à l\'accueil.', 'Le bouton « Le bilan » montre la réussite par catégorie, les questions à revoir (avec les réponses données) et les résultats de chaque joueur. Télécharge-le en Word (.docx) ou en texte (.txt). Le dernier bilan reste disponible sur l\'écran d\'accueil.']},
+  {part:'Avec les manettes : les élèves jouent sur téléphone'},
+  {img:'manJoin', title:'Choisir le mode « Avec manettes »', text:['Sur l\'écran d\'accueil, dans « Mode de jeu », clique sur « Avec manettes ». Il faut une connexion à internet.', 'Un QR code et un code à 5 chiffres s\'affichent. Les élèves scannent le QR code, ou vont sur classeparty.github.io/manette.html et tapent le code.', 'Chacun touche son prénom (ou le nom de son équipe : plusieurs téléphones peuvent prendre le même nom). Le nombre de manettes connectées s\'affiche.', 'Pas de téléphones ni de tablettes dans la classe ? Choisis « Sans manettes » : tout se joue au tableau, comme d\'habitude.']},
+  {img:'manPlay', title:'Jouer avec les manettes', text:['Le plateau reste au tableau. Quand c\'est son tour, l\'élève lance les dés depuis son téléphone.', 'Quiz et vrai ou faux : il répond sur son écran. Il valide aussi les cartes Chance, Malchance et Prison.', 'Boutique : il fait ses achats sur son téléphone (dé bonus, canne à pêche, glue).', 'Mime : le mot s\'affiche seulement sur le téléphone du mimeur. Il peut lancer le chrono ou refuser discrètement. C\'est toujours toi qui valides « Mime réussi » ou « Pas trouvé ».', 'Un élève arrive en retard ? Le bouton violet 📱 en haut de l\'écran réaffiche le QR code.']},
+  {img:'manAll', title:'Toute la classe répond', text:['Option cochée au départ : à chaque quiz et vrai ou faux, toute la classe répond sur son téléphone. Seul le joueur du tour avance ; les autres gagnent 1 pièce s\'ils ont juste.', 'Quand le joueur a répondu, les autres ont encore quelques secondes (10 par défaut, réglable) : personne ne doit se précipiter. La correction arrive dès que tout le monde a répondu, ou avec « Corriger maintenant ».', 'Comme tout le monde gagne plus de pièces, les prix de la boutique augmentent automatiquement (réglable).', 'Toutes les réponses vont dans le bilan : tu vois ce que chaque élève a répondu.']},
+  {tip:'Manettes : fais un essai avec ton propre téléphone avant le cours, pour vérifier le réseau de l\'école. Les prénoms passent par internet le temps de la partie mais ne sont jamais enregistrés ; tu peux aussi utiliser des pseudos.'},
   {tip:'Astuce : avant le cours, fais une partie d\'essai à 2 joueurs avec 6 minutes de jeu. Tu verras le coup de feu, les étoiles et le podium en quelques minutes.'}
 ];
 function fillTuto(body){
@@ -2014,7 +2080,7 @@ function fillBackupTab(body){
     const apply = async (mode) => {
       const QL = ['quiz','vf','actions','mimes'];
       if (mode === 'replace') LISTS.forEach(k => { if (QL.includes(k) || found.includes(k)) draft[k] = clone(data[k]); });
-      else found.forEach(k => { draft[k] = draft[k].concat(clone(data[k])); });
+      else found.forEach(k => { const have = new Set(draft[k].map(drawKey)); draft[k] = draft[k].concat(clone(data[k]).filter(it => { const key = drawKey(it); if (have.has(key)) return false; have.add(key); return true; })); });
       if (mode === 'replace'){ ['title','subtitle','bestStar','course'].forEach(k => { if (data.settings[k] !== undefined && data.settings[k] !== '') draft.settings[k] = data.settings[k]; }); }
       dirty = true;
       await saveAdmin();
@@ -2272,6 +2338,7 @@ const TOUR = [
   {sel:'.stepper', title:'Le nombre de joueurs', text:'De 2 à 30. Au-delà de 10 élèves, joue en équipes de 3 ou 4 : chacun participe plus souvent. À partir de 15 joueurs, les cases gagnées et perdues comptent double.'},
   {sel:'#names', title:'Les prénoms ou les équipes', text:'Écris le prénom de chaque élève ou le nom de chaque équipe. Chacun reçoit une couleur de pion.'},
   {sel:'#dur', title:'La durée de la partie', text:'40 minutes conviennent bien pour un cours de 50 minutes. Les 5 dernières minutes, c\'est le « coup de feu » : tout compte double.'},
+  {sel:'#modeBox', title:'Avec ou sans manettes', text:'Sans manettes : tout se joue au tableau. Avec manettes : les élèves rejoignent avec un QR code et jouent sur leur téléphone ou une tablette (internet nécessaire). Le tuto du mode prof explique tout.'},
   {sel:'#btnStart', title:'Lancer la partie', text:'Quand tout est prêt, clique ici. Astuce : appuie sur F11 pour passer en plein écran au projecteur.'},
   {sel:'.tb-audio', title:'Musique et sons', text:'Le bouton Musique ouvre un menu : 5 airs d\'ambiance à choisir, ou « Enchaîner les 5 » pour changer d\'air toutes les 2 à 3 minutes, et le volume. Le bouton Sons coupe les bruitages. La musique accélère pendant le coup de feu !'},
   {title:'Pendant la partie', text:'Clique sur les dés : le pion avance tout seul. Pour un quiz ou un vrai/faux, clique sur la réponse de l\'élève. Pour une action ou un mime, c\'est toi qui valides avec « Réussi » ou « Raté ».', img:'play'},
@@ -2352,9 +2419,56 @@ function importFromSite(){
     setTimeout(() => bigToast('COURS CHARGÉ !', 'gold'), 700);
   } catch (e) {}
 }
+/* ================= MANETTES (téléphones des élèves) =================
+   Mode optionnel : les élèves rejoignent la partie avec un QR code.
+   Les fichiers sont chargés depuis le site Classe Party (internet nécessaire). */
+const SITE_URL = 'https://classeparty.github.io/';
+let gameMode = lsGet('classeparty-mode') === 'manettes' ? 'manettes' : 'sans';
+let manLoading = null;
+function manBase(){
+  const hn = location.hostname;
+  return (/^https?:$/.test(location.protocol) && (hn === 'classeparty.github.io' || hn === 'localhost' || hn === '127.0.0.1')) ? '' : SITE_URL;
+}
+function loadScript(src){ return new Promise((ok, ko) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.body.append(s); }); }
+function loadManettes(){
+  if (window.CP_LAB) return Promise.resolve(true);
+  if (manLoading) return manLoading;
+  const base = manBase(); window.CP_SITE = base;
+  manLoading = (async () => {
+    try {
+      if (!window.supabase) await loadScript(base + 'lib/supabase.js');
+      if (!window.CP_CONFIG) await loadScript(base + 'config.js?v=' + BUILD);
+      if (!window.qrcode) await loadScript(base + 'qrcode.js');
+      await loadScript(base + 'manettes.js?v=' + BUILD);
+      return !!window.CP_LAB;
+    } catch (e) { return false; }
+    finally { manLoading = null; }
+  })();
+  return manLoading;
+}
+async function setMode(m){
+  gameMode = m === 'manettes' ? 'manettes' : 'sans'; lsSet('classeparty-mode', gameMode);
+  const on = gameMode === 'manettes';
+  $('#modeSans').classList.toggle('on', !on); $('#modeSans').setAttribute('aria-checked', String(!on));
+  $('#modeAvec').classList.toggle('on', on); $('#modeAvec').setAttribute('aria-checked', String(on));
+  const zone = $('#manetteZone');
+  if (!on){ if (window.CP_LAB) window.CP_LAB.stop(); zone.className = ''; zone.replaceChildren(); return; }
+  zone.className = ''; zone.replaceChildren(h('p', {class:'man-msg'}, 'Connexion au serveur des manettes…'));
+  const ok = await loadManettes();
+  if (gameMode !== 'manettes') return;
+  if (!ok){
+    zone.replaceChildren(h('p', {class:'man-msg err'}, 'Les manettes ne peuvent pas se connecter. Elles ont besoin d\'internet : vérifie la connexion, ou joue sans manettes.'), btn('Réessayer', 'small violet', () => setMode('manettes')));
+    return;
+  }
+  window.CP_LAB.start(zone);
+}
+$('#modeSans').addEventListener('click', () => { SFX.click(); setMode('sans'); });
+$('#modeAvec').addEventListener('click', () => { SFX.click(); setMode('manettes'); });
+
 function boot(data){
   importFromSite();
   renderSetup(); showScreen('setup'); syncAudioButtons();
+  if (gameMode === 'manettes') setMode('manettes');
   if (!lsGet('classeparty-tour-done') && !(data && data.G)) setTimeout(startTour, 600);
   if (data && data.G && Array.isArray(data.G.players)){ G = data.G; resumeGame(); }
 }
@@ -2362,10 +2476,4 @@ try { if (window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(wi
 catch (e) { boot({}); }
 </script>
 <a href="index.html" style="position:fixed;left:8px;bottom:5px;z-index:96;font:700 .78rem 'Baloo 2',sans-serif;color:#3a1d0e;background:rgba(255,253,247,.85);border:2px solid #3a1d0e;border-radius:8px;padding:2px 9px;text-decoration:none">← Site Classe Party</a>
-<script>
-(function(){ if (!/[?&]labo=1(&|$)/.test(location.search)) return;
-  var list = ['lib/supabase.js', 'config.js', 'qrcode.js', 'labo-host.js?v=20261010g'], i = 0;
-  (function next(){ if (i >= list.length) return; var s = document.createElement('script'); s.src = list[i++]; s.onload = next; s.onerror = next; document.body.appendChild(s); })();
-})();
-</script>
 </body></html>

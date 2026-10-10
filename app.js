@@ -194,6 +194,7 @@
     foot.replaceChildren(el('div', {class: 'wrap foot-in'},
       el('div', {}, el('b', {}, 'Classe Party'), ` v${CP.version} · © 2026 ${CP.author} · `, el('a', {href: 'licence.html', title: 'Licence Creative Commons BY-NC-ND 4.0 : gratuit en classe, pas d\'utilisation commerciale'}, 'Licence CC BY-NC-ND')),
       el('div', {class: 'foot-links'},
+        el('a', {href: 'nouveautes.html'}, 'Nouveautés'),
         el('a', {href: 'deontologie.html'}, 'Charte de déontologie'),
         el('a', {href: 'confidentialite.html'}, 'Confidentialité'),
         el('a', {href: 'qui-sommes-nous.html'}, 'Qui sommes-nous'),
