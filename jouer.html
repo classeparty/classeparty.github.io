@@ -125,6 +125,8 @@ button{font:inherit}
 .imp-err ul{margin:6px 0 0;padding-left:1.2em;color:var(--ink);font-weight:600;font-size:.92rem;display:grid;gap:2px}
 .imp-btns{display:flex;flex-wrap:wrap;gap:10px}
 .qcount{margin:0;font-weight:700;color:var(--ink-2);background:var(--white);border:2px solid var(--ink-2);border-radius:12px;padding:6px 12px}
+.test-badge{display:inline-flex;align-items:center;font-family:var(--f-display);font-size:.95rem;color:#fff;background:var(--a);border:3px solid var(--ink);border-radius:999px;padding:.2em .8em;box-shadow:0 4px 0 var(--ink)}
+.badge.card-exit{background:var(--v)}.badge.card-joker{background:var(--a)}
 .mode-box{display:grid;gap:8px}
 .mode-btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .mode-btn{display:grid;gap:2px;text-align:left;font:inherit;color:var(--ink);background:var(--white);border:3px solid var(--ink);border-radius:14px;padding:8px 12px;box-shadow:0 4px 0 var(--ink);cursor:pointer}
@@ -772,7 +774,14 @@ function say(t){ if (G){ G.msg = t; const m = $('#msg'); if (m) m.textContent = 
 /* ================= SETUP SCREEN ================= */
 let nPlayers = 7;
 const APP_VERSION = '1.1';
-const BUILD = '20261011c';
+const BUILD = '20261011d';
+let TEST111 = false;
+function enableTest111(){
+  if (TEST111) return; TEST111 = true;
+  const b = h('span', {class:'test-badge', title:'Version de test réservée au développeur : cartes Sortie de retenue, Joker et Malchance −1 dé'}, '🧪 TEST 1.11');
+  const bar = document.querySelector('.tb-btns'); if (bar) bar.prepend(b);
+}
+window.enableTest111 = enableTest111;
 const AUTHOR = 'Manderlier Jérôme';
 const COPYRIGHT = '© 2026 Manderlier Jérôme. Classe Party est sous licence Creative Commons BY-NC-ND 4.0 : utilisation gratuite en classe, toute utilisation commerciale ou revente interdite sans accord écrit de l\'auteur.';
 function gameTitle(){ return String(bank.settings.title || '').trim() || DEFAULT_BANK.settings.title; }
@@ -952,7 +961,7 @@ function renderCenter(){
   const n = diceCount(p); setDice(n);
   btn.textContent = G.paused ? 'EN PAUSE' : (p.jailed ? 'EN RETENUE…' : (n === 2 ? 'LANCER LES DÉS !' : n === 1 ? 'LANCER LE DÉ !' : `LANCER ${n} DÉS !`));
   const fx = $('#fxNote');
-  if (fx){ const parts = []; if (p.extraDice > 0) parts.push('DÉ BONUS : +1 dé'); if (p.glued > 0) parts.push('COLLÉ : −1 dé'); fx.hidden = !parts.length; fx.textContent = parts.join(' · '); fx.classList.toggle('bad', p.glued > 0 && !(p.extraDice > 0)); }
+  if (fx){ const parts = []; if (p.extraDice > 0) parts.push('DÉ BONUS : +1 dé'); if (p.glued > 0) parts.push('COLLÉ : −1 dé'); if (p.lessDie > 0) parts.push('MALCHANCE : −1 dé'); fx.hidden = !parts.length; fx.textContent = parts.join(' · '); fx.classList.toggle('bad', (p.glued > 0 || p.lessDie > 0) && !(p.extraDice > 0)); }
   btn.disabled = G.phase !== 'roll' || G.paused;
   $('#msg').textContent = G.msg || '';
   $('#rushNote').hidden = !G.rushOn;
@@ -975,6 +984,9 @@ function renderSide(){
         (G.rushOn && !G.over && isLast(p)) ? h('span', {class:'badge three'}, '3 DÉS') : null,
         (!G.over && p.extraDice > 0) ? h('span', {class:'badge plus'}, '+1 DÉ') : null,
         (!G.over && p.glued > 0) ? h('span', {class:'badge glue'}, 'COLLÉ') : null,
+        (!G.over && p.lessDie > 0) ? h('span', {class:'badge glue'}, '−1 DÉ') : null,
+        (!G.over && p.cards && p.cards.exit > 0) ? h('span', {class:'badge card-exit', title:'Carte Sortie de retenue'}, '🎟️ SORTIE') : null,
+        (!G.over && p.cards && p.cards.joker > 0) ? h('span', {class:'badge card-joker', title:'Joker : protège de la glue et de la canne à pêche'}, '🛡️ JOKER') : null,
         h('small', {title:'Case actuelle et bonnes réponses'}, `Case ${p.progress % N} · ✓ ${p.stats.correct}`)),
       shopOn() ? coinChip(p.coins || 0, 'cside') : h('span', {}),
       h('span', {class:'stours'}, h('b', {}, tours), h('small', {}, plural(tours, 'tour', 'tours')))
@@ -1054,6 +1066,7 @@ async function roll(){
   const vals = await animateDice(n);
   if (p.extraDice > 0) p.extraDice--;
   if (p.glued > 0) p.glued--;
+  if (p.lessDie > 0) p.lessDie--;
   const sum = vals.reduce((a, b) => a + b, 0);
   p.stats.distance += sum;
   say(`${p.name} fait ${sum} !`);
@@ -1219,18 +1232,30 @@ function askQuestion(p, kind, jail){
   const title = jail ? 'QUESTION DE RETENUE' : (isVF ? 'VRAI OU FAUX ?' : 'QUIZ !');
   const rule = jail ? 'Réponds juste pour sortir de retenue et lancer les dés.'
                     : `Bonne réponse : +${casesTxt(m)} · Mauvaise réponse : −${casesTxt(m)}`;
+  ensurePlayerFields(p);
+  const exitBtn = (jail && TEST111 && p.cards.exit > 0) ? btn('🎟️ Je ne sais pas : carte Sortie de retenue', 'small violet lab-exit', () => useExitCard(p)) : null;
+  if (exitBtn) buttons.forEach(b => b.addEventListener('click', () => { exitBtn.hidden = true; }));
   openModal(card({type: jail ? 'P' : (isVF ? 'V' : 'Q'), title, player:p,
-    body:[h('p', {class:'rule'}, rule), h('p', {class:'qtext'}, item.q), answers, fb, ex], foot:[cont]}));
+    body:[h('p', {class:'rule'}, rule), h('p', {class:'qtext'}, item.q), answers, fb, ex], foot:[exitBtn, cont]}));
 }
 function freeFromJail(p){
   p.jailed = false; SFX.lap();
   say(`${p.name} sort de retenue ! Lance les dés.`);
   G.phase = 'roll'; renderAll(); saveGame();
 }
+function useExitCard(p){
+  ensurePlayerFields(p); if (!(p.cards.exit > 0)) return false;
+  p.cards.exit--; closeModal(); bigToast('CARTE SORTIE DE RETENUE !', 'gold');
+  freeFromJail(p); say(`${p.name} utilise sa carte Sortie de retenue ! Lance les dés.`);
+  return true;
+}
 function jailCard(p){
+  ensurePlayerFields(p);
+  const exitBtn = (TEST111 && p.cards.exit > 0) ? btn('🎟️ UTILISER MA CARTE SORTIE', 'big violet phone-ok', () => useExitCard(p)) : null;
   openModal(card({type:'P', title:'EN RETENUE !', player:p,
-    body:[h('div', {class:'big-ico', html:SVG.lock}), h('p', {class:'qtext center-txt'}, `${p.name}, réponds juste à une question pour sortir !`)],
-    foot:[btn('VOIR LA QUESTION', 'big blue', () => { closeModal(); const ks = ['quiz','vf'].filter(hasKind); if (!ks.length){ say(`Pas de question : ${p.name} sort de retenue !`); return freeFromJail(p); } askQuestion(p, ks[Math.floor(Math.random() * ks.length)], true); })]}));
+    body:[h('div', {class:'big-ico', html:SVG.lock}), h('p', {class:'qtext center-txt'}, `${p.name}, réponds juste à une question pour sortir !`),
+      exitBtn ? h('p', {class:'rule center-txt'}, `${p.name} a une carte Sortie de retenue : il peut l'utiliser maintenant, ou la garder et tenter la question.`) : null],
+    foot:[exitBtn, btn('VOIR LA QUESTION', 'big blue phone-ok', () => { closeModal(); const ks = ['quiz','vf'].filter(hasKind); if (!ks.length){ say(`Pas de question : ${p.name} sort de retenue !`); return freeFromJail(p); } askQuestion(p, ks[Math.floor(Math.random() * ks.length)], true); })]}));
 }
 function prisonLanding(p){
   p.jailed = true; SFX.jail(); renderTokens(); renderSide();
@@ -1293,7 +1318,44 @@ function doMime(p){
 }
 
 /* --- chance / malchance --- */
+const SPECIAL = {
+  exit:['Le directeur te fait confiance : tu reçois une carte Sortie de retenue !', 'Tu as rendu service à l\'éducateur : voici une carte Sortie de retenue !', 'Ton comportement est exemplaire : une carte Sortie de retenue pour toi !'],
+  joker:['Tu reçois un Joker : il te protège une fois de la glue ou de la canne à pêche !', 'Ton ange gardien veille sur toi : carte Joker !', 'Tu trouves un bouclier magique : carte Joker !'],
+  lessDie:['Tu as oublié ton cartable : un dé de moins à ton prochain lancer.', 'Tu t\'es tordu la cheville en récré : un dé de moins au prochain lancer.', 'Panne de réveil : tu pars en retard, un dé de moins au prochain lancer.']
+};
+function specialCard(p, kind){
+  ensurePlayerFields(p); const r = Math.random();
+  const pick = k => SPECIAL[k][Math.floor(Math.random() * SPECIAL[k].length)];
+  if (kind === 'chance'){
+    if (r < .22) return {special:'exit', text:pick('exit')};
+    if (r < .40) return {special:'joker', text:pick('joker')};
+  } else if (r < .30) return {special:'lessDie', text:pick('lessDie')};
+  return null;
+}
+function doSpecialLuck(p, kind, sp){
+  const good = kind === 'chance'; if (!good) p.stats.malchance++;
+  let effTxt, effCls = 'eff ' + (good ? 'up' : 'down'), ico;
+  const has = sp.special !== 'lessDie' && p.cards[sp.special] > 0;
+  if (sp.special === 'exit'){ effTxt = has ? 'DÉJÀ UNE CARTE : +2 PIÈCES' : 'CARTE SORTIE DE RETENUE'; ico = '🎟️'; }
+  else if (sp.special === 'joker'){ effTxt = has ? 'DÉJÀ UN JOKER : +2 PIÈCES' : 'CARTE JOKER'; ico = '🛡️'; }
+  else { effTxt = 'UN DÉ DE MOINS AU PROCHAIN LANCER'; ico = '🎲'; }
+  setTimeout(() => (good ? SFX.good() : SFX.bad()), 250);
+  const apply = () => {
+    closeModal();
+    if (sp.special === 'lessDie'){ p.lessDie = 1; say(`${p.name} lancera un dé de moins au prochain tour.`); }
+    else if (has){ addCoins(p, 2); say(`${p.name} a déjà cette carte : +2 pièces.`); }
+    else { p.cards[sp.special] = 1; say(sp.special === 'exit' ? `${p.name} garde une carte Sortie de retenue.` : `${p.name} garde un Joker contre la glue et la canne à pêche.`); }
+    renderAll(); saveGame(); endTurn();
+  };
+  openModal(card({type: good ? 'C' : 'X', title: good ? 'CHANCE !' : 'MALCHANCE…', player:p,
+    body:[h('div', {class:'luck'}, h('div', {class:'luck-card'},
+      h('div', {class:'big-ico', style:'font-size:84px;line-height:1'}, ico),
+      h('p', {class:'txt'}, sp.text), h('div', {class:effCls}, effTxt),
+      h('p', {class:'hintline'}, '🧪 Carte de la version test 1.11')))],
+    foot:[btn('OK !', 'big ' + (good ? 'go' : 'red'), apply)]}));
+}
 function doLuck(p, kind){
+  if (TEST111){ const sp = specialCard(p, kind); if (sp) return doSpecialLuck(p, kind, sp); }
   const item = draw(kind);
   if (!item){ say('Pas de carte.'); return endTurn(); }
   const m = mult(); const good = kind === 'chance';
@@ -1352,12 +1414,14 @@ function diceCount(p){
   let n = (G.rushOn && isLast(p)) ? 3 : 2;
   if (p.extraDice > 0) n++;
   if (p.glued > 0) n--;
+  if (p.lessDie > 0) n--;
   return Math.max(1, n);
 }
 function ensurePlayerFields(p){
   if (p.coins === undefined) p.coins = setNum('startCoins', 3);
   if (p.bestLap === undefined) p.bestLap = Math.floor(p.progress / N);
-  p.extraDice = p.extraDice || 0; p.glued = p.glued || 0;
+  p.extraDice = p.extraDice || 0; p.glued = p.glued || 0; p.lessDie = p.lessDie || 0;
+  p.cards = p.cards || {exit:0, joker:0};
   p.stats.coinsWon = p.stats.coinsWon || 0; p.stats.bought = p.stats.bought || 0;
 }
 function validTargets(p, item){
@@ -1402,7 +1466,7 @@ function openShop(p, done){
       const list = h('div', {class:'target-list'});
       validTargets(p, it).forEach(t => {
         const tours = Math.floor(t.progress / N);
-        list.append(h('button', {type:'button', class:'target-btn', onclick:() => purchase(it, t)}, pdot(t), h('span', {}, t.name), h('small', {}, `${tours} ${plural(tours, 'tour', 'tours')}`)));
+        list.append(h('button', {type:'button', class:'target-btn', onclick:() => purchase(it, t)}, pdot(t), h('span', {}, t.name), (t.cards && t.cards.joker > 0) ? h('span', {title:'Ce joueur a un Joker : ton objet sera bloqué'}, '🛡️') : null, h('small', {}, `${tours} ${plural(tours, 'tour', 'tours')}`)));
       });
       wrap.append(h('div', {class:'target-box'}, h('p', {class:'rule'}, it.id === 'fish' ? 'À qui veux-tu voler un tour ?' : 'Qui veux-tu coller ?'), list));
     }
@@ -1410,6 +1474,11 @@ function openShop(p, done){
   const purchase = (it, t) => {
     const price = it.price(); if (p.coins < price) return;
     p.coins -= price; p.stats.bought++; bought.add(it.id); picking = null;
+    if (t && t.cards && t.cards.joker > 0){
+      t.cards.joker--; SFX.star(); bigToast(`${t.name} SE PROTÈGE AVEC SON JOKER !`, 'gold');
+      say(`${t.name} utilise son Joker : ${it.id === 'fish' ? 'la canne à pêche' : 'la glue'} de ${p.name} ne fait rien !`);
+      renderTokens(); renderSide(); saveGame(); render(); return;
+    }
     if (it.id === 'die'){ p.extraDice = 1; SFX.lap(); bigToast('+1 DÉ BONUS !', 'gold'); say(`${p.name} achète un dé bonus !`); }
     else if (it.id === 'fish'){
       t.progress -= N; t.bestLap = Math.max(0, (t.bestLap || 0) - 1);
@@ -2515,6 +2584,19 @@ try { if (window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(wi
 catch (e) { boot({}); }
 </script>
 <a href="index.html" style="position:fixed;left:8px;bottom:5px;z-index:96;font:700 .78rem 'Baloo 2',sans-serif;color:#3a1d0e;background:rgba(255,253,247,.85);border:2px solid #3a1d0e;border-radius:8px;padding:2px 9px;text-decoration:none">← Site Classe Party</a>
+<script>
+/* version de test 1.11 : seulement depuis le Labo, et seulement pour l'administrateur connecté */
+(function(){ if (!/[?&]test=1\.11(&|$)/.test(location.search)) return;
+  function load(src){ return new Promise(function(ok, ko){ var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.body.appendChild(s); }); }
+  (window.supabase ? Promise.resolve() : load('lib/supabase.js'))
+  .then(function(){ return window.CP_CONFIG ? null : load('config.js?v=20261011d'); })
+  .then(function(){ var C = window.CP_CONFIG || {}; if (!window.supabase || !C.SUPABASE_URL) return;
+    var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+    return sb.auth.getSession().then(function(r){ var se = r && r.data && r.data.session; if (!se) return;
+      return sb.from('profiles').select('is_admin').eq('id', se.user.id).maybeSingle().then(function(x){ if (x && x.data && x.data.is_admin && window.enableTest111) window.enableTest111(); }); }); })
+  .catch(function(){});
+})();
+</script>
 <script>
 /* compteur « en ce moment » et statistiques anonymes : signale seulement qu'un jeu est ouvert (rien sur la personne) */
 setTimeout(function(){

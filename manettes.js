@@ -60,7 +60,8 @@
     const title = (m.querySelector('.card-title') || {}).textContent || '';
     if (LAB.q && m.querySelector('.ans')) {
       const hold = (LAB.q.hold && !LAB.q.revealed) ? Math.max(0, Math.ceil((LAB.q.hold.until - Date.now()) / 1000)) : 0;
-      return {type: 'q', title, q: {text: LAB.q.text, vf: LAB.q.vf, opts: LAB.q.opts, revealed: LAB.q.revealed, right: LAB.q.revealed ? LAB.q.right : null, all: LAB.q.all, hold, results: LAB.q.revealed ? LAB.q.results : null}, cont: LAB.q.revealed};
+      const ex = m.querySelector('.lab-exit');
+      return {type: 'q', title, exit: !!(ex && !ex.hidden), q: {text: LAB.q.text, vf: LAB.q.vf, opts: LAB.q.opts, revealed: LAB.q.revealed, right: LAB.q.revealed ? LAB.q.right : null, all: LAB.q.all, hold, results: LAB.q.revealed ? LAB.q.results : null}, cont: LAB.q.revealed};
     }
     const foot = [...m.querySelectorAll('.card-foot .btn')].filter(b => !b.hidden);
     if (m.querySelector('.shop-wrap')) return {type: 'shop', title, shop: shopInfo(m)};
@@ -68,7 +69,8 @@
       const chronoBtn = [...m.querySelectorAll('.secret-row .btn')][1];
       return {type: 'mime', title, mime: {pid: LAB.mime.pid, word: LAB.mime.word, chrono: !!(chronoBtn && chronoBtn.disabled)}};
     }
-    return {type: 'other', title, btn: foot.length === 1 ? foot[0].textContent : null};
+    const ok = foot.filter(b => foot.length === 1 || b.classList.contains('phone-ok'));
+    return {type: 'other', title, btn: ok.length === 1 ? ok[0].textContent : null, btns: ok.map(b => b.textContent)};
   }
   /* boutique : ce que la manette du joueur doit afficher */
   function shopInfo(m) {
@@ -80,7 +82,7 @@
         const b = els[i] && els[i].querySelector('.btn');
         const why = b && b.disabled ? b.textContent : '';
         return {i, name: it.name, desc: it.desc, price: it.price(), why, target: !!it.target,
-          targets: (it.target && !why) ? validTargets(p, it).map(t => ({pid: G.players.indexOf(t), name: t.name, color: t.color, tours: Math.floor(t.progress / N)})) : []};
+          targets: (it.target && !why) ? validTargets(p, it).map(t => ({pid: G.players.indexOf(t), name: t.name, color: t.color, joker: !!(t.cards && t.cards.joker > 0), tours: Math.floor(t.progress / N)})) : []};
       })
     };
   }
@@ -129,10 +131,14 @@
     }
     if (!isTurn || m.hidden) return;
     if (a.a === 'cont') {
+      if (m.querySelector('.shop-wrap') || m.querySelector('.secret') || m.querySelector('.ans:not([disabled])')) return;
       const foot = [...m.querySelectorAll('.card-foot .btn')].filter(b => !b.hidden && !b.disabled);
-      if (foot.length === 1 && !m.querySelector('.shop-wrap') && !m.querySelector('.secret')) foot[0].click();
+      const ok = foot.filter(b => foot.length === 1 || b.classList.contains('phone-ok'));
+      const i = Number.isInteger(a.i) ? a.i : 0;
+      if (ok[i]) ok[i].click();
       return;
     }
+    if (a.a === 'useexit') { const b = m.querySelector('.lab-exit'); if (b && !b.hidden) b.click(); return; }
     /* --- boutique depuis le téléphone --- */
     if (a.a === 'buy' && m.querySelector('.shop-wrap')) {
       const i = parseInt(a.i, 10), it = ITEMS[i]; if (!it) return;

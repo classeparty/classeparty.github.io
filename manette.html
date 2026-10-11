@@ -177,11 +177,13 @@ p{margin:0;font-weight:600;line-height:1.35}
     answered = null; lastQ = '';
     if (S.paused) return show(el('div', {class: 'emoji'}, '⏸️'), el('h2', {class: 'center'}, 'Pause'), el('p', {class: 'center'}, 'Le jeu est en pause.'));
     if (myTurn && !card && S.phase === 'roll') { const bz = 'roll' + S.turn + '|' + JSON.stringify(S.players[pid]); if (bz !== lastBuzz) { lastBuzz = bz; vib([60, 60, 60]); } return show(el('h2', {class: 'center'}, 'C\'est ton tour !'), el('button', {type: 'button', class: 'btn go huge', onclick: e => { e.currentTarget.disabled = true; act('roll'); }}, '🎲 LANCE LES DÉS !')); }
-    if (myTurn && card) return show(el('h2', {class: 'center'}, card.title || 'À toi !'), el('p', {class: 'center'}, 'Regarde le tableau.'), card.btn ? el('button', {type: 'button', class: 'btn violet', onclick: e => { e.currentTarget.disabled = true; act('cont'); }}, card.btn) : el('p', {class: 'center muted'}, 'Le prof va valider.'));
+    if (myTurn && card) { const bl = card.btns && card.btns.length ? card.btns : (card.btn ? [card.btn] : []);
+      return show(el('h2', {class: 'center'}, card.title || 'À toi !'), el('p', {class: 'center'}, 'Regarde le tableau.'),
+        bl.length ? el('div', {style: 'display:grid;gap:10px'}, bl.map((l, i) => el('button', {type: 'button', class: 'btn ' + (i === bl.length - 1 ? 'violet' : 'blue'), onclick: e => { e.currentTarget.disabled = true; act('cont', {i}); }}, l))) : el('p', {class: 'center muted'}, 'Le prof va valider.')); }
     if (myTurn) return show(el('div', {class: 'emoji'}, '🎲'), el('h2', {class: 'center'}, 'C\'est ton tour !'), el('p', {class: 'center'}, 'Regarde ton pion avancer au tableau.'));
     return show(el('div', {class: 'emoji'}, '👀'), el('h2', {class: 'center'}, 'Tour de ' + (who.name || '…')), el('p', {class: 'center'}, card ? (card.title || '') + ' Regarde le tableau.' : 'Regarde le tableau.'));
   }
-  function show(...kids) { main.replaceChildren(...kids); }
+  function show(...kids) { main.replaceChildren(...kids.filter(k => k !== null && k !== undefined && k !== false)); }
 
   /* ---------- boutique ---------- */
   function shopScreen(shop) {
@@ -197,7 +199,7 @@ p{margin:0;font-weight:600;line-height:1.35}
       else if (shopPick !== it.i) box.append(el('button', {type: 'button', class: 'btn go', onclick: () => { shopPick = it.i; vib(20); render(); }}, 'ACHETER'));
       else box.append(el('p', {class: 'small'}, el('b', {}, it.i === 1 ? 'À qui veux-tu voler un tour ?' : 'Qui veux-tu coller ?')),
         el('div', {class: 'names'}, it.targets.map(t => el('button', {type: 'button', class: 'name', onclick: e => { e.currentTarget.disabled = true; shopPick = -1; act('buy', {i: it.i, t: t.pid}); }},
-          el('span', {class: 'dot', style: '--pc:' + t.color}), t.name, el('small', {}, t.tours + ' tour' + (t.tours > 1 ? 's' : ''))))),
+          el('span', {class: 'dot', style: '--pc:' + t.color}), t.name, t.joker ? ' 🛡️' : '', el('small', {}, t.tours + ' tour' + (t.tours > 1 ? 's' : ''))))),
         el('button', {type: 'button', class: 'btn small grey', onclick: () => { shopPick = -1; render(); }}, 'Annuler'));
       list.append(box);
     });
@@ -265,7 +267,8 @@ p{margin:0;font-weight:600;line-height:1.35}
     if (q.hold && !myTurn) {
       if (holdKey !== key) { holdKey = key; holdAt = Date.now() + q.hold * 1000; vib([30, 30, 30]); }
       show(el('p', {class: 'hold', id: 'holdBanner'}, '⏳'), head, el('p', {class: 'qtext'}, q.text), box); tickHold();
-    } else show(head, el('p', {class: 'qtext'}, q.text), box);
+    } else show(head, el('p', {class: 'qtext'}, q.text), box,
+      (myTurn && card.exit) ? el('button', {type: 'button', class: 'btn violet', onclick: e => { e.currentTarget.disabled = true; act('useexit'); }}, '🎟️ Je ne sais pas : carte Sortie de retenue') : null);
   }
 
   setInterval(() => {
