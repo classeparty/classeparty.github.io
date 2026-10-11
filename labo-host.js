@@ -12,7 +12,7 @@
 
   const LAB = {
     on: false, code: '', ch: null, all: true, phones: {}, q: null,
-    sideAns: new Map(), sendT: null, seq: 0, priceMode: 'auto'
+    sideAns: new Map(), sendT: null, seq: 0, priceMode: 'auto', wait: 10
   };
   window.CP_LAB = LAB;
 
@@ -43,6 +43,7 @@
   .lab-chk input{width:20px;height:20px;accent-color:var(--v);flex:none;margin-top:2px}
   .lab-chip{font-family:var(--f-display);font-size:1rem;background:var(--v);color:#fff;border:3px solid var(--ink);border-radius:999px;padding:.2em .8em;box-shadow:0 4px 0 var(--ink);cursor:pointer;-webkit-text-stroke:0}
   .lab-count{margin:0;font-weight:800;color:var(--v);text-align:center}
+  .answers.lab-wait .ans{opacity:.55;pointer-events:none}
   .lab-big{display:grid;justify-items:center;gap:12px;text-align:center}
   .lab-big .lab-qr{width:min(320px,70vw)}
   .lab-big .lab-code{font-size:3.6rem}
@@ -68,7 +69,8 @@
     if (!m || m.hidden || !m.firstChild) return null;
     const title = (m.querySelector('.card-title') || {}).textContent || '';
     if (LAB.q && m.querySelector('.ans')) {
-      return {type: 'q', title, q: {text: LAB.q.text, vf: LAB.q.vf, opts: LAB.q.opts, revealed: LAB.q.revealed, right: LAB.q.revealed ? LAB.q.right : null, all: LAB.q.all, results: LAB.q.revealed ? LAB.q.results : null}, cont: LAB.q.revealed};
+      const hold = (LAB.q.hold && !LAB.q.revealed) ? Math.max(0, Math.ceil((LAB.q.hold.until - Date.now()) / 1000)) : 0;
+      return {type: 'q', title, q: {text: LAB.q.text, vf: LAB.q.vf, opts: LAB.q.opts, revealed: LAB.q.revealed, right: LAB.q.revealed ? LAB.q.right : null, all: LAB.q.all, hold, results: LAB.q.revealed ? LAB.q.results : null}, cont: LAB.q.revealed};
     }
     const foot = [...m.querySelectorAll('.card-foot .btn')].filter(b => !b.hidden);
     if (m.querySelector('.shop-wrap')) return {type: 'shop', title, shop: shopInfo(m)};
@@ -131,7 +133,7 @@
       if (!LAB.q || LAB.q.revealed) return;
       const j = parseInt(a.j, 10);
       if (!(j >= 0 && j < LAB.q.btns.length)) return;
-      if (isTurn) { LAB.q.btns[j].click(); return; }
+      if (isTurn) { if (!LAB.q.hold) LAB.q.btns[j].click(); return; }
       if (LAB.q.all && !LAB.sideAns.has(pid)) { LAB.sideAns.set(pid, j); refreshCounters(); push(); }
       return;
     }
@@ -208,7 +210,44 @@
       const body = m.querySelector('.card-body'); if (body) body.append(line);
     }
     btns.forEach((b, j) => b.addEventListener('click', () => reveal(j), {once: true}));
+    /* le joueur du tour a répondu : on laisse quelques secondes aux autres avant de corriger */
+    const box = m.querySelector('.answers');
+    if (box) box.addEventListener('click', e => {
+      const b = e.target.closest('.ans'); const q = LAB.q;
+      if (!b || !q || q.pass || q.revealed || !q.all) return;
+      if (!q.hold && !othersPending()) return;
+      e.stopImmediatePropagation(); e.preventDefault();
+      if (!q.hold) startHold(q.btns.indexOf(b));
+    }, true);
     refreshCounters(); push();
+  }
+  function eligible() { return [...new Set(Object.values(LAB.phones).map(ph => ph.pid))].filter(pid => pid >= 0 && pid !== G.turn && pid < G.players.length); }
+  function othersPending() { return eligible().some(pid => !LAB.sideAns.has(pid)); }
+  function startHold(j) {
+    const q = LAB.q; if (!q) return;
+    q.hold = {j, until: Date.now() + LAB.wait * 1000};
+    const box = document.querySelector('#modal .answers'); if (box) box.classList.add('lab-wait');
+    const line = document.getElementById('labCount');
+    if (line) {
+      const now = h('button', {type: 'button', class: 'btn mini grey', style: 'margin-left:8px'}, 'Corriger maintenant');
+      now.addEventListener('click', finishHold);
+      line.after(h('p', {class: 'lab-count', id: 'labHold'}, '', now));
+    }
+    q.hold.timer = setInterval(tickHold, 250); tickHold(); push();
+  }
+  function tickHold() {
+    const q = LAB.q; if (!q || !q.hold) return;
+    const left = Math.max(0, Math.ceil((q.hold.until - Date.now()) / 1000));
+    const el = document.getElementById('labHold');
+    if (el && el.firstChild) el.firstChild.textContent = `✅ ${q.player.name} a répondu ! ⏳ Encore ${left} s pour que la classe réponde`;
+    if (left <= 0 || !othersPending()) finishHold();
+  }
+  function finishHold() {
+    const q = LAB.q; if (!q || !q.hold || q.pass) return;
+    clearInterval(q.hold.timer); q.pass = true;
+    const box = document.querySelector('#modal .answers'); if (box) box.classList.remove('lab-wait');
+    const el = document.getElementById('labHold'); if (el) el.remove();
+    q.btns[q.hold.j].click();
   }
   function reveal() {
     const q = LAB.q; if (!q || q.revealed) return;
@@ -245,7 +284,7 @@
     const orig = window[fn]; if (typeof orig !== 'function') return;
     window[fn] = function () {
       const r = orig.apply(this, arguments);
-      if (fn === 'closeModal') { LAB.q = null; LAB.mime = null; }
+      if (fn === 'closeModal') { if (LAB.q && LAB.q.hold) clearInterval(LAB.q.hold.timer); LAB.q = null; LAB.mime = null; }
       if (fn === 'openModal') hookMime();
       push(); return r;
     };
@@ -318,6 +357,12 @@
       h('p', {}, `${nPhones()} manette${nPhones() > 1 ? 's' : ''} connectée${nPhones() > 1 ? 's' : ''}`),
       h('div', {class: 'lab-list'}, playerList().filter(p => phonesFor(p.i)).map(p => h('span', {}, h('span', {class: 'tdot', style: '--pc:' + p.color + ';width:16px;height:16px;border-width:2px'}), p.name + (phonesFor(p.i) > 1 ? ' ×' + phonesFor(p.i) : '')))),
       (() => { const c = h('input', {type: 'checkbox'}); c.checked = LAB.all; c.addEventListener('change', () => { LAB.all = c.checked; renderSetupBox(); }); return h('label', {class: 'lab-chk'}, c, h('span', {}, 'Toute la classe répond à chaque quiz et vrai ou faux (seul le joueur du tour avance ; les autres gagnent 1 pièce s\'ils ont juste).')); })(),
+      LAB.all ? (() => {
+        const sel = h('select', {class: 'in', style: 'width:auto;padding:4px 8px'});
+        [5, 10, 15, 20, 30].forEach(v => { const o = h('option', {value: String(v)}, v + ' secondes'); if (v === LAB.wait) o.selected = true; sel.append(o); });
+        sel.addEventListener('change', () => { LAB.wait = parseInt(sel.value, 10) || 10; });
+        return h('label', {class: 'lab-chk', style: 'align-items:center;flex-wrap:wrap'}, h('span', {}, '⏳ Quand le joueur a répondu, les autres ont encore :'), sel);
+      })() : null,
       (LAB.all && shopOn()) ? (() => {
         const sel = h('select', {class: 'in', style: 'width:auto;padding:4px 8px'});
         [['auto', `Automatique (×${autoMult()} avec ${playerList().length} joueurs)`], [1, 'Prix normaux'], [2, 'Prix ×2'], [3, 'Prix ×3'], [4, 'Prix ×4'], [5, 'Prix ×5']].forEach(([v, l]) => {

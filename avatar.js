@@ -1,5 +1,5 @@
 /* =====================================================================
-   Classe Party - AVATARS (version test 1.11) - v2 "détaillés"
+   Classe Party - AVATARS (version 1.11) - v2 "détaillés"
    Personnages originaux dessinés en SVG (dégradés, ombres, reflets) :
    animaux, créatures fantastiques, enfants, princes, princesses, fées,
    super-héros. Tous inventés pour Classe Party : aucun personnage existant.

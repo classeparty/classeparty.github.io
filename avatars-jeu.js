@@ -1,5 +1,5 @@
 /* =====================================================================
-   Classe Party - AVATARS DANS LE JEU (version test 1.11)
+   Classe Party - AVATARS DANS LE JEU (version 1.11)
    Avec ou sans tablettes : chaque joueur peut avoir un avatar, créé au
    tableau (clic sur sa pastille) ou sur sa tablette. Affiché sur les pions,
    le classement, la plaque du tour et le podium animé.
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   if (window.CPAV) return;
-  const on = () => typeof TEST111 !== 'undefined' && TEST111 === true;
+  const on = () => (typeof avatarsOn === 'function') ? avatarsOn() : (typeof TEST111 !== 'undefined' && TEST111 === true);
   const KEY = 'classeparty-avatars';
   const CPAV = window.CPAV = {listeners: []};
   let store = {};
@@ -128,8 +128,11 @@
 
   /* ---------- écran d'accueil : pastille cliquable ---------- */
   function decorateNames() {
-    if (!on() || !window.CPAvatar) return;
-    const box = document.getElementById('names'); if (!box) return;
+    const box = document.getElementById('names'); if (!box || !window.CPAvatar) return;
+    if (!on()) {
+      [...box.querySelectorAll('.av-pick')].forEach((b, i) => b.replaceWith(h('span', {class: 'tdot' + (box.children.length > 8 ? ' num' : ''), style: '--pc:' + COLORS[i]}, box.children.length > 8 ? i + 1 : null)));
+      const hint = document.getElementById('avHint'); if (hint) hint.remove(); return;
+    }
     [...box.querySelectorAll('.nm')].forEach((row, i) => {
       let b = row.querySelector('.av-pick');
       if (!b) {
@@ -143,7 +146,7 @@
       b.classList.toggle('empty', !av); b.innerHTML = av ? CPAvatar.svg(av) : '';
       b.title = 'Choisir l\'avatar de ' + nameOf(i); b.setAttribute('aria-label', b.title);
     });
-    if (!document.getElementById('avHint')) box.after(h('p', {class: 'av-hint', id: 'avHint'}, '🧪 Clique sur la pastille d\'un joueur pour lui créer un avatar (même sans tablette).'));
+    if (!document.getElementById('avHint')) box.after(h('p', {class: 'av-hint', id: 'avHint'}, '🙂 Clique sur la pastille d\'un joueur pour lui créer un avatar.'));
   }
   const _renderNames = window.renderNames;
   if (typeof _renderNames === 'function') renderNames = function () { const r = _renderNames.apply(this, arguments); decorateNames(); return r; };

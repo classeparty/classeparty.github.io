@@ -294,7 +294,7 @@
     renderSetupBox();
   }
   /* ---------- avatars (version test 1.11) : affichage géré par avatars-jeu.js ---------- */
-  function avOn() { return typeof TEST111 !== 'undefined' && TEST111 === true; }
+  function avOn() { return (typeof avatarsOn === 'function') ? avatarsOn() : (typeof TEST111 !== 'undefined' && TEST111 === true); }
   function avGet(i) { hookAv(); return (avOn() && window.CPAV) ? CPAV.get(i) : null; }
   function loadAvatars() {
     if (!avOn() || window.CPAV || window.__cpavLoad) return; window.__cpavLoad = true;

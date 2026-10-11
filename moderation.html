@@ -136,14 +136,8 @@
       el('h2', {}, '🛠️ Labo ', el('span', {class: 'chip', style: 'background:#efe6ff'}, 'réservé à l\'administrateur')),
       el('p', {class: 'muted'}, 'Les fonctions en test. Personne d\'autre ne les voit : elles ne sont liées nulle part sur le site et ne s\'activent que pour un compte administrateur.'),
       el('div', {class: 'paper stack', style: 'align-content:start'},
-        el('h3', {}, '🧪 Version test 1.11 : cartes spéciales et avatars'),
-        el('ul', {style: 'margin:0;padding-left:1.2em;display:grid;gap:4px'},
-          el('li', {}, el('b', {}, 'Chance → carte Sortie de retenue 🎟️ : '), 'on la garde, et on l\'utilise en retenue si on ne connaît pas la réponse.'),
-          el('li', {}, el('b', {}, 'Chance → carte Joker 🛡️ : '), 'protège une fois contre la glue ou la canne à pêche (l\'objet de l\'adversaire est bloqué).'),
-          el('li', {}, el('b', {}, 'Malchance → un dé de moins '), 'au lancer suivant, en plus des pertes de pièces habituelles.'),
-          el('li', {}, el('b', {}, 'Avatars 🎭 (avec les tablettes) : '), 'en attendant le début de la partie, chaque élève crée son personnage (animal, monstre, prince, princesse, féerique, super-héros, ou au hasard). On le voit sur son pion, dans le classement et sur le podium animé.')),
-        el('p', {class: 'small muted'}, 'Ces cartes s\'ajoutent aux cartes habituelles (environ 2 cartes Chance sur 5 et 1 carte Malchance sur 3). Elles n\'existent que dans ce jeu de test : le jeu normal, le jeu téléchargé et le programme Windows ne changent pas. Un badge « 🧪 TEST 1.11 » s\'affiche en haut du jeu.'),
-        el('div', {class: 'btn-row'}, el('a', {class: 'btn violet', href: 'jouer.html?test=1.11', target: '_blank', rel: 'noopener'}, 'Lancer le jeu de test 1.11'), el('a', {class: 'btn small grey', href: 'manette.html', target: '_blank', rel: 'noopener'}, 'Ouvrir une manette')))));
+        el('p', {class: 'muted', style: 'margin:0'}, 'Aucune fonction en test pour le moment. La version 1.11 (avatars et cartes spéciales) est publique depuis le 11 octobre 2026.'),
+        el('div', {class: 'btn-row'}, el('a', {class: 'btn small grey', href: 'manette.html', target: '_blank', rel: 'noopener'}, 'Ouvrir une manette')))));
   showDone.addEventListener('change', load);
   async function open(r){
     if (r.cible_type === 'cours'){
