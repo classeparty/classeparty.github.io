@@ -19,7 +19,7 @@
     <p class="small muted">Version du 11 octobre 2026 (statistiques anonymes ajoutées). Ce texte respecte le Règlement général sur la protection des données (RGPD).</p>
 
     <h2>Qui est responsable ?</h2>
-    <p>Le site Classe Party est édité par Jérôme Manderlier, enseignant, à titre personnel. Contact : <span id="contact" class="todo">[adresse mail de contact à compléter dans config.js]</span>.</p>
+    <p>Le site Classe Party est édité par Jérôme Manderlier, enseignant, à titre personnel. Contact : <span id="contact"><a href="mailto:jeuclasse.party@gmail.com">jeuclasse.party@gmail.com</a></span>.</p>
 
     <h2>Quand tu joues</h2>
     <ul>
@@ -82,14 +82,14 @@
 </main>
 <footer id="site-foot"></footer>
 <script src="lib/supabase.js"></script>
-<script src="config.js"></script>
+<script src="config.js?v=20261011j"></script>
 <script src="format.js"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261011e"></script>
+<script src="app.js?v=20261011j"></script>
 <script>
 CP.init('confidentialite.html').then(() => {
   const c = (window.CP_CONFIG || {}).CONTACT_EMAIL;
-  if (c){ const s = document.getElementById('contact'); s.textContent = c; s.className = ''; }
+  if (c){ const s = document.getElementById('contact'); s.replaceChildren(Object.assign(document.createElement('a'), {href: 'mailto:' + c, textContent: c})); s.className = ''; }
 });
 
 </script>

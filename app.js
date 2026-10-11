@@ -199,7 +199,7 @@
         el('a', {href: 'confidentialite.html'}, 'Confidentialité'),
         el('a', {href: 'qui-sommes-nous.html'}, 'Qui sommes-nous'),
         el('a', {href: 'tuto.html'}, 'Tuto'),
-        CFG.CONTACT_EMAIL ? el('span', {}, 'Contact : ' + CFG.CONTACT_EMAIL) : null)));
+        el('a', {href: 'mailto:' + (CFG.CONTACT_EMAIL || 'jeuclasse.party@gmail.com')}, 'Contact : ' + (CFG.CONTACT_EMAIL || 'jeuclasse.party@gmail.com')))));
   }
 
   CP.init = async function (page) {

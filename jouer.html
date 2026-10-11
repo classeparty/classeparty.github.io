@@ -3207,7 +3207,7 @@ catch (e) { boot({}); }
 (function(){ if (!/[?&]test=1\.11(&|$)/.test(location.search)) return;
   function load(src){ return new Promise(function(ok, ko){ var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.body.appendChild(s); }); }
   (window.supabase ? Promise.resolve() : load('lib/supabase.js'))
-  .then(function(){ return window.CP_CONFIG ? null : load('config.js?v=20261011d'); })
+  .then(function(){ return window.CP_CONFIG ? null : load('config.js?v=20261011i'); })
   .then(function(){ var C = window.CP_CONFIG || {}; if (!window.supabase || !C.SUPABASE_URL) return;
     var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
     return sb.auth.getSession().then(function(r){ var se = r && r.data && r.data.session; if (!se) return;
@@ -3220,7 +3220,7 @@ catch (e) { boot({}); }
 setTimeout(function(){
   function load(src){ return new Promise(function(ok, ko){ var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.body.appendChild(s); }); }
   (window.supabase ? Promise.resolve() : load('lib/supabase.js'))
-  .then(function(){ return window.CP_CONFIG ? null : load('config.js?v=20261011d'); })
+  .then(function(){ return window.CP_CONFIG ? null : load('config.js?v=20261011i'); })
   .then(function(){ var C = window.CP_CONFIG || {}; if (!window.supabase || !C.SUPABASE_URL) return;
     var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY, {auth: {persistSession: false, autoRefreshToken: false, detectSessionInUrl: false}});
     var ch = sb.channel('cp-site', {config: {presence: {key: 'j' + Math.random().toString(36).slice(2, 10)}}});
