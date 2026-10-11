@@ -109,9 +109,9 @@
       playing, over: playing ? !!G.over : false,
       players: playerList().map(p => {
         const gp = playing ? G.players[p.i] : null;
-        return {name: p.name, color: p.color, coins: gp ? (gp.coins || 0) : null, tours: gp ? Math.floor(gp.progress / N) : null, jailed: gp ? !!gp.jailed : false, av: avOn() ? (LAB.avatars[p.i] || null) : null};
+        return {name: p.name, color: p.color, coins: gp ? (gp.coins || 0) : null, tours: gp ? Math.floor(gp.progress / N) : null, jailed: gp ? !!gp.jailed : false, av: avGet(p.i)};
       }),
-      avatars: avOn(), turn: playing ? G.turn : -1, phase: playing ? G.phase : 'setup', paused: playing ? !!G.paused : false,
+      avatars: avOn() && !!window.CPAV, turn: playing ? G.turn : -1, phase: playing ? G.phase : 'setup', paused: playing ? !!G.paused : false,
       shop: typeof shopOn === 'function' ? shopOn() : true,
       card: playing ? modalInfo() : null
     };
@@ -293,44 +293,21 @@
     if (chip) chip.textContent = `📱 ${LAB.code} · ${nPhones()}`;
     renderSetupBox();
   }
-  /* ---------- avatars (version test 1.11) ---------- */
-  LAB.avatars = {};
+  /* ---------- avatars (version test 1.11) : affichage géré par avatars-jeu.js ---------- */
   function avOn() { return typeof TEST111 !== 'undefined' && TEST111 === true; }
-  if (!window.CPAvatar) { const sc = document.createElement('script'); sc.src = (window.CP_SITE || '') + 'avatar.js?v=20261011g'; sc.onload = () => { applyAvatars(); renderSetupBox(); }; document.body.append(sc); }
+  function avGet(i) { hookAv(); return (avOn() && window.CPAV) ? CPAV.get(i) : null; }
+  function loadAvatars() {
+    if (!avOn() || window.CPAV || window.__cpavLoad) return; window.__cpavLoad = true;
+    const sc = document.createElement('script'); sc.src = (window.CP_SITE || '') + 'avatars-jeu.js?v=20261011h';
+    sc.onload = () => { hookAv(); renderSetupBox(); push(); };
+    document.body.append(sc);
+  }
+  function hookAv() { if (window.CPAV && !LAB.avHooked) { LAB.avHooked = true; CPAV.listeners.push(() => { renderSetupBox(); push(); }); } }
   function setAvatar(a) {
-    if (!avOn() || !window.CPAvatar) return;
+    if (!avOn() || !window.CPAV) return;
     const pid = parseInt(a.pid, 10); if (!(pid >= 0 && pid < playerList().length)) return;
-    LAB.avatars[pid] = CPAvatar.clean(a.av); applyAvatars(); renderSetupBox(); push();
+    CPAV.set(pid, a.av);
   }
-  function sideOrder() { return G.players.map((p, i) => ({p, i})).sort((a, b) => b.p.progress - a.p.progress); }
-  function applyAvatars() {
-    if (!avOn() || !window.CPAvatar || !G || !Array.isArray(G.players)) return;
-    G.players.forEach((p, i) => {
-      const av = LAB.avatars[i]; const tk = document.querySelector('#tok-' + i + ' .tk'); if (!tk || !av) return;
-      const key = JSON.stringify(av); if (tk.dataset.av === key) return;
-      tk.dataset.av = key; tk.classList.add('has-av'); tk.innerHTML = CPAvatar.svg(av);
-    });
-    const cav = LAB.avatars[G.turn]; const plateDot = document.querySelector('#turnPlate .tdot');
-    if (cav && plateDot && !G.over) plateDot.replaceWith(h('span', {class: 'lab-av plate-av', html: CPAvatar.svg(cav)}));
-    const rows = [...document.querySelectorAll('#score .srow')];
-    sideOrder().forEach(({i}, k) => { const av = LAB.avatars[i]; const dot = rows[k] && rows[k].querySelector('.tdot'); if (av && dot) { const s = h('span', {class: 'lab-av side-av', html: CPAvatar.svg(av)}); dot.replaceWith(s); } });
-  }
-  const _showPodium = showPodium;
-  showPodium = function () {
-    const r = _showPodium.apply(this, arguments);
-    if (avOn() && window.CPAvatar && G) {
-      const order = [...G.players].sort((a, b) => b.progress - a.progress);
-      [1, 2, 3].forEach(place => {
-        const p = order[place - 1]; const pod = document.querySelector('#modal .pod.p' + place); if (!p || !pod) return;
-        const av = LAB.avatars[G.players.indexOf(p)]; const dot = pod.querySelector('.tdot'); if (!av || !dot) return;
-        dot.replaceWith(h('div', {class: 'pod-av pod-av-' + place, html: CPAvatar.svg(av) + (place === 1 ? '<span class="pod-shine">✨</span>' : '')}));
-      });
-      const rest = [...document.querySelectorAll('#modal .rest li')];
-      order.slice(3).forEach((p, k) => { const av = LAB.avatars[G.players.indexOf(p)]; const dot = rest[k] && rest[k].querySelector('.tdot'); if (av && dot) dot.replaceWith(h('span', {class: 'lab-av', html: CPAvatar.svg(av)})); });
-    }
-    return r;
-  };
-  ['renderTokens', 'buildBoard'].forEach(fn => { const orig = window[fn]; if (typeof orig !== 'function') return; window[fn] = function () { const r = orig.apply(this, arguments); applyAvatars(); return r; }; });
 
   ['renderCenter', 'renderSide', 'openModal', 'closeModal', 'renderNames', 'showScreen'].forEach(fn => {
     const orig = window[fn]; if (typeof orig !== 'function') return;
@@ -338,7 +315,6 @@
       const r = orig.apply(this, arguments);
       if (fn === 'closeModal') { if (LAB.q && LAB.q.hold) clearInterval(LAB.q.hold.timer); LAB.q = null; LAB.mime = null; }
       if (fn === 'openModal') hookMime();
-      if (fn === 'renderSide' || fn === 'renderCenter') applyAvatars();
       push(); return r;
     };
   });
@@ -403,7 +379,7 @@
           h('p', {}, 'Code de la partie :'), h('div', {class: 'lab-code'}, LAB.code))),
       LAB.err ? h('p', {style: 'color:var(--x)'}, LAB.err) : null,
       h('p', {}, `${nPhones()} manette${nPhones() > 1 ? 's' : ''} connectée${nPhones() > 1 ? 's' : ''}`),
-      h('div', {class: 'lab-list'}, playerList().filter(p => phonesFor(p.i)).map(p => h('span', {}, (avOn() && LAB.avatars[p.i] && window.CPAvatar) ? h('span', {class: 'lab-av', html: CPAvatar.svg(LAB.avatars[p.i])}) : h('span', {class: 'tdot', style: '--pc:' + p.color + ';width:16px;height:16px;border-width:2px'}), p.name + (phonesFor(p.i) > 1 ? ' ×' + phonesFor(p.i) : '')))),
+      h('div', {class: 'lab-list'}, playerList().filter(p => phonesFor(p.i)).map(p => h('span', {}, avGet(p.i) ? h('span', {class: 'lab-av', html: CPAvatar.svg(avGet(p.i))}) : h('span', {class: 'tdot', style: '--pc:' + p.color + ';width:16px;height:16px;border-width:2px'}), p.name + (phonesFor(p.i) > 1 ? ' ×' + phonesFor(p.i) : '')))),
       (() => { const c = h('input', {type: 'checkbox'}); c.checked = LAB.all; c.addEventListener('change', () => { LAB.all = c.checked; renderSetupBox(); }); return h('label', {class: 'lab-chk'}, c, h('span', {}, 'Toute la classe répond à chaque quiz et vrai ou faux (seul le joueur du tour avance ; les autres gagnent 1 pièce s\'ils ont juste).')); })(),
       LAB.all ? (() => {
         const sel = h('select', {class: 'in', style: 'width:auto;padding:4px 8px'});
@@ -441,6 +417,6 @@
     document.body.append(ov);
   }
 
-  LAB.start = function (zone) { LAB.zone = zone || LAB.zone; if (!LAB.on) start(); else renderSetupBox(); };
+  LAB.start = function (zone) { LAB.zone = zone || LAB.zone; loadAvatars(); if (!LAB.on) start(); else renderSetupBox(); };
   LAB.stop = stop;
 })();

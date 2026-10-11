@@ -2593,7 +2593,7 @@ catch (e) { boot({}); }
   .then(function(){ var C = window.CP_CONFIG || {}; if (!window.supabase || !C.SUPABASE_URL) return;
     var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
     return sb.auth.getSession().then(function(r){ var se = r && r.data && r.data.session; if (!se) return;
-      return sb.from('profiles').select('is_admin').eq('id', se.user.id).maybeSingle().then(function(x){ if (x && x.data && x.data.is_admin && window.enableTest111) window.enableTest111(); }); }); })
+      return sb.from('profiles').select('is_admin').eq('id', se.user.id).maybeSingle().then(function(x){ if (x && x.data && x.data.is_admin && window.enableTest111) { window.enableTest111(); if (!window.CPAV && !window.__cpavLoad) { window.__cpavLoad = true; load('avatars-jeu.js?v=20261011h'); } } }); }); })
   .catch(function(){});
 })();
 </script>
