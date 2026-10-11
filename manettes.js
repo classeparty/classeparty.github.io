@@ -314,7 +314,7 @@
       });
     LAB.ch = ch; addChip(); renderSetupBox();
     /* jeu ouvert hors du site (fichier, programme Windows) : compté dans « en ce moment » */
-    if (window.CP_SITE && !LAB.siteCh) { try { const pc = sb.channel('cp-site', {config: {presence: {key: 'j' + Math.random().toString(36).slice(2, 10)}}}); pc.subscribe(st => { if (st === 'SUBSCRIBED') { try { pc.track({p: 'jeu'}); } catch (e) {} } }); LAB.siteCh = pc; } catch (e) {} }
+    if (window.CP_SITE && !LAB.siteCh) { try { const pc = sb.channel('cp-site', {config: {presence: {key: 'j' + Math.random().toString(36).slice(2, 10)}}}); pc.subscribe(st => { if (st === 'SUBSCRIBED') { try { pc.track({p: 'jeu'}); } catch (e) {} } }); LAB.siteCh = pc; sb.rpc('compter_visite', {p_page: 'jeu', p_nouvelle: true}).then(() => {}, () => {}); } catch (e) {} }
     clearInterval(LAB.beat); LAB.beat = setInterval(push, 8000);
   }
   function stop() {

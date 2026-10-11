@@ -222,3 +222,27 @@ textarea.in{resize:vertical;line-height:1.35}
 .live-tile span:last-child{font-weight:700;font-size:.9rem;color:var(--ink-2)}
 .live-ico{font-size:1.6rem}
 .live-list{display:flex;flex-wrap:wrap;gap:6px}
+
+/* ---------- historique des visites (modération) ---------- */
+.stat-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.stat-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat-tile{display:grid;gap:2px;justify-items:start;text-align:left;font:inherit;color:var(--ink);background:var(--paper);border:3px solid var(--ink);border-radius:14px;padding:8px 12px;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+.stat-tile b{font-family:var(--f-display);font-weight:400;font-size:1.8rem;line-height:1}
+.stat-tile span{font-weight:700;font-size:.85rem;color:var(--ink-2)}
+.stat-tile.on{background:#f3ebff;border-color:#9b5de5;box-shadow:0 3px 0 #9b5de5}
+.stat-tile:focus-visible{outline:3px solid #9b5de5;outline-offset:2px}
+.chart-box{position:relative;background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:12px 12px 6px}
+.chart-title{margin:0 0 4px;font-weight:800;color:var(--ink)}
+.chart{display:block;width:100%;height:auto}
+.chart .grid{stroke:#eadfca;stroke-width:1}
+.chart .axis{stroke:#cdbd9f;stroke-width:1}
+.chart .tick{font:600 11px 'Baloo 2',sans-serif;fill:var(--muted)}
+.chart .bar{fill:#9b5de5}
+.chart .hit{fill:transparent;cursor:default;outline:none}
+.chart .hit.on{fill:rgba(155,93,229,.08)}
+.chart-tip{position:absolute;transform:translate(-50%,-100%);display:grid;gap:1px;background:var(--ink);color:var(--crumb);border-radius:10px;padding:6px 10px;font-size:.85rem;pointer-events:none;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.chart-tip b{color:#fff}
+.table-scroll{overflow-x:auto;max-height:320px;overflow-y:auto;margin-top:8px}
+.stats-table{border-collapse:collapse;width:100%;font-size:.9rem}
+.stats-table th,.stats-table td{border-bottom:1px solid #eadfca;padding:4px 8px;text-align:right;white-space:nowrap}
+.stats-table th:first-child,.stats-table td:first-child{text-align:left}

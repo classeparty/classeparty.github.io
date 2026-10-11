@@ -217,6 +217,7 @@
     }
     renderUserBox();
     joinPresence(page);
+    countVisit(page);
     return CP;
   };
 
@@ -224,6 +225,15 @@
      Chaque page ouverte se signale sur un canal temps réel, avec seulement
      le nom de la page. Rien n'est enregistré : quand la page se ferme, elle
      disparaît du compteur. */
+  /* statistiques anonymes : une page vue de plus pour cette heure (rien sur le visiteur) */
+  function countVisit(page) {
+    if (!ONLINE) return;
+    const p = String(page || '').replace(/\.html$/, '') || 'index';
+    if (p === 'moderation' || (CP.isAdmin && CP.isAdmin())) return;
+    let neu = true;
+    try { neu = !document.referrer || new URL(document.referrer).origin !== location.origin; } catch (e) {}
+    try { sb.rpc('compter_visite', {p_page: p, p_nouvelle: neu}).then(() => {}, () => {}); } catch (e) {}
+  }
   function joinPresence(page) {
     if (!ONLINE || CP.siteCh) return;
     try {

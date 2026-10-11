@@ -7,7 +7,7 @@
 <meta name="description" content="Quelles données Classe Party utilise, pourquoi, où elles sont stockées et comment exercer tes droits.">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="style.css?v=20261011c">
+<link rel="stylesheet" href="style.css?v=20261011d">
 </head>
 <body>
 <header id="site-head"></header>
@@ -16,7 +16,7 @@
   <div class="prose">
     <h1 class="outline">Confidentialité</h1>
     <p class="lead">En résumé : jouer ne demande aucune donnée personnelle. Le compte de prof ne contient que le strict nécessaire. Les données des élèves ne sont jamais enregistrées sur nos serveurs.</p>
-    <p class="small muted">Version du 11 octobre 2026. Ce texte respecte le Règlement général sur la protection des données (RGPD).</p>
+    <p class="small muted">Version du 11 octobre 2026 (statistiques anonymes ajoutées). Ce texte respecte le Règlement général sur la protection des données (RGPD).</p>
 
     <h2>Qui est responsable ?</h2>
     <p>Le site Classe Party est édité par Jérôme Manderlier, enseignant, à titre personnel. Contact : <span id="contact" class="todo">[adresse mail de contact à compléter dans config.js]</span>.</p>
@@ -25,7 +25,7 @@
     <ul>
       <li>Le jeu fonctionne entièrement dans ton navigateur. <b>Aucun compte n'est nécessaire.</b></li>
       <li>Les prénoms des élèves, les parties en cours, les questions que tu écris dans le mode prof et les bilans sont enregistrés <b>uniquement dans ton navigateur</b>, sur ton ordinateur. Ils ne sont jamais envoyés sur nos serveurs.</li>
-      <li>Ce stockage local sert seulement au fonctionnement du jeu. Il n'y a ni publicité ni outil de mesure d'audience.</li>
+      <li>Ce stockage local sert seulement au fonctionnement du jeu. Il n'y a ni publicité ni outil de suivi : seulement des statistiques anonymes de fréquentation (voir plus bas).</li>
     </ul>
 
     <h2>Quand tu joues avec les manettes</h2>
@@ -65,6 +65,9 @@
     <h2>Compteur « en ce moment »</h2>
     <p>Quand une page du site, le jeu ou une manette est ouvert, il se signale au service temps réel de Supabase avec seulement le nom de la page (par exemple « bibliothèque » ou « jeu »). Cela permet à l'administrateur de voir combien de pages sont ouvertes à l'instant. <b>Rien n'est enregistré</b> : ni nom, ni adresse IP, ni cookie, ni historique. Quand la page se ferme, elle disparaît du compteur.</p>
 
+    <h2>Statistiques de visites</h2>
+    <p>Pour savoir si le site est utilisé, chaque page vue ajoute <b>+1 à un compteur par heure</b> (par exemple : « bibliothèque, 14 h – 15 h : 12 pages vues »). On ne note <b>ni ton nom, ni ton adresse IP, ni aucun identifiant</b>, et aucun cookie n'est déposé : il est impossible de savoir qui a visité le site. Ces chiffres sont visibles seulement par l'administrateur et sont effacés après 13 mois.</p>
+
     <h2>Cookies</h2>
     <p>Le site n'utilise <b>aucun cookie publicitaire ni de suivi</b>. Il utilise seulement le stockage local du navigateur pour garder ta connexion ouverte et pour le fonctionnement du jeu.</p>
   </div>
@@ -75,7 +78,7 @@
 <script src="config.js"></script>
 <script src="format.js"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261011c"></script>
+<script src="app.js?v=20261011d"></script>
 <script>
 CP.init('confidentialite.html').then(() => {
   const c = (window.CP_CONFIG || {}).CONTACT_EMAIL;

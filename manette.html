@@ -108,6 +108,7 @@ p{margin:0;font-weight:600;line-height:1.35}
   const devId = ss.get('dev') || ('m' + Math.random().toString(36).slice(2, 10)); ss.set('dev', devId);
   /* compteur « en ce moment » : signale seulement qu'une tablette est ouverte */
   try { const pc = sb.channel('cp-site', {config: {presence: {key: devId}}}); pc.subscribe(st => { if (st === 'SUBSCRIBED') { try { pc.track({p: 'manette'}); } catch (e) {} } }); } catch (e) {}
+  try { sb.rpc('compter_visite', {p_page: 'manette', p_nouvelle: true}).then(() => {}, () => {}); } catch (e) {}
 
   let ch = null, code = '', S = null, pid = -1, answered = null, lastQ = '', helloT = null, foundT = null, lastSig = '', lastBuzz = '', lastSeen = 0, lostShown = false, shopPick = -1, chronoAt = 0, refuseArm = false, holdKey = '', holdAt = 0;
 
