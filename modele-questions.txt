@@ -19,7 +19,7 @@
 #   MIMES      un mime par ligne
 #   CHANCE et MALCHANCE   effet | texte de la carte (facultatif :
 #              sans ces sections, le jeu garde ses cartes habituelles)
-#              effets possibles : +3 pièces, -2 pièces, +2 cases, -3 cases, Rejoue, Prison
+#              effets possibles : +3 pièces, -2 pièces, +2 cases, -3 cases, Rejoue, Retenue
 #
 # Remplace les exemples ci-dessous par tes propres questions.
 

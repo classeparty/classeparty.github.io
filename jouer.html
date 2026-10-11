@@ -540,7 +540,7 @@ const CELL = {
   M:{name:'Mime', svg:'mime', color:'var(--m)'},
   C:{name:'Chance', svg:'clover', color:'var(--c)'},
   X:{name:'Malchance', svg:'bolt', color:'var(--x)'},
-  P:{name:'Prison', svg:'lock', color:'var(--p)'}
+  P:{name:'Retenue', svg:'lock', color:'var(--p)'}
 };
 
 /* ================= HELPERS ================= */
@@ -772,7 +772,7 @@ function say(t){ if (G){ G.msg = t; const m = $('#msg'); if (m) m.textContent = 
 /* ================= SETUP SCREEN ================= */
 let nPlayers = 7;
 const APP_VERSION = '1.1';
-const BUILD = '20261011b';
+const BUILD = '20261011c';
 const AUTHOR = 'Manderlier Jérôme';
 const COPYRIGHT = '© 2026 Manderlier Jérôme. Classe Party est sous licence Creative Commons BY-NC-ND 4.0 : utilisation gratuite en classe, toute utilisation commerciale ou revente interdite sans accord écrit de l\'auteur.';
 function gameTitle(){ return String(bank.settings.title || '').trim() || DEFAULT_BANK.settings.title; }
@@ -950,7 +950,7 @@ function renderCenter(){
   ensurePlayerFields(p);
   if (shopOn()) plate.append(coinChip(p.coins));
   const n = diceCount(p); setDice(n);
-  btn.textContent = G.paused ? 'EN PAUSE' : (p.jailed ? 'EN PRISON…' : (n === 2 ? 'LANCER LES DÉS !' : n === 1 ? 'LANCER LE DÉ !' : `LANCER ${n} DÉS !`));
+  btn.textContent = G.paused ? 'EN PAUSE' : (p.jailed ? 'EN RETENUE…' : (n === 2 ? 'LANCER LES DÉS !' : n === 1 ? 'LANCER LE DÉ !' : `LANCER ${n} DÉS !`));
   const fx = $('#fxNote');
   if (fx){ const parts = []; if (p.extraDice > 0) parts.push('DÉ BONUS : +1 dé'); if (p.glued > 0) parts.push('COLLÉ : −1 dé'); fx.hidden = !parts.length; fx.textContent = parts.join(' · '); fx.classList.toggle('bad', p.glued > 0 && !(p.extraDice > 0)); }
   btn.disabled = G.phase !== 'roll' || G.paused;
@@ -971,7 +971,7 @@ function renderSide(){
       h('span', {class:'srank'}, rank),
       pdot(p),
       h('span', {class:'sname'}, p.name,
-        p.jailed ? h('span', {class:'badge'}, 'PRISON') : null,
+        p.jailed ? h('span', {class:'badge'}, 'RETENUE') : null,
         (G.rushOn && !G.over && isLast(p)) ? h('span', {class:'badge three'}, '3 DÉS') : null,
         (!G.over && p.extraDice > 0) ? h('span', {class:'badge plus'}, '+1 DÉ') : null,
         (!G.over && p.glued > 0) ? h('span', {class:'badge glue'}, 'COLLÉ') : null,
@@ -1178,7 +1178,7 @@ function askQuestion(p, kind, jail){
     if (!isRight) chosenBtn.classList.add('wrong');
     if (ok){ SFX.good(); } else { SFX.bad(); }
     fb.hidden = false; fb.className = 'feedback ' + (ok ? 'ok' : 'ko');
-    fb.textContent = jail ? (ok ? 'BONNE RÉPONSE ! Tu sors de prison !' : 'RATÉ… Tu restes en prison.')
+    fb.textContent = jail ? (ok ? 'BONNE RÉPONSE ! Tu sors de retenue !' : 'RATÉ… Tu restes en retenue.')
                           : (ok ? `BONNE RÉPONSE ! +${casesTxt(m)}` : `RATÉ… −${casesTxt(m)}`);
     if (item.expl){ ex.textContent = item.expl; ex.hidden = false; }
     cont.hidden = false; setTimeout(() => cont.focus(), 50);
@@ -1210,34 +1210,34 @@ function askQuestion(p, kind, jail){
     logAnswer(p, kind, item.q, ok, isVF ? (item.a ? 'Vrai' : 'Faux') : (item.options || [])[item.correct], given);
     if (jail){
       if (ok){ return freeFromJail(p); }
-      say(`${p.name} reste en prison.`); return endTurn();
+      say(`${p.name} reste en retenue.`); return endTurn();
     }
     say(ok ? `Bravo ${p.name} ! +${casesTxt(m)}` : `Dommage ${p.name}… −${casesTxt(m)}`);
     await moveBy(G.turn, ok ? m : -m);
     endTurn();
   });
-  const title = jail ? 'QUESTION DE PRISON' : (isVF ? 'VRAI OU FAUX ?' : 'QUIZ !');
-  const rule = jail ? 'Réponds juste pour sortir de prison et lancer les dés.'
+  const title = jail ? 'QUESTION DE RETENUE' : (isVF ? 'VRAI OU FAUX ?' : 'QUIZ !');
+  const rule = jail ? 'Réponds juste pour sortir de retenue et lancer les dés.'
                     : `Bonne réponse : +${casesTxt(m)} · Mauvaise réponse : −${casesTxt(m)}`;
   openModal(card({type: jail ? 'P' : (isVF ? 'V' : 'Q'), title, player:p,
     body:[h('p', {class:'rule'}, rule), h('p', {class:'qtext'}, item.q), answers, fb, ex], foot:[cont]}));
 }
 function freeFromJail(p){
   p.jailed = false; SFX.lap();
-  say(`${p.name} sort de prison ! Lance les dés.`);
+  say(`${p.name} sort de retenue ! Lance les dés.`);
   G.phase = 'roll'; renderAll(); saveGame();
 }
 function jailCard(p){
-  openModal(card({type:'P', title:'EN PRISON !', player:p,
+  openModal(card({type:'P', title:'EN RETENUE !', player:p,
     body:[h('div', {class:'big-ico', html:SVG.lock}), h('p', {class:'qtext center-txt'}, `${p.name}, réponds juste à une question pour sortir !`)],
-    foot:[btn('VOIR LA QUESTION', 'big blue', () => { closeModal(); const ks = ['quiz','vf'].filter(hasKind); if (!ks.length){ say(`Pas de question : ${p.name} sort de prison !`); return freeFromJail(p); } askQuestion(p, ks[Math.floor(Math.random() * ks.length)], true); })]}));
+    foot:[btn('VOIR LA QUESTION', 'big blue', () => { closeModal(); const ks = ['quiz','vf'].filter(hasKind); if (!ks.length){ say(`Pas de question : ${p.name} sort de retenue !`); return freeFromJail(p); } askQuestion(p, ks[Math.floor(Math.random() * ks.length)], true); })]}));
 }
 function prisonLanding(p){
   p.jailed = true; SFX.jail(); renderTokens(); renderSide();
-  openModal(card({type:'P', title:'PRISON !', player:p,
-    body:[h('div', {class:'big-ico', html:SVG.lock}), h('p', {class:'qtext center-txt'}, 'Te voilà en prison !'),
+  openModal(card({type:'P', title:'RETENUE !', player:p,
+    body:[h('div', {class:'big-ico', html:SVG.lock}), h('p', {class:'qtext center-txt'}, 'Te voilà en retenue !'),
       h('p', {class:'rule center-txt'}, 'Au prochain tour, réponds juste à une question pour sortir.')],
-    foot:[btn('CONTINUER', 'big grey', () => { say(`${p.name} est en prison.`); endTurn(); })]}));
+    foot:[btn('CONTINUER', 'big grey', () => { say(`${p.name} est en retenue.`); endTurn(); })]}));
 }
 
 /* --- action --- */
@@ -1302,7 +1302,7 @@ function doLuck(p, kind){
   const val = (parseInt(item.value, 10) || 0) * m;
   const isCoins = item.kind === 'coins' && shopOn();
   if (item.kind === 'replay'){ effTxt = 'REJOUE !'; effCls += ' up'; }
-  else if (item.kind === 'prison'){ effTxt = 'VA EN PRISON !'; effCls += ' down'; }
+  else if (item.kind === 'prison'){ effTxt = 'VA EN RETENUE !'; effCls += ' down'; }
   else if (isCoins && val >= 0){ effTxt = `GAGNE ${val} ${plural(val, 'PIÈCE', 'PIÈCES')}`; effCls += ' up'; }
   else if (isCoins){ effTxt = `PERD ${-val} ${plural(-val, 'PIÈCE', 'PIÈCES')}`; effCls += ' down'; }
   else if (val >= 0){ effTxt = `AVANCE DE ${casesTxt(val).toUpperCase()}`; effCls += ' up'; }
@@ -1311,7 +1311,7 @@ function doLuck(p, kind){
   const apply = async () => {
     closeModal();
     if (item.kind === 'replay'){ say(`${p.name} rejoue !`); return endTurn(true); }
-    if (item.kind === 'prison'){ sendToPrison(p); say(`${p.name} part en prison !`); await sleep(500); return endTurn(); }
+    if (item.kind === 'prison'){ sendToPrison(p); say(`${p.name} part en retenue !`); await sleep(500); return endTurn(); }
     if (isCoins){ ensurePlayerFields(p); addCoins(p, val); say(`${item.text} ${val >= 0 ? '+' : '−'}${Math.abs(val)} ${plural(val, 'pièce', 'pièces')}`); renderAll(); saveGame(); return endTurn(); }
     say(`${item.text} ${val >= 0 ? '+' : '−'}${casesTxt(Math.abs(val))}`);
     if (val) await moveBy(G.turn, val);
@@ -1867,7 +1867,7 @@ const TUTO = [
   {img:'end', title:'La fin de la partie', text:['À la sonnerie, le tour en cours se termine.', 'Clique sur « Révéler » pour chaque étoile bonus : fais durer le suspense !', 'Le podium s\'affiche ensuite. « Nouvelle partie » ramène à l\'accueil.', 'Le bouton « Le bilan » montre la réussite par catégorie, les questions à revoir (avec les réponses données) et les résultats de chaque joueur. Télécharge-le en Word (.docx) ou en texte (.txt). Le dernier bilan reste disponible sur l\'écran d\'accueil.']},
   {part:'Avec les manettes : les élèves jouent sur tablette'},
   {img:'manJoin', title:'Choisir le mode « Avec manettes »', text:['Sur l\'écran d\'accueil, dans « Mode de jeu », clique sur « Avec manettes ». Il faut une connexion à internet.', 'Un QR code et un code à 5 chiffres s\'affichent. Les élèves scannent le QR code, ou vont sur classeparty.github.io/manette.html et tapent le code.', 'Chacun touche son prénom (ou le nom de son équipe : plusieurs tablettes peuvent prendre le même nom). Le nombre de manettes connectées s\'affiche.', 'Pas de tablettes dans la classe ? Choisis « Sans manettes » : tout se joue au tableau, comme d\'habitude.']},
-  {img:'manPlay', title:'Jouer avec les manettes', text:['Le plateau reste au tableau. Quand c\'est son tour, l\'élève lance les dés depuis sa tablette.', 'Quiz et vrai ou faux : il répond sur son écran. Il valide aussi les cartes Chance, Malchance et Prison.', 'Boutique : il fait ses achats sur sa tablette (dé bonus, canne à pêche, glue).', 'Mime : le mot s\'affiche seulement sur la tablette du mimeur. Il peut lancer le chrono ou refuser discrètement. C\'est toujours toi qui valides « Mime réussi » ou « Pas trouvé ».', 'Un élève arrive en retard ? Le bouton violet 📱 en haut de l\'écran réaffiche le QR code.']},
+  {img:'manPlay', title:'Jouer avec les manettes', text:['Le plateau reste au tableau. Quand c\'est son tour, l\'élève lance les dés depuis sa tablette.', 'Quiz et vrai ou faux : il répond sur son écran. Il valide aussi les cartes Chance, Malchance et Retenue.', 'Boutique : il fait ses achats sur sa tablette (dé bonus, canne à pêche, glue).', 'Mime : le mot s\'affiche seulement sur la tablette du mimeur. Il peut lancer le chrono ou refuser discrètement. C\'est toujours toi qui valides « Mime réussi » ou « Pas trouvé ».', 'Un élève arrive en retard ? Le bouton violet 📱 en haut de l\'écran réaffiche le QR code.']},
   {img:'manAll', title:'Toute la classe répond', text:['Option cochée au départ : à chaque quiz et vrai ou faux, toute la classe répond sur sa tablette. Seul le joueur du tour avance ; les autres gagnent 1 pièce s\'ils ont juste.', 'Quand le joueur a répondu, les autres ont encore quelques secondes (10 par défaut, réglable) : personne ne doit se précipiter. La correction arrive dès que tout le monde a répondu, ou avec « Corriger maintenant ».', 'Comme tout le monde gagne plus de pièces, les prix de la boutique augmentent automatiquement (réglable).', 'Toutes les réponses vont dans le bilan : tu vois ce que chaque élève a répondu.']},
   {tip:'Manettes : fais un essai avec une tablette avant le cours, pour vérifier le réseau de l\'école. Les prénoms passent par internet le temps de la partie mais ne sont jamais enregistrés ; tu peux aussi utiliser des pseudos.'},
   {tip:'Astuce : avant le cours, fais une partie d\'essai à 2 joueurs avec 6 minutes de jeu. Tu verras le coup de feu, les étoiles et le podium en quelques minutes.'}
@@ -1893,7 +1893,7 @@ function oneLine(t){ return String(t ?? '').replace(/\s*\r?\n\s*/g, ' ').trim();
 function cardEffectTxt(c){
   const v = parseInt(c.value, 10) || 0;
   if (c.kind === 'replay') return 'Rejoue';
-  if (c.kind === 'prison') return 'Prison';
+  if (c.kind === 'prison') return 'Retenue';
   const sign = v >= 0 ? '+' : '-';
   if (c.kind === 'coins') return `${sign}${Math.abs(v)} ${Math.abs(v) > 1 ? 'pièces' : 'pièce'}`;
   return `${sign}${Math.abs(v)} ${Math.abs(v) > 1 ? 'cases' : 'case'}`;
@@ -1920,7 +1920,7 @@ function bankToTxt(b, course){
   L.push('#              R: la réponse attendue (facultatif)');
   L.push('#   MIMES      un mime par ligne');
   L.push('#   CHANCE et MALCHANCE   effet | texte de la carte');
-  L.push('#              effets possibles : +3 pièces, -2 pièces, +2 cases, -3 cases, Rejoue, Prison');
+  L.push('#              effets possibles : +3 pièces, -2 pièces, +2 cases, -3 cases, Rejoue, Retenue');
   L.push('');
   L.push('[RÉGLAGES]');
   L.push('Cours = ' + oneLine(course));
@@ -2008,9 +2008,9 @@ function txtToBank(text){
       if (!txt){ err(i, 'la carte n\'a pas de texte.'); return; }
       const e = txtNorm(eff);
       if (e.startsWith('REJOUE')){ out[section].push({text:txt, kind:'replay', value:0}); return; }
-      if (e.startsWith('PRISON')){ out[section].push({text:txt, kind:'prison', value:0}); return; }
+      if (e.startsWith('PRISON') || e.startsWith('RETENUE')){ out[section].push({text:txt, kind:'prison', value:0}); return; }
       m = eff.replace('−', '-').match(/^([+-]?)\s*(\d+)\s*([a-zA-Zèé]*)/);
-      if (!m){ err(i, `effet « ${eff} » non compris (ex. : +3 pièces, -2 cases, Rejoue, Prison).`); return; }
+      if (!m){ err(i, `effet « ${eff} » non compris (ex. : +3 pièces, -2 cases, Rejoue, Retenue).`); return; }
       let v = parseInt(m[2], 10); if (m[1] === '-' || (!m[1] && section === 'malchance')) v = -v;
       const unit = txtNorm(m[3]);
       out[section].push({text:txt, kind: unit.startsWith('CASE') ? 'move' : 'coins', value:v}); return;
@@ -2265,7 +2265,7 @@ function fillAdminBody(body){
     body.append(addBar('Ajouter une carte', () => addItem(adminTab),
       'Effet « Pièces » : un nombre positif fait gagner des pièces, un nombre négatif en fait perdre. Effet « Déplacement » : avancer ou reculer de cases.'));
     list.forEach((it, i) => {
-      const sel = h('select', {class:'in', id:`${adminTab}-${i}-k`}, h('option', {value:'coins'}, 'Pièces'), h('option', {value:'move'}, 'Déplacement (cases)'), h('option', {value:'replay'}, 'Rejoue'), h('option', {value:'prison'}, 'Va en prison'));
+      const sel = h('select', {class:'in', id:`${adminTab}-${i}-k`}, h('option', {value:'coins'}, 'Pièces'), h('option', {value:'move'}, 'Déplacement (cases)'), h('option', {value:'replay'}, 'Rejoue'), h('option', {value:'prison'}, 'Va en retenue'));
       sel.value = it.kind || 'move';
       const num = inp(`${adminTab}-${i}-v`, it.value, v => { it.value = parseInt(v, 10) || 0; }, {type:'number', min:'-20', max:'20', inputmode:'numeric'});
       const numF = fld('Nombre', num);
@@ -2371,7 +2371,7 @@ async function downloadGameFile(statusEl){
 /* ================= VISITE GUIDÉE ================= */
 const TOUR = [
   {title:'Bienvenue dans ' + '%TITLE%' + ' !', text:'Une petite visite guidée de toutes les options, étape par étape. Tu peux la passer à tout moment et la revoir plus tard avec le bouton « ? ».', img:'room'},
-  {sel:'#legend', title:'Les cases du plateau', text:'Quiz, Vrai / Faux, Action, Mime, Chance, Malchance, Prison et Départ. Chaque case a sa couleur et sa règle : bonne réponse, on avance ; mauvaise réponse, on recule.'},
+  {sel:'#legend', title:'Les cases du plateau', text:'Quiz, Vrai / Faux, Action, Mime, Chance, Malchance, Retenue et Départ. Chaque case a sa couleur et sa règle : bonne réponse, on avance ; mauvaise réponse, on recule.'},
   {sel:'#btnProf', title:'Le mode prof', text:'C\'est ici que tu prépares le jeu : questions, titre, réglages, sauvegarde. Le code de départ est 1234 : change-le dans Réglages. Le mode prof contient aussi un tuto illustré.'},
   {sel:'#emptyBox', alt:'#qCount', title:'Les questions du jeu', text:'Le jeu est livré vide. Charge un fichier de questions (.txt) ou écris tes questions avec la touche +. Il n\'y a pas de minimum : même quelques questions suffisent pour jouer.'},
   {sel:'.stepper', title:'Le nombre de joueurs', text:'De 2 à 30. Au-delà de 10 élèves, joue en équipes de 3 ou 4 : chacun participe plus souvent. À partir de 15 joueurs, les cases gagnées et perdues comptent double.'},
@@ -2381,7 +2381,7 @@ const TOUR = [
   {sel:'#btnStart', title:'Lancer la partie', text:'Quand tout est prêt, clique ici. Astuce : appuie sur F11 pour passer en plein écran au projecteur.'},
   {sel:'.tb-audio', title:'Musique et sons', text:'Le bouton Musique ouvre un menu : 5 airs d\'ambiance à choisir, ou « Enchaîner les 5 » pour changer d\'air toutes les 2 à 3 minutes, et le volume. Le bouton Sons coupe les bruitages. La musique accélère pendant le coup de feu !'},
   {title:'Pendant la partie', text:'Clique sur les dés : le pion avance tout seul. Pour un quiz ou un vrai/faux, clique sur la réponse de l\'élève. Pour une action ou un mime, c\'est toi qui valides avec « Réussi » ou « Raté ».', img:'play'},
-  {sel:'#score', title:'Le classement', text:'Les tours, les pièces et les effets actifs de chaque joueur (dé bonus, collé, prison). Le joueur dont c\'est le tour est surligné.'},
+  {sel:'#score', title:'Le classement', text:'Les tours, les pièces et les effets actifs de chaque joueur (dé bonus, collé, retenue). Le joueur dont c\'est le tour est surligné.'},
   {sel:'#timer', title:'Le chrono', text:'Le temps restant. « Pause » l\'arrête, « Terminer » arrête la partie plus tôt (il faut cliquer deux fois).'},
   {title:'Le mime', text:'Le mot est caché : tourne l\'écran vers le mimeur avant de cliquer sur « Montrer le mot ». Mime réussi : gros bonus. Refuser de mimer : une seule case en arrière, personne n\'est forcé.', img:'mime'},
   {title:'Les pièces et la boutique', text:'Chance fait gagner des pièces, Malchance en fait perdre. À chaque tour complet : un salaire et la boutique. Dé bonus, canne à pêche pour voler un tour, glue pour ralentir un joueur. Les effets durent un seul lancer.', img:'shop'},
