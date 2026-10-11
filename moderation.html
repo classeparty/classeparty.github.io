@@ -7,7 +7,7 @@
 <meta name="description" content="Espace de modération réservé aux administrateurs de Classe Party.">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="style.css?v=20261011b">
+<link rel="stylesheet" href="style.css?v=20261011c">
 </head>
 <body>
 <header id="site-head"></header>
@@ -19,7 +19,7 @@
 <script src="config.js"></script>
 <script src="format.js"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261011b"></script>
+<script src="app.js?v=20261011c"></script>
 <script>
 (async () => {
   await CP.init('moderation.html');
@@ -30,7 +30,28 @@
   const TABLE = {cours: 'courses', sujet: 'forum_topics', message: 'forum_posts'};
   const showDone = el('input', {type: 'checkbox'});
   const list = el('div', {class: 'stack', style: 'gap:10px'});
-  zone.replaceChildren(el('section', {class: 'panel stack'},
+  /* --- compteur « en ce moment » --- */
+  const LABELS = {index: 'Accueil', bibliotheque: 'Bibliothèque', forum: 'Forum', 'mes-cours': 'Mes cours', tuto: 'Tuto', connexion: 'Connexion', nouveautes: 'Nouveautés', 'qui-sommes-nous': 'Qui sommes-nous', 'astuce-ia': 'Astuce IA', moderation: 'Modération (toi)', deontologie: 'Charte', confidentialite: 'Confidentialité', licence: 'Licence'};
+  const tile = (ico, n, label) => el('div', {class: 'live-tile'}, el('span', {class: 'live-ico'}, ico), el('b', {}, String(n)), el('span', {}, label));
+  const liveTiles = el('div', {class: 'live-tiles'}), liveList = el('div', {class: 'live-list'}), liveAt = el('p', {class: 'small muted'});
+  const live = el('section', {class: 'panel stack'},
+    el('h2', {}, '👀 En ce moment sur Classe Party'),
+    liveTiles, liveList, liveAt,
+    el('p', {class: 'small muted'}, 'Compte les pages ouvertes en direct (une personne avec deux onglets compte deux fois). Rien n\'est enregistré : ni nom, ni adresse, ni cookie.'));
+  function renderLive(st) {
+    const counts = {}; let site = 0, jeu = 0, tab = 0;
+    Object.values(st || {}).forEach(metas => {
+      const m = metas && metas[0]; if (!m) return;
+      const k = m.p || 'autre';
+      if (k === 'jeu') jeu++; else if (k === 'manette') tab++; else { site++; counts[k] = (counts[k] || 0) + 1; }
+    });
+    liveTiles.replaceChildren(tile('🌐', site, site > 1 ? 'pages du site ouvertes' : 'page du site ouverte'), tile('🎲', jeu, jeu > 1 ? 'jeux ouverts' : 'jeu ouvert'), tile('📱', tab, tab > 1 ? 'tablettes connectées' : 'tablette connectée'));
+    liveList.replaceChildren(...Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => el('span', {class: 'chip'}, (LABELS[k] || k) + ' · ' + n)));
+    liveAt.textContent = 'Mis à jour à ' + new Date().toLocaleTimeString('fr-BE', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+  }
+  CP.onPresence = renderLive;
+  renderLive(CP.siteCh ? CP.siteCh.presenceState() : {});
+  zone.replaceChildren(live, el('section', {class: 'panel stack'},
     el('h1', {class: 'outline'}, 'Modération'),
     el('p', {class: 'lead'}, 'Les contenus signalés par les membres. Vérifie chaque signalement, puis supprime le contenu ou marque le signalement comme traité.'),
     el('label', {class: 'check'}, showDone, el('span', {}, 'Afficher aussi les signalements déjà traités')), list),

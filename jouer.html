@@ -2515,4 +2515,17 @@ try { if (window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(wi
 catch (e) { boot({}); }
 </script>
 <a href="index.html" style="position:fixed;left:8px;bottom:5px;z-index:96;font:700 .78rem 'Baloo 2',sans-serif;color:#3a1d0e;background:rgba(255,253,247,.85);border:2px solid #3a1d0e;border-radius:8px;padding:2px 9px;text-decoration:none">← Site Classe Party</a>
+<script>
+/* compteur « en ce moment » : signale seulement qu'un jeu est ouvert sur le site (rien n'est enregistré) */
+setTimeout(function(){
+  function load(src){ return new Promise(function(ok, ko){ var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.body.appendChild(s); }); }
+  (window.supabase ? Promise.resolve() : load('lib/supabase.js'))
+  .then(function(){ return window.CP_CONFIG ? null : load('config.js?v=20261011c'); })
+  .then(function(){ var C = window.CP_CONFIG || {}; if (!window.supabase || !C.SUPABASE_URL) return;
+    var sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY, {auth: {persistSession: false, autoRefreshToken: false, detectSessionInUrl: false}});
+    var ch = sb.channel('cp-site', {config: {presence: {key: 'j' + Math.random().toString(36).slice(2, 10)}}});
+    ch.subscribe(function(st){ if (st === 'SUBSCRIBED') { try { ch.track({p: 'jeu'}); } catch (e) {} } }); })
+  .catch(function(){});
+}, 2500);
+</script>
 </body></html>

@@ -313,6 +313,8 @@
         else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') { LAB.err = 'Connexion impossible au serveur temps réel.'; renderSetupBox(); }
       });
     LAB.ch = ch; addChip(); renderSetupBox();
+    /* jeu ouvert hors du site (fichier, programme Windows) : compté dans « en ce moment » */
+    if (window.CP_SITE && !LAB.siteCh) { try { const pc = sb.channel('cp-site', {config: {presence: {key: 'j' + Math.random().toString(36).slice(2, 10)}}}); pc.subscribe(st => { if (st === 'SUBSCRIBED') { try { pc.track({p: 'jeu'}); } catch (e) {} } }); LAB.siteCh = pc; } catch (e) {} }
     clearInterval(LAB.beat); LAB.beat = setInterval(push, 8000);
   }
   function stop() {

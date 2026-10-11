@@ -213,3 +213,12 @@ textarea.in{resize:vertical;line-height:1.35}
 .news{display:flex;align-items:center;gap:14px;flex-wrap:wrap;text-decoration:none;color:var(--ink);border-color:var(--v)}
 .news:hover{background:#f6efff;color:var(--ink)}
 .news-txt{flex:1;min-width:240px;font-weight:600;line-height:1.4}
+
+/* ---------- compteur en direct (modération) ---------- */
+.live-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:620px){.live-tiles{grid-template-columns:minmax(0,1fr)}}
+.live-tile{display:grid;justify-items:center;gap:2px;background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:12px 8px;box-shadow:0 4px 0 var(--ink);text-align:center}
+.live-tile b{font-family:var(--f-display);font-size:2.6rem;line-height:1}
+.live-tile span:last-child{font-weight:700;font-size:.9rem;color:var(--ink-2)}
+.live-ico{font-size:1.6rem}
+.live-list{display:flex;flex-wrap:wrap;gap:6px}

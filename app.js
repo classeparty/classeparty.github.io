@@ -216,6 +216,22 @@
       });
     }
     renderUserBox();
+    joinPresence(page);
     return CP;
   };
+
+  /* ---------- compteur « en ce moment » ----------
+     Chaque page ouverte se signale sur un canal temps réel, avec seulement
+     le nom de la page. Rien n'est enregistré : quand la page se ferme, elle
+     disparaît du compteur. */
+  function joinPresence(page) {
+    if (!ONLINE || CP.siteCh) return;
+    try {
+      const key = 'v' + Math.random().toString(36).slice(2, 10);
+      const ch = sb.channel('cp-site', {config: {presence: {key}}});
+      ch.on('presence', {event: 'sync'}, () => { if (CP.onPresence) CP.onPresence(ch.presenceState()); })
+        .subscribe(st => { if (st === 'SUBSCRIBED') { try { ch.track({p: String(page || '').replace(/\.html$/, '') || 'index'}); } catch (e) {} } });
+      CP.siteCh = ch;
+    } catch (e) {}
+  }
 })();

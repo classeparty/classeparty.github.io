@@ -7,7 +7,7 @@
 <meta name="description" content="Quelles données Classe Party utilise, pourquoi, où elles sont stockées et comment exercer tes droits.">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="style.css?v=20261011b">
+<link rel="stylesheet" href="style.css?v=20261011c">
 </head>
 <body>
 <header id="site-head"></header>
@@ -62,6 +62,9 @@
       <li>Si tu estimes que tes droits ne sont pas respectés, tu peux introduire une plainte auprès de l'<b>Autorité de protection des données</b> (www.autoriteprotectiondonnees.be).</li>
     </ul>
 
+    <h2>Compteur « en ce moment »</h2>
+    <p>Quand une page du site, le jeu ou une manette est ouvert, il se signale au service temps réel de Supabase avec seulement le nom de la page (par exemple « bibliothèque » ou « jeu »). Cela permet à l'administrateur de voir combien de pages sont ouvertes à l'instant. <b>Rien n'est enregistré</b> : ni nom, ni adresse IP, ni cookie, ni historique. Quand la page se ferme, elle disparaît du compteur.</p>
+
     <h2>Cookies</h2>
     <p>Le site n'utilise <b>aucun cookie publicitaire ni de suivi</b>. Il utilise seulement le stockage local du navigateur pour garder ta connexion ouverte et pour le fonctionnement du jeu.</p>
   </div>
@@ -72,7 +75,7 @@
 <script src="config.js"></script>
 <script src="format.js"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261011b"></script>
+<script src="app.js?v=20261011c"></script>
 <script>
 CP.init('confidentialite.html').then(() => {
   const c = (window.CP_CONFIG || {}).CONTACT_EMAIL;
