@@ -32,6 +32,22 @@
   .lab-chk input{width:20px;height:20px;accent-color:var(--v);flex:none;margin-top:2px}
   .lab-chip{font-family:var(--f-display);font-size:1rem;background:var(--v);color:#fff;border:3px solid var(--ink);border-radius:999px;padding:.2em .8em;box-shadow:0 4px 0 var(--ink);cursor:pointer;-webkit-text-stroke:0}
   .lab-count{margin:0;font-weight:800;color:var(--v);text-align:center}
+  .lab-av{display:inline-block;width:26px;height:26px;flex:none}
+  .lab-av svg{display:block;width:100%;height:100%}
+  .side-av{width:30px;height:30px}
+  .plate-av{width:max(36px,5cqw);height:max(36px,5cqw)}
+  .score.many .side-av{width:24px;height:24px}
+  .tk.has-av{font-size:0;padding:0;overflow:hidden;background:radial-gradient(circle at 50% 40%,#fffdf7 0 55%,var(--pc) 56%)}
+  .tk.has-av svg{display:block;width:118%;height:118%;margin:-9% 0 0 -9%}
+  .pod-av{position:relative;width:min(120px,22vw);aspect-ratio:1;animation:podHop 1s ease-in-out infinite;transform-origin:50% 100%}
+  .pod-av svg{display:block;width:100%;height:100%;filter:drop-shadow(0 4px 0 rgba(58,29,14,.35))}
+  .pod-av-1{width:min(150px,28vw);animation:podDance 1.1s ease-in-out infinite}
+  .pod-av-2{animation-delay:.25s}.pod-av-3{animation-delay:.5s}
+  .pod-shine{position:absolute;right:-6px;top:-6px;font-size:1.8rem;animation:podShine 1.4s linear infinite}
+  @keyframes podHop{0%,100%{transform:translateY(0)}40%{transform:translateY(-16px) scaleY(1.04)}60%{transform:translateY(0) scaleY(.94)}}
+  @keyframes podDance{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-22px) rotate(-8deg)}50%{transform:translateY(0) rotate(0) scaleY(.92)}75%{transform:translateY(-22px) rotate(8deg)}}
+  @keyframes podShine{0%{transform:scale(.6) rotate(0);opacity:.4}50%{transform:scale(1.2) rotate(180deg);opacity:1}100%{transform:scale(.6) rotate(360deg);opacity:.4}}
+  @media (prefers-reduced-motion: reduce){.pod-av,.pod-av-1,.pod-shine{animation:none}}
   .answers.lab-wait .ans{opacity:.55;pointer-events:none}
   .lab-big{display:grid;justify-items:center;gap:12px;text-align:center}
   .lab-big .lab-qr{width:min(320px,70vw)}
@@ -93,9 +109,9 @@
       playing, over: playing ? !!G.over : false,
       players: playerList().map(p => {
         const gp = playing ? G.players[p.i] : null;
-        return {name: p.name, color: p.color, coins: gp ? (gp.coins || 0) : null, tours: gp ? Math.floor(gp.progress / N) : null, jailed: gp ? !!gp.jailed : false};
+        return {name: p.name, color: p.color, coins: gp ? (gp.coins || 0) : null, tours: gp ? Math.floor(gp.progress / N) : null, jailed: gp ? !!gp.jailed : false, av: avOn() ? (LAB.avatars[p.i] || null) : null};
       }),
-      turn: playing ? G.turn : -1, phase: playing ? G.phase : 'setup', paused: playing ? !!G.paused : false,
+      avatars: avOn(), turn: playing ? G.turn : -1, phase: playing ? G.phase : 'setup', paused: playing ? !!G.paused : false,
       shop: typeof shopOn === 'function' ? shopOn() : true,
       card: playing ? modalInfo() : null
     };
@@ -112,6 +128,7 @@
 
   /* ---------- actions reçues des manettes ---------- */
   function onAct(a) {
+    if (a && a.a === 'avatar') return setAvatar(a);
     if (!a || !G || !Array.isArray(G.players) || document.getElementById('game').hidden) return;
     const pid = parseInt(a.pid, 10);
     if (!(pid >= 0 && pid < G.players.length)) return;
@@ -276,12 +293,52 @@
     if (chip) chip.textContent = `📱 ${LAB.code} · ${nPhones()}`;
     renderSetupBox();
   }
+  /* ---------- avatars (version test 1.11) ---------- */
+  LAB.avatars = {};
+  function avOn() { return typeof TEST111 !== 'undefined' && TEST111 === true; }
+  if (!window.CPAvatar) { const sc = document.createElement('script'); sc.src = (window.CP_SITE || '') + 'avatar.js?v=20261011g'; sc.onload = () => { applyAvatars(); renderSetupBox(); }; document.body.append(sc); }
+  function setAvatar(a) {
+    if (!avOn() || !window.CPAvatar) return;
+    const pid = parseInt(a.pid, 10); if (!(pid >= 0 && pid < playerList().length)) return;
+    LAB.avatars[pid] = CPAvatar.clean(a.av); applyAvatars(); renderSetupBox(); push();
+  }
+  function sideOrder() { return G.players.map((p, i) => ({p, i})).sort((a, b) => b.p.progress - a.p.progress); }
+  function applyAvatars() {
+    if (!avOn() || !window.CPAvatar || !G || !Array.isArray(G.players)) return;
+    G.players.forEach((p, i) => {
+      const av = LAB.avatars[i]; const tk = document.querySelector('#tok-' + i + ' .tk'); if (!tk || !av) return;
+      const key = JSON.stringify(av); if (tk.dataset.av === key) return;
+      tk.dataset.av = key; tk.classList.add('has-av'); tk.innerHTML = CPAvatar.svg(av);
+    });
+    const cav = LAB.avatars[G.turn]; const plateDot = document.querySelector('#turnPlate .tdot');
+    if (cav && plateDot && !G.over) plateDot.replaceWith(h('span', {class: 'lab-av plate-av', html: CPAvatar.svg(cav)}));
+    const rows = [...document.querySelectorAll('#score .srow')];
+    sideOrder().forEach(({i}, k) => { const av = LAB.avatars[i]; const dot = rows[k] && rows[k].querySelector('.tdot'); if (av && dot) { const s = h('span', {class: 'lab-av side-av', html: CPAvatar.svg(av)}); dot.replaceWith(s); } });
+  }
+  const _showPodium = showPodium;
+  showPodium = function () {
+    const r = _showPodium.apply(this, arguments);
+    if (avOn() && window.CPAvatar && G) {
+      const order = [...G.players].sort((a, b) => b.progress - a.progress);
+      [1, 2, 3].forEach(place => {
+        const p = order[place - 1]; const pod = document.querySelector('#modal .pod.p' + place); if (!p || !pod) return;
+        const av = LAB.avatars[G.players.indexOf(p)]; const dot = pod.querySelector('.tdot'); if (!av || !dot) return;
+        dot.replaceWith(h('div', {class: 'pod-av pod-av-' + place, html: CPAvatar.svg(av) + (place === 1 ? '<span class="pod-shine">✨</span>' : '')}));
+      });
+      const rest = [...document.querySelectorAll('#modal .rest li')];
+      order.slice(3).forEach((p, k) => { const av = LAB.avatars[G.players.indexOf(p)]; const dot = rest[k] && rest[k].querySelector('.tdot'); if (av && dot) dot.replaceWith(h('span', {class: 'lab-av', html: CPAvatar.svg(av)})); });
+    }
+    return r;
+  };
+  ['renderTokens', 'buildBoard'].forEach(fn => { const orig = window[fn]; if (typeof orig !== 'function') return; window[fn] = function () { const r = orig.apply(this, arguments); applyAvatars(); return r; }; });
+
   ['renderCenter', 'renderSide', 'openModal', 'closeModal', 'renderNames', 'showScreen'].forEach(fn => {
     const orig = window[fn]; if (typeof orig !== 'function') return;
     window[fn] = function () {
       const r = orig.apply(this, arguments);
       if (fn === 'closeModal') { if (LAB.q && LAB.q.hold) clearInterval(LAB.q.hold.timer); LAB.q = null; LAB.mime = null; }
       if (fn === 'openModal') hookMime();
+      if (fn === 'renderSide' || fn === 'renderCenter') applyAvatars();
       push(); return r;
     };
   });
@@ -346,7 +403,7 @@
           h('p', {}, 'Code de la partie :'), h('div', {class: 'lab-code'}, LAB.code))),
       LAB.err ? h('p', {style: 'color:var(--x)'}, LAB.err) : null,
       h('p', {}, `${nPhones()} manette${nPhones() > 1 ? 's' : ''} connectée${nPhones() > 1 ? 's' : ''}`),
-      h('div', {class: 'lab-list'}, playerList().filter(p => phonesFor(p.i)).map(p => h('span', {}, h('span', {class: 'tdot', style: '--pc:' + p.color + ';width:16px;height:16px;border-width:2px'}), p.name + (phonesFor(p.i) > 1 ? ' ×' + phonesFor(p.i) : '')))),
+      h('div', {class: 'lab-list'}, playerList().filter(p => phonesFor(p.i)).map(p => h('span', {}, (avOn() && LAB.avatars[p.i] && window.CPAvatar) ? h('span', {class: 'lab-av', html: CPAvatar.svg(LAB.avatars[p.i])}) : h('span', {class: 'tdot', style: '--pc:' + p.color + ';width:16px;height:16px;border-width:2px'}), p.name + (phonesFor(p.i) > 1 ? ' ×' + phonesFor(p.i) : '')))),
       (() => { const c = h('input', {type: 'checkbox'}); c.checked = LAB.all; c.addEventListener('change', () => { LAB.all = c.checked; renderSetupBox(); }); return h('label', {class: 'lab-chk'}, c, h('span', {}, 'Toute la classe répond à chaque quiz et vrai ou faux (seul le joueur du tour avance ; les autres gagnent 1 pièce s\'ils ont juste).')); })(),
       LAB.all ? (() => {
         const sel = h('select', {class: 'in', style: 'width:auto;padding:4px 8px'});

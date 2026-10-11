@@ -59,6 +59,23 @@ p{margin:0;font-weight:600;line-height:1.35}
 .status{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--go);border:2px solid var(--ink);margin-right:4px;vertical-align:middle}
 .status.off{background:var(--x)}
 @keyframes pulse{to{transform:scale(1.03)}}
+.big-av{width:150px;height:150px;justify-self:center;animation:avHop 1.6s ease-in-out infinite}
+.big-av svg,.mini-av svg,.me-av svg{display:block;width:100%;height:100%}
+.me-av{width:30px;height:30px;flex:none}
+@keyframes avHop{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.av-styles{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.av-chip{font:inherit;font-weight:800;font-size:.85rem;background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:4px 10px;box-shadow:0 3px 0 var(--ink);cursor:pointer}
+.av-chip.dice{background:#fff1b8}
+.av-cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.av-cat{flex:none;font:inherit;font-weight:800;font-size:.8rem;background:var(--white);color:var(--ink);border:2px solid var(--ink);border-radius:10px;padding:4px 8px;cursor:pointer}
+.av-cat.on{background:var(--ink);color:var(--white)}
+.av-opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.av-opts.colors{grid-template-columns:repeat(6,minmax(0,1fr))}
+.av-opt{display:grid;justify-items:center;gap:2px;font:inherit;font-weight:700;font-size:.72rem;color:var(--ink);background:var(--white);border:3px solid var(--ink);border-radius:14px;padding:4px;cursor:pointer;min-height:44px}
+.av-opt.on{border-color:var(--v);box-shadow:0 0 0 3px var(--v)}
+.av-opts.colors .av-opt{aspect-ratio:1;border-radius:50%}
+.mini-av{width:64px;height:64px}
+@media (prefers-reduced-motion: reduce){.big-av{animation:none}}
 .shop{display:grid;gap:10px}
 .item{display:grid;gap:6px;background:var(--white);border:3px solid var(--ink);border-radius:16px;padding:10px 12px;box-shadow:0 4px 0 var(--ink)}
 .item.picking{border-color:var(--x);box-shadow:0 4px 0 var(--x)}
@@ -83,6 +100,7 @@ p{margin:0;font-weight:600;line-height:1.35}
 </div>
 <script src="lib/supabase.js"></script>
 <script src="config.js"></script>
+<script src="avatar.js?v=20261011g"></script>
 <script>
 (function () {
   'use strict';
@@ -164,8 +182,11 @@ p{margin:0;font-weight:600;line-height:1.35}
     $('#footBtns').replaceChildren(el('button', {type: 'button', onclick: () => { pid = -1; ss.del('pid'); track(); render(); }}, 'Changer de joueur'), el('button', {type: 'button', onclick: () => { leave(); ss.del('code'); ss.del('pid'); pid = -1; code = ''; codeScreen(); }}, 'Quitter'));
     if (pid < 0) return pickScreen();
     const me = S.players[pid];
-    $('#meBox').replaceChildren(el('div', {class: 'me'}, el('span', {class: 'dot', style: '--pc:' + me.color}), el('b', {}, me.name), (S.playing && S.shop && me.coins !== null) ? el('span', {}, '🪙 ' + me.coins) : null, (S.playing && me.tours !== null) ? el('span', {}, '· ' + me.tours + ' tour' + (me.tours > 1 ? 's' : '')) : null));
-    if (!S.playing) return show(el('div', {class: 'emoji'}, '⏳'), el('h2', {class: 'center'}, 'Tu es prêt !'), el('p', {class: 'center'}, 'La partie va bientôt commencer. Regarde le tableau.'));
+    syncAvatar(me);
+    $('#meBox').replaceChildren(el('div', {class: 'me'}, (me.av && window.CPAvatar) ? avEl(me.av, 'me-av') : el('span', {class: 'dot', style: '--pc:' + me.color}), el('b', {}, me.name), (S.playing && S.shop && me.coins !== null) ? el('span', {}, '🪙 ' + me.coins) : null, (S.playing && me.tours !== null) ? el('span', {}, '· ' + me.tours + ' tour' + (me.tours > 1 ? 's' : '')) : null));
+    if (!S.playing && S.avatars && window.CPAvatar && (avEditing || !me.av)) return avatarScreen(me);
+    if (!S.playing) return show(me.av && window.CPAvatar ? avEl(me.av, 'big-av') : el('div', {class: 'emoji'}, '⏳'), el('h2', {class: 'center'}, 'Tu es prêt !'), el('p', {class: 'center'}, 'La partie va bientôt commencer. Regarde le tableau.'),
+      (S.avatars && window.CPAvatar) ? el('button', {type: 'button', class: 'btn small grey', style: 'justify-self:center', onclick: () => { avEditing = true; avDraft = Object.assign({}, me.av || {}); render(); }}, '✏️ Modifier mon avatar') : null);
     if (S.over) return show(el('div', {class: 'emoji'}, '🏆'), el('h2', {class: 'center'}, 'Partie terminée !'), el('p', {class: 'center'}, 'Regarde le tableau pour les étoiles bonus et le podium.'));
     const myTurn = S.turn === pid; const who = S.players[S.turn] || {};
     const card = S.card;
@@ -182,6 +203,34 @@ p{margin:0;font-weight:600;line-height:1.35}
         bl.length ? el('div', {style: 'display:grid;gap:10px'}, bl.map((l, i) => el('button', {type: 'button', class: 'btn ' + (i === bl.length - 1 ? 'violet' : 'blue'), onclick: e => { e.currentTarget.disabled = true; act('cont', {i}); }}, l))) : el('p', {class: 'center muted'}, 'Le prof va valider.')); }
     if (myTurn) return show(el('div', {class: 'emoji'}, '🎲'), el('h2', {class: 'center'}, 'C\'est ton tour !'), el('p', {class: 'center'}, 'Regarde ton pion avancer au tableau.'));
     return show(el('div', {class: 'emoji'}, '👀'), el('h2', {class: 'center'}, 'Tour de ' + (who.name || '…')), el('p', {class: 'center'}, card ? (card.title || '') + ' Regarde le tableau.' : 'Regarde le tableau.'));
+  }
+  /* ---------- avatar (version test 1.11) ---------- */
+  let avEditing = false, avDraft = null, avCat = 'perso', avSentKey = '';
+  const avKey = () => 'av-' + code + '-' + pid;
+  function avEl(av, cls) { const d = el('div', {class: cls || ''}); d.innerHTML = CPAvatar.svg(av); return d; }
+  function syncAvatar(me) {
+    if (!S.avatars || !window.CPAvatar) return;
+    const saved = ss.get(avKey());
+    if (!me.av && saved && avSentKey !== JSON.stringify(saved) + S.seq) { avSentKey = JSON.stringify(saved) + S.seq; send('act', {dev: devId, pid, a: 'avatar', av: saved}); }
+  }
+  function avatarScreen(me) {
+    const A = CPAvatar; if (!avDraft) avDraft = Object.assign({}, A.STYLES.animal.a);
+    const prev = avEl(avDraft, 'big-av');
+    const styles = el('div', {class: 'av-styles'}, Object.values(A.STYLES).map(st => el('button', {type: 'button', class: 'av-chip', onclick: () => { avDraft = Object.assign({}, st.a); vib(15); render(); }}, st.nom)),
+      el('button', {type: 'button', class: 'av-chip dice', onclick: () => { avDraft = A.random(); vib(15); render(); }}, '🎲 Au hasard'));
+    const cats = A.cats ? A.cats(avDraft) : ['cheveux', 'cheveuxCouleur', 'peau', 'tete', 'oreilles', 'yeux', 'bouche', 'dessus', 'visage', 'dos', 'teinte'];
+    if (!cats.includes(avCat)) avCat = cats[0];
+    const catRow = el('div', {class: 'av-cats'}, cats.map(c => el('button', {type: 'button', class: 'av-cat' + (c === avCat ? ' on' : ''), onclick: () => { avCat = c; render(); }}, A.LABELS[c])));
+    const isColor = avCat === 'peau' || avCat === 'teinte' || avCat === 'cheveuxCouleur';
+    const opts = el('div', {class: 'av-opts' + (isColor ? ' colors' : '')}, A.OPT[avCat].map(v => {
+      const on = A.clean(avDraft)[avCat] === v;
+      const b = el('button', {type: 'button', class: 'av-opt' + (on ? ' on' : ''), 'aria-label': A.LABELS[v] || v, onclick: () => { avDraft[avCat] = v; vib(10); render(); }});
+      if (isColor) { b.style.background = v === 'naturel' && A.mainColor ? A.mainColor(Object.assign({}, avDraft, {peau: 'naturel'})) : v; if (v === 'naturel') b.textContent = '★'; }
+      else { b.append(avEl(Object.assign({}, avDraft, {[avCat]: v}), 'mini-av'), el('span', {}, A.LABELS[v] || v)); }
+      return b;
+    }));
+    const ok = el('button', {type: 'button', class: 'btn go', onclick: () => { const av = A.clean(avDraft); ss.set(avKey(), av); avEditing = false; avSentKey = ''; send('act', {dev: devId, pid, a: 'avatar', av}); vib([30, 30, 60]); render(); }}, '✅ C\'est moi !');
+    show(el('h2', {class: 'center'}, 'Crée ton avatar !'), el('p', {class: 'center muted small'}, 'En attendant les autres joueurs. On le verra sur le plateau et sur le podium !'), prev, styles, catRow, opts, ok);
   }
   function show(...kids) { main.replaceChildren(...kids.filter(k => k !== null && k !== undefined && k !== false)); }
 
