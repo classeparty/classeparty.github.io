@@ -7,7 +7,7 @@
 <meta name="description" content="Espace de modération réservé aux administrateurs de Classe Party.">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="style.css?v=20261011e">
+<link rel="stylesheet" href="style.css?v=20261013i">
 </head>
 <body>
 <header id="site-head"></header>
@@ -16,10 +16,10 @@
 </main>
 <footer id="site-foot"></footer>
 <script src="lib/supabase.js"></script>
-<script src="config.js?v=20261011j"></script>
+<script src="config.js?v=20261013i"></script>
 <script src="format.js"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261011j"></script>
+<script src="app.js?v=20261013i"></script>
 <script>
 (async () => {
   await CP.init('moderation.html');
@@ -128,6 +128,7 @@
     rows = data || []; renderStats();
   }
   loadStats();
+  const imgBox = el('div', {class: 'paper stack', style: 'align-content:start'});
   zone.replaceChildren(live, stats, el('section', {class: 'panel stack'},
     el('h1', {class: 'outline'}, 'Modération'),
     el('p', {class: 'lead'}, 'Les contenus signalés par les membres. Vérifie chaque signalement, puis supprime le contenu ou marque le signalement comme traité.'),
@@ -136,11 +137,53 @@
       el('h2', {}, '🛠️ Labo ', el('span', {class: 'chip', style: 'background:#efe6ff'}, 'réservé à l\'administrateur')),
       el('p', {class: 'muted'}, 'Les fonctions en test. Personne d\'autre ne les voit : elles ne sont liées nulle part sur le site et ne s\'activent que pour un compte administrateur.'),
       el('div', {class: 'paper stack', style: 'align-content:start'},
-        el('p', {class: 'muted', style: 'margin:0'}, 'Aucune fonction en test pour le moment. Le plateau Halloween est public depuis la version 1.12 (13 octobre 2026).')),
+        el('h3', {style: 'margin:0'}, '🖼️ Images dans les questions ', el('span', {class: 'chip', style: 'background:#efe6ff'}, 'en test')),
+        el('p', {class: 'muted', style: 'margin:0'}, 'Une ligne « I: » sous une question affiche une image. Dans le jeu : Mode prof, chaque question a un champ « Image ». Sur le site : les images d\'un cours sont contrôlées par l\'IA (OpenAI) puis stockées dans Supabase. Pour l\'instant, seul ton compte peut en envoyer.'),
+        el('div', {class: 'btn-row'}, el('a', {class: 'btn small violet', href: 'jouer.html?test=images', target: '_blank', rel: 'noopener'}, 'Tester les images dans le jeu'))),
+      imgBox,
       el('div', {class: 'paper stack', style: 'align-content:start'},
         el('p', {class: 'muted', style: 'margin:0'}, 'Versions publiques : 1.11 (avatars, cartes spéciales) le 11 octobre 2026, 1.12 (plateau Halloween) le 13 octobre 2026.'),
         el('div', {class: 'btn-row'}, el('a', {class: 'btn small grey', href: 'manette.html', target: '_blank', rel: 'noopener'}, 'Ouvrir une manette')))));
   showDone.addEventListener('change', load);
+  /* ---------- images (Labo) ---------- */
+  async function loadImages(){
+    imgBox.replaceChildren(el('p', {class: 'muted'}, 'Chargement des images…'));
+    const {data: res, error} = await CP.sb.rpc('images_resume');
+    if (error || !res) {
+      imgBox.replaceChildren(el('div', {class: 'notice'}, el('b', {}, 'Le stockage des images n\'est pas encore installé. '), 'Suis le guide « Installer les images » : fichier images.sql dans le SQL Editor, puis la fonction « images » dans Edge Functions.'));
+      return;
+    }
+    const mo = (res.octets || 0) / 1048576;
+    const resume = el('div', {class: 'btn-row'},
+      el('span', {class: 'chip pub'}, `✅ ${res.ok} acceptée${res.ok > 1 ? 's' : ''}`),
+      el('span', {class: 'chip', style: 'background:#ffe0e0'}, `⛔ ${res.refusees} refusée${res.refusees > 1 ? 's' : ''}`),
+      el('span', {class: 'chip'}, `📦 ${mo.toFixed(1)} Mo sur 1 024 Mo`),
+      el('span', {class: 'chip'}, `🕐 ${res.jour} ces dernières 24 h`));
+    const {data: rows} = await CP.sb.from('images').select('id,url,statut,raison,octets,created_at,profiles!owner(display_name)').neq('statut', 'supprimee').order('created_at', {ascending: false}).limit(60);
+    const list = rows || [];
+    const who = r => (r.profiles && r.profiles.display_name) || 'un membre';
+    const oks = list.filter(r => r.statut === 'ok'), refs = list.filter(r => r.statut === 'refusee');
+    const grid = el('div', {class: 'img-grid'}, oks.map(r => {
+      const del = el('button', {type: 'button', class: 'btn small red'}, 'Supprimer');
+      del.addEventListener('click', async () => {
+        if (!del.dataset.armed){ del.dataset.armed = '1'; del.textContent = 'Sûr ? Re-clique'; return; }
+        del.disabled = true;
+        const {data: d, error: e} = await CP.sb.functions.invoke('images', {body: {action: 'supprimer', id: r.id}});
+        if (e || !d || !d.ok){ CP.toast('Suppression impossible.'); del.disabled = false; return; }
+        CP.toast('Image supprimée. Elle ne s\'affichera plus dans les cours.'); loadImages();
+      });
+      return el('figure', {class: 'img-card'},
+        el('a', {href: r.url, target: '_blank', rel: 'noopener'}, el('img', {src: r.url, alt: 'Image envoyée par ' + who(r), loading: 'lazy'})),
+        el('figcaption', {class: 'small'}, el('b', {}, who(r)), ' · ', CP.ago(r.created_at)), del);
+    }));
+    imgBox.replaceChildren(resume,
+      el('h3', {style: 'margin:6px 0 0'}, 'Images récentes'),
+      oks.length ? grid : el('p', {class: 'muted'}, 'Aucune image pour le moment.'),
+      el('h3', {style: 'margin:6px 0 0'}, 'Images refusées par l\'IA'),
+      el('p', {class: 'small muted', style: 'margin:0'}, 'Elles n\'ont jamais été publiées : seule la raison est gardée. Si un même membre en accumule, c\'est un signal à surveiller.'),
+      refs.length ? el('ul', {class: 'qlist'}, refs.map(r => el('li', {}, el('b', {}, who(r)), ' · ', CP.ago(r.created_at), el('small', {}, 'Raison : ' + (r.raison || 'non précisée'))))) : el('p', {class: 'muted'}, 'Aucune image refusée. 👍'));
+  }
+  loadImages();
   async function open(r){
     if (r.cible_type === 'cours'){
       const {data} = await CP.sb.from('courses').select('*').eq('id', r.cible_id).maybeSingle();

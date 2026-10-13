@@ -92,6 +92,34 @@
   CP.initials = n => { const p = String(n || '?').trim().split(/\s+/); return ((p[0] || '?')[0] + (p[1] ? p[1][0] : '')).toUpperCase(); };
 
   /* ---------- fichiers de questions ---------- */
+  /* images des questions : contrôle par l'IA puis rangement sur le site (fonction « images ») */
+  CP.imgBase = () => String(CFG.SUPABASE_URL || '').replace(/\/$/, '') + '/storage/v1/object/public/images/';
+  CP.imgLines = text => {
+    const out = []; const seen = new Set();
+    String(text).split(/\r\n|\n|\r/).forEach(l => { const m = l.trim().match(/^(?:I|IMG|IMAGE)\s*[:.)]\s*(\S+)\s*$/i); if (m && !seen.has(m[1])) { seen.add(m[1]); out.push(m[1]); } });
+    return out;
+  };
+  CP.processImages = async function (text, onStep) {
+    const base = CP.imgBase();
+    const todo = CP.imgLines(text).filter(u => !u.startsWith(base));
+    const res = {text: String(text), done: 0, refused: [], removed: [], fatal: ''};
+    const drop = (u) => { res.text = res.text.split(/\r\n|\n|\r/).filter(l => { const m = l.trim().match(/^(?:I|IMG|IMAGE)\s*[:.)]\s*(\S+)\s*$/i); return !(m && m[1] === u); }).join('\r\n'); };
+    for (let k = 0; k < todo.length; k++) {
+      const u = todo[k]; if (onStep) onStep(k + 1, todo.length);
+      if (!/^data:image\//.test(u) && !/^https:\/\//i.test(u)) { drop(u); res.removed.push('lien non valide'); continue; }
+      let out = null;
+      try {
+        const {data, error} = await CP.sb.functions.invoke('images', {body: u.startsWith('data:') ? {data: u} : {url: u}});
+        if (error) { try { out = error.context && error.context.json ? await error.context.json() : null; } catch (e) { out = null; } if (!out) out = {ok: false, raison: 'Le service des images ne répond pas.', panne: true}; else out.panne = true; }
+        else out = data;
+      } catch (e) { out = {ok: false, raison: 'Le service des images ne répond pas.', panne: true}; }
+      if (out && out.ok && out.url) { res.text = res.text.split(u).join(out.url); res.done++; continue; }
+      if (out && out.refusee) { drop(u); res.refused.push(out.raison); continue; }
+      // service indisponible ou pas autorisé : on retire l'image (rien n'est publié sans contrôle)
+      drop(u); res.removed.push((out && out.raison) || 'image retirée');
+    }
+    return res;
+  };
   CP.parse = function (text) {
     const r = window.txtToBank(text);
     const d = r.data;

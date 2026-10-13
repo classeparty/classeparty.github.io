@@ -425,6 +425,14 @@ body.hw .card-head{background:linear-gradient(180deg,rgba(255,255,255,.35) 0 46%
 body.hw .overlay{background:rgba(20,8,35,.7)}
 @media (prefers-reduced-motion: reduce){.hw-bat{display:none}}
 
+/* ================= IMAGES DANS LES QUESTIONS ================= */
+.q-img{display:flex;justify-content:center;margin:0 0 10px}
+.q-img img{display:block;max-width:100%;max-height:min(34vh,380px);object-fit:contain;background:#fff;border:4px solid var(--ink);border-radius:16px;box-shadow:0 5px 0 var(--ink)}
+.img-edit{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.img-edit .thumb{width:96px;height:72px;object-fit:contain;background:#fff;border:3px solid var(--ink);border-radius:10px}
+.img-edit .paste{flex:1;min-width:160px;font-size:.85rem}
+.img-edit .img-note{font-size:.8rem;color:var(--muted);font-weight:700}
+.img-lab{font-family:var(--f-body);font-weight:800;font-size:.7rem;background:#efe6ff;color:var(--v);border:2px solid var(--v);border-radius:999px;padding:0 6px;margin-left:6px}
 </style></head><body>
 <div id="gtm-app">
 <div class="stage" id="stage">
@@ -800,7 +808,7 @@ function normalizeBank(b){
   return d;
 }
 async function persistBank(){
-  lsSet('classeparty-bank', bank);
+  try { localStorage.setItem('classeparty-bank', JSON.stringify(bank)); } catch (e) { return 'quota'; }
   if (db){
     try { await db.doc('bank/main').set(clone(bank)); return 'cloud'; }
     catch (e) { return 'local-err'; }
@@ -908,7 +916,7 @@ function enableTestHalloween(){
   setTheme(lsGet('classeparty-theme') || 'classique');
 }
 window.enableTestHalloween = enableTestHalloween;
-window.enableTest = name => { if (name === 'halloween') enableTestHalloween(); else enableTest111(); };
+window.enableTest = name => { if (name === 'halloween') enableTestHalloween(); else if (name === 'images') enableTestImages(); else enableTest111(); };
 document.getElementById('themeClassic').addEventListener('click', () => { SFX.click(); setTheme('classique'); });
 document.getElementById('themeHw').addEventListener('click', () => { SFX.click(); setTheme('halloween'); });
 setTheme(lsGet('classeparty-theme') || 'classique');
@@ -1271,6 +1279,7 @@ function playKind(p, kind){
    On retient le texte des questions déjà posées (et pas leur numéro) : ça reste juste même si
    le prof modifie ou recharge ses questions pendant la partie, et deux questions identiques
    dans le fichier ne comptent que pour une. */
+function qImg(it){ return (it && it.img && okImg(it.img)) ? h('div', {class:'q-img'}, h('img', {src:it.img, alt:'Image de la question', loading:'eager', decoding:'async'})) : null; }
 function drawKey(it){ return String(typeof it === 'string' ? it : (it.q || it.text || JSON.stringify(it))).trim().toLowerCase(); }
 function draw(kind){
   const list = bank[kind]; if (!list || !list.length) return null;
@@ -1371,7 +1380,7 @@ function askQuestion(p, kind, jail){
   const exitBtn = (jail && specialOn() && p.cards.exit > 0) ? btn('🎟️ Je ne sais pas : carte Sortie de retenue', 'small violet lab-exit', () => useExitCard(p)) : null;
   if (exitBtn) buttons.forEach(b => b.addEventListener('click', () => { exitBtn.hidden = true; }));
   openModal(card({type: jail ? 'P' : (isVF ? 'V' : 'Q'), title, player:p,
-    body:[h('p', {class:'rule'}, rule), h('p', {class:'qtext'}, item.q), answers, fb, ex], foot:[exitBtn, cont]}));
+    body:[h('p', {class:'rule'}, rule), qImg(item), h('p', {class:'qtext'}, item.q), answers, fb, ex], foot:[exitBtn, cont]}));
 }
 function freeFromJail(p){
   p.jailed = false; SFX.lap();
@@ -1414,7 +1423,7 @@ function doAction(p){
     await moveBy(G.turn, ok ? m : -m); endTurn();
   };
   openModal(card({type:'A', title:'ACTION !', player:p,
-    body:[h('p', {class:'rule'}, `Le prof valide. Réussi : +${casesTxt(m)} · Raté : −${casesTxt(m)}`), h('p', {class:'qtext'}, item.text), h('div', {}, showHint), hint],
+    body:[h('p', {class:'rule'}, `Le prof valide. Réussi : +${casesTxt(m)} · Raté : −${casesTxt(m)}`), qImg(item), h('p', {class:'qtext'}, item.text), h('div', {}, showHint), hint],
     foot:[btn('RÉUSSI !', 'big go', () => finish(true)), btn('RATÉ', 'big red', () => finish(false))]}));
 }
 
@@ -2141,6 +2150,7 @@ function bankToTxt(b, course){
   L.push('#              E: explication (facultatif)');
   L.push('#   ACTIONS    A: le défi');
   L.push('#              R: la réponse attendue (facultatif)');
+  L.push('#   IMAGE      I: lien https://… de l\'image, sous la ligne Q:, V:, F: ou A: (facultatif)');
   L.push('#   MIMES      un mime par ligne');
   L.push('#   CHANCE et MALCHANCE   effet | texte de la carte');
   L.push('#              effets possibles : +3 pièces, -2 pièces, +2 cases, -3 cases, Rejoue, Retenue');
@@ -2154,16 +2164,16 @@ function bankToTxt(b, course){
   L.push(`[QUIZ]   # ${b.quiz.length} questions`);
   b.quiz.forEach(q => {
     L.push('');
-    L.push('Q: ' + oneLine(q.q));
+    L.push('Q: ' + oneLine(q.q)); if (q.img) L.push('I: ' + q.img);
     (q.options || []).forEach((o, j) => { if (oneLine(o)) L.push((j === q.correct ? '* ' : '- ') + oneLine(o)); });
     if (oneLine(q.expl)) L.push('E: ' + oneLine(q.expl));
   });
   L.push('');
   L.push(`[VRAI-FAUX]   # ${b.vf.length} affirmations`);
-  b.vf.forEach(v => { L.push(''); L.push((v.a ? 'V: ' : 'F: ') + oneLine(v.q)); if (oneLine(v.expl)) L.push('E: ' + oneLine(v.expl)); });
+  b.vf.forEach(v => { L.push(''); L.push((v.a ? 'V: ' : 'F: ') + oneLine(v.q)); if (v.img) L.push('I: ' + v.img); if (oneLine(v.expl)) L.push('E: ' + oneLine(v.expl)); });
   L.push('');
   L.push(`[ACTIONS]   # ${b.actions.length} défis`);
-  b.actions.forEach(a => { L.push(''); L.push('A: ' + oneLine(a.text)); if (oneLine(a.hint)) L.push('R: ' + oneLine(a.hint)); });
+  b.actions.forEach(a => { L.push(''); L.push('A: ' + oneLine(a.text)); if (a.img) L.push('I: ' + a.img); if (oneLine(a.hint)) L.push('R: ' + oneLine(a.hint)); });
   L.push('');
   L.push(`[MIMES]   # ${b.mimes.length} mimes`);
   b.mimes.forEach(m => { if (oneLine(m)) L.push(oneLine(m)); });
@@ -2176,6 +2186,10 @@ function bankToTxt(b, course){
   L.push('');
   return '\ufeff' + L.join('\r\n');
 }
+/* une ligne « I: » = l'image de la question au-dessus (lien https ou image intégrée) */
+const IMG_LINE = /^(?:I|IMG|IMAGE)\s*[:.)]\s*(\S+)\s*$/i;
+function okImg(u){ return /^https:\/\/[^\s"'<>]+$/i.test(u) || /^data:image\/(jpeg|png|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(u); }
+function setImg(cur, u, i, err){ if (okImg(u)) cur.img = u; else err(i, 'image non comprise : il faut un lien qui commence par https:// (ou une image ajoutée dans le mode prof).'); }
 function txtToBank(text){
   const out = {quiz:[], vf:[], actions:[], mimes:[], chance:[], malchance:[], settings:{}, present:new Set()};
   const errors = [];
@@ -2207,6 +2221,7 @@ function txtToBank(text){
     if (section === 'quiz'){
       if ((m = t.match(/^Q\s*[:.)]\s*(.*)$/i))){ cur = {q:m[1].trim(), options:[], correct:-1, expl:'', line:i}; out.quiz.push(cur); return; }
       if (!cur){ err(i, 'une question de quiz doit commencer par « Q: ».'); return; }
+      if ((m = t.match(IMG_LINE))){ setImg(cur, m[1], i, err); return; }
       if ((m = t.match(/^\*\s*(.*)$/))){ if (cur.correct >= 0) err(i, 'deux bonnes réponses (*) pour la même question : la première est gardée.'); else cur.correct = cur.options.length; cur.options.push(m[1].trim()); return; }
       if ((m = t.match(/^[-–—•]\s*(.*)$/))){ cur.options.push(m[1].trim()); return; }
       if ((m = t.match(/^E\s*[:.)]\s*(.*)$/i))){ cur.expl = m[1].trim(); return; }
@@ -2215,11 +2230,13 @@ function txtToBank(text){
     }
     if (section === 'vf'){
       if ((m = t.match(/^(V|VRAI|F|FAUX)\s*[:.)]\s*(.*)$/i))){ cur = {q:m[2].trim(), a:/^v/i.test(m[1]), expl:''}; out.vf.push(cur); return; }
+      if ((m = t.match(IMG_LINE)) && cur){ setImg(cur, m[1], i, err); return; }
       if ((m = t.match(/^E\s*[:.)]\s*(.*)$/i)) && cur){ cur.expl = m[1].trim(); return; }
       err(i, 'un vrai-faux commence par « V: » (vrai) ou « F: » (faux).'); return;
     }
     if (section === 'actions'){
       if ((m = t.match(/^A\s*[:.)]\s*(.*)$/i))){ cur = {text:m[1].trim(), hint:''}; out.actions.push(cur); return; }
+      if ((m = t.match(IMG_LINE)) && cur){ setImg(cur, m[1], i, err); return; }
       if ((m = t.match(/^R\s*[:.)]\s*(.*)$/i)) && cur){ cur.hint = m[1].trim(); return; }
       if (!cur){ cur = {text:t, hint:''}; out.actions.push(cur); return; }
       err(i, 'une action commence par « A: », sa réponse par « R: ».'); return;
@@ -2241,7 +2258,7 @@ function txtToBank(text){
   });
   out.quiz = out.quiz.filter(q => {
     const n = q.line + 1; q.options = q.options.filter(o => o);
-    if (!q.q){ errors.push(`Ligne ${n} : question vide, ignorée.`); return false; }
+    if (!q.q && !q.img){ errors.push(`Ligne ${n} : question vide, ignorée.`); return false; }
     if (q.options.length < 2){ errors.push(`Ligne ${n} : « ${q.q.slice(0, 40)} » a moins de 2 réponses, ignorée.`); return false; }
     if (q.correct < 0){ errors.push(`Ligne ${n} : « ${q.q.slice(0, 40)} » n'a pas de bonne réponse (*), ignorée.`); return false; }
     if (q.options.length > 4){ errors.push(`Ligne ${n} : « ${q.q.slice(0, 40)} » a plus de 4 réponses, seules les 4 premières sont gardées.`); if (q.correct > 3){ q.options[3] = q.options[q.correct]; q.correct = 3; } q.options = q.options.slice(0, 4); }
@@ -2394,6 +2411,54 @@ function markDirty(){ dirty = true; const s = $('#adminStatus'); if (s){ s.class
 function inp(id, val, on, attrs = {}){ const el = h('input', Object.assign({class:'in', id, type:'text'}, attrs)); el.value = val ?? ''; el.addEventListener('input', () => { on(el.value); markDirty(); }); return el; }
 function txa(id, val, on, rows = 2){ const el = h('textarea', {class:'in', id, rows:String(rows)}); el.value = val ?? ''; el.addEventListener('input', () => { on(el.value); markDirty(); }); return el; }
 function fld(label, ctrl){ return h('label', {class:'fld', for:ctrl.id}, h('span', {class:'fld-l'}, label), ctrl); }
+/* ---------- images (Labo) ---------- */
+let IMG_LAB = false;
+function enableTestImages(){ if (IMG_LAB) return; IMG_LAB = true; const ab = document.getElementById('admin'); if (ab && !ab.hidden && typeof renderAdmin === 'function') renderAdmin(); }
+window.enableTestImages = enableTestImages;
+const IMG_MAX = 60;
+function countImgs(d){ return ['quiz','vf','actions'].reduce((t, k) => t + (d[k] || []).filter(x => x && x.img).length, 0); }
+function compressImage(blob){
+  return new Promise((ok, ko) => {
+    if (!blob || !/^image\//.test(blob.type)) return ko(new Error('Ce fichier n\'est pas une image.'));
+    if (blob.size > 25 * 1024 * 1024) return ko(new Error('Image trop lourde (25 Mo maximum).'));
+    const url = URL.createObjectURL(blob); const im = new Image();
+    im.onload = () => {
+      URL.revokeObjectURL(url);
+      const max = 800, sc = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight));
+      const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(im.naturalWidth * sc)); c.height = Math.max(1, Math.round(im.naturalHeight * sc));
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+      let q = .8, out = c.toDataURL('image/jpeg', q);
+      while (out.length > 110000 && q > .4){ q -= .1; out = c.toDataURL('image/jpeg', q); }
+      ok(out);
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); ko(new Error('Image illisible.')); };
+    im.src = url;
+  });
+}
+function imgField(it, idp){
+  const wrap = h('div', {class:'img-edit'});
+  const status = h('span', {class:'img-note'});
+  const set = async (blob) => {
+    if (!it.img && countImgs(draft) >= IMG_MAX){ status.textContent = `Maximum ${IMG_MAX} images par cours.`; return; }
+    status.textContent = 'Préparation de l\'image…';
+    try { it.img = await compressImage(blob); markDirty(); draw(); }
+    catch (e) { status.textContent = e.message; }
+  };
+  const file = h('input', {type:'file', accept:'image/*', hidden:true, id:idp + '-file'});
+  file.addEventListener('change', () => { if (file.files[0]) set(file.files[0]); file.value = ''; });
+  const paste = h('input', {class:'in paste', type:'text', placeholder:'ou clique ici et colle une image (Ctrl+V)', 'aria-label':'Coller une image'});
+  paste.addEventListener('paste', e => { const f = [...(e.clipboardData ? e.clipboardData.items : [])].find(x => x.type && x.type.startsWith('image/')); e.preventDefault(); if (f) set(f.getAsFile()); else status.textContent = 'Pas d\'image dans le presse-papiers.'; });
+  function draw(){
+    wrap.replaceChildren(
+      it.img ? h('img', {class:'thumb', src:it.img, alt:'Aperçu'}) : null,
+      btn(it.img ? '🖼️ Changer l\'image' : '🖼️ Ajouter une image', 'mini blue', () => file.click()),
+      it.img ? btn('Retirer', 'mini red', () => { delete it.img; markDirty(); draw(); }) : paste,
+      file, status);
+    status.textContent = it.img && /^https:/.test(it.img) ? 'Image en ligne' : (it.img ? `Image sur cet ordinateur (${Math.round(it.img.length * .75 / 1024)} Ko)` : '');
+  }
+  draw();
+  return h('div', {class:'fld'}, h('span', {class:'fld-l'}, 'Image (facultatif)', h('span', {class:'img-lab'}, '🧪 Labo')), wrap);
+}
 function rowHead(n, onDel){ return h('div', {class:'arow-head'}, h('span', {class:'arow-num'}, '#' + n), btn('Supprimer', 'mini red', onDel)); }
 function renderAdmin(){
   const box = $('#admin'); box.replaceChildren();
@@ -2455,7 +2520,7 @@ function fillAdminBody(body){
         opts.append(h('div', {class:'optedit'}, r, inp(`quiz-${i}-o-${j}`, o, v => { it.options[j] = v; }, {placeholder:'Réponse ' + 'ABCD'[j], maxlength:'90'})));
       });
       body.append(h('div', {class:'arow'}, rowHead(i + 1, del(draft.quiz, i)),
-        fld('Question', txa(`quiz-${i}-q`, it.q, v => { it.q = v; })),
+        fld('Question', txa(`quiz-${i}-q`, it.q, v => { it.q = v; })), IMG_LAB ? imgField(it, `quiz-${i}-img`) : null,
         h('div', {class:'fld'}, h('span', {class:'fld-l'}, 'Réponses (coche la bonne)'), opts),
         fld('Explication affichée après la réponse (facultatif)', inp(`quiz-${i}-e`, it.expl, v => { it.expl = v; }))));
     });
@@ -2465,7 +2530,7 @@ function fillAdminBody(body){
       const sel = h('select', {class:'in', id:`vf-${i}-a`}, h('option', {value:'1'}, 'VRAI'), h('option', {value:'0'}, 'FAUX'));
       sel.value = it.a ? '1' : '0'; sel.addEventListener('change', () => { it.a = sel.value === '1'; markDirty(); });
       body.append(h('div', {class:'arow'}, rowHead(i + 1, del(draft.vf, i)),
-        fld('Affirmation', txa(`vf-${i}-q`, it.q, v => { it.q = v; })),
+        fld('Affirmation', txa(`vf-${i}-q`, it.q, v => { it.q = v; })), IMG_LAB ? imgField(it, `vf-${i}-img`) : null,
         h('div', {class:'two'}, fld('Bonne réponse', sel), fld('Explication (facultatif)', inp(`vf-${i}-e`, it.expl, v => { it.expl = v; })))));
     });
   } else if (adminTab === 'actions'){
@@ -2473,7 +2538,7 @@ function fillAdminBody(body){
       'Un défi à faire devant la classe. Tu valides toi-même si c\'est réussi.'));
     draft.actions.forEach((it, i) => {
       body.append(h('div', {class:'arow'}, rowHead(i + 1, del(draft.actions, i)),
-        fld('Défi', txa(`act-${i}-t`, it.text, v => { it.text = v; })),
+        fld('Défi', txa(`act-${i}-t`, it.text, v => { it.text = v; })), IMG_LAB ? imgField(it, `act-${i}-img`) : null,
         fld('Réponse attendue (cachée, pour toi)', inp(`act-${i}-h`, it.hint, v => { it.hint = v; }))));
     });
   } else if (adminTab === 'mimes'){
@@ -2541,7 +2606,7 @@ function fillAdminBody(body){
 }
 function validateDraft(){
   const d = draft; const isBlank = s => !String(s || '').trim();
-  d.quiz = d.quiz.filter(q => !(isBlank(q.q) && q.options.every(isBlank)));
+  d.quiz = d.quiz.filter(q => !(isBlank(q.q) && !q.img && q.options.every(isBlank)));
   d.vf = d.vf.filter(v => !isBlank(v.q));
   d.actions = d.actions.filter(a => !isBlank(a.text));
   d.mimes = d.mimes.map(m => String(m || '').trim()).filter(Boolean);
@@ -2549,7 +2614,7 @@ function validateDraft(){
   d.malchance = d.malchance.filter(c => !isBlank(c.text));
   for (let i = 0; i < d.quiz.length; i++){
     const q = d.quiz[i];
-    if (isBlank(q.q)) return ['quiz', `Quiz #${i + 1} : la question est vide.`];
+    if (isBlank(q.q) && !q.img) return ['quiz', `Quiz #${i + 1} : la question est vide (écris une question ou ajoute une image).`];
     if (q.options.filter(o => !isBlank(o)).length < 2) return ['quiz', `Quiz #${i + 1} : il faut au moins 2 réponses.`];
     if (isBlank(q.options[q.correct])) return ['quiz', `Quiz #${i + 1} : la réponse cochée est vide.`];
   }
@@ -2573,6 +2638,7 @@ async function saveAdmin(){
   const s2 = $('#adminStatus');
   if (res === 'cloud'){ s2.textContent = 'Enregistré sur ton compte Claude !'; }
   else if (res === 'local'){ s2.textContent = 'Enregistré sur cet ordinateur.'; }
+  else if (res === 'quota'){ s2.className = 'status err'; s2.textContent = 'Pas assez de place sur cet ordinateur : enlève quelques images, ou enregistre le cours sur le site (Mes cours).'; }
   else { s2.className = 'status err'; s2.textContent = 'Enregistré sur cet ordinateur seulement (compte inaccessible).'; }
   SFX.good();
 }

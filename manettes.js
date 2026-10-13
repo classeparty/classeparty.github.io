@@ -78,7 +78,7 @@
     if (LAB.q && m.querySelector('.ans')) {
       const hold = (LAB.q.hold && !LAB.q.revealed) ? Math.max(0, Math.ceil((LAB.q.hold.until - Date.now()) / 1000)) : 0;
       const ex = m.querySelector('.lab-exit');
-      return {type: 'q', title, exit: !!(ex && !ex.hidden), q: {text: LAB.q.text, vf: LAB.q.vf, opts: LAB.q.opts, revealed: LAB.q.revealed, right: LAB.q.revealed ? LAB.q.right : null, all: LAB.q.all, hold, results: LAB.q.revealed ? LAB.q.results : null}, cont: LAB.q.revealed};
+      return {type: 'q', title, exit: !!(ex && !ex.hidden), q: {text: LAB.q.text, img: LAB.q.img || '', vf: LAB.q.vf, opts: LAB.q.opts, revealed: LAB.q.revealed, right: LAB.q.revealed ? LAB.q.right : null, all: LAB.q.all, hold, results: LAB.q.revealed ? LAB.q.results : null}, cont: LAB.q.revealed};
     }
     const foot = [...m.querySelectorAll('.card-foot .btn')].filter(b => !b.hidden);
     if (m.querySelector('.shop-wrap')) return {type: 'shop', title, shop: shopInfo(m)};
@@ -215,6 +215,7 @@
     const p = LAB.pendingPlayer;
     LAB.q = {
       kind: LAB.pendingKind, text: (m.querySelector('.qtext') || {}).textContent || '',
+      img: (() => { const im = m.querySelector('.q-img img'); const src = im ? im.getAttribute('src') || '' : ''; return /^https:\/\//.test(src) ? src : (src ? 'local' : ''); })(),
       vf: LAB.pendingKind === 'vf', btns, opts: btns.map(b => b.dataset.txt || b.textContent),
       right: btns.findIndex(b => b.dataset.right === '1'), revealed: false,
       all: LAB.on && LAB.all && nPhones() > 0, player: p, results: null

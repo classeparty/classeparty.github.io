@@ -246,3 +246,7 @@ textarea.in{resize:vertical;line-height:1.35}
 .stats-table{border-collapse:collapse;width:100%;font-size:.9rem}
 .stats-table th,.stats-table td{border-bottom:1px solid #eadfca;padding:4px 8px;text-align:right;white-space:nowrap}
 .stats-table th:first-child,.stats-table td:first-child{text-align:left}
+.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.img-card{margin:0;background:var(--paper);border:2px solid var(--ink);border-radius:12px;padding:8px;display:grid;gap:6px;align-content:start}
+.img-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;display:block;background:#eee}
+.img-card figcaption{color:var(--muted)}

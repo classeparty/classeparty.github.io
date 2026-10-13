@@ -7,7 +7,7 @@
 <meta name="description" content="Sauvegarde tes cours Classe Party en ligne et partage-les avec les autres enseignants.">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="style.css?v=20261011e">
+<link rel="stylesheet" href="style.css?v=20261013i">
 </head>
 <body>
 <header id="site-head"></header>
@@ -18,10 +18,10 @@
 </main>
 <footer id="site-foot"></footer>
 <script src="lib/supabase.js"></script>
-<script src="config.js?v=20261011j"></script>
+<script src="config.js?v=20261013i"></script>
 <script src="format.js"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261011j"></script>
+<script src="app.js?v=20261013i"></script>
 <script>
 (async () => {
   await CP.init('mes-cours.html');
@@ -65,7 +65,7 @@
     };
     file.addEventListener('change', () => {
       const f = file.files && file.files[0]; if (!f) return;
-      if (f.size > 190000){ msg.className = 'msg err'; msg.textContent = 'Fichier trop gros (200 Ko maximum).'; return; }
+      if (f.size > 12000000){ msg.className = 'msg err'; msg.textContent = 'Fichier trop gros (12 Mo maximum, images comprises).'; return; }
       const rd = new FileReader();
       rd.onload = () => {
         text = String(rd.result || ''); parsed = CP.parse(text); showInfo();
@@ -75,20 +75,39 @@
       rd.readAsText(f, 'utf-8');
     });
     showInfo();
+    let busy = false;
+    const saveBtnState = b => { busy = b; document.querySelectorAll('.modal-card .btn-row .btn.go').forEach(x => { x.disabled = b; }); };
     const save = async () => {
+      if (busy) return; let imgWarn = '';
       if (titre.value.trim().length < 3){ msg.className = 'msg err'; msg.textContent = 'Donne un titre d\'au moins 3 caractères.'; return; }
       if (!matiere.value || !niveau.value){ msg.className = 'msg err'; msg.textContent = 'Choisis la matière et le niveau du cours.'; return; }
       if (!text || !parsed || !parsed.total){ msg.className = 'msg err'; msg.textContent = 'Choisis un fichier de questions (.txt) qui contient au moins une question.'; return; }
+      const nImg = CP.imgLines(text).filter(u => !u.startsWith(CP.imgBase())).length;
+      if (nImg) {
+        saveBtnState(true); msg.className = 'msg'; msg.textContent = 'Contrôle des images…';
+        const r = await CP.processImages(text, (k, n) => { msg.textContent = `🛡️ Contrôle des images par l'IA : ${k} / ${n}…`; });
+        saveBtnState(false);
+        text = r.text; parsed = CP.parse(text); showInfo();
+        const notes = [];
+        if (r.done) notes.push(`${r.done} image${r.done > 1 ? 's' : ''} vérifiée${r.done > 1 ? 's' : ''} et ajoutée${r.done > 1 ? 's' : ''}.`);
+        if (r.refused.length) notes.push(`${r.refused.length} image${r.refused.length > 1 ? 's refusées' : ' refusée'} par le contrôle automatique et retirée${r.refused.length > 1 ? 's' : ''} du cours.`);
+        if (r.removed.length) notes.push(`${r.removed.length} image${r.removed.length > 1 ? 's' : ''} retirée${r.removed.length > 1 ? 's' : ''} : ${[...new Set(r.removed)].join(' ; ')}`);
+        if (notes.length) CP.toast(notes.join(' '));
+        if (r.refused.length || r.removed.length) { msg.className = 'msg err'; msg.textContent = notes.join(' '); imgWarn = notes.join(' '); }
+      }
+      if (text.length > 200000) { msg.className = 'msg err'; msg.textContent = 'Le cours est trop long pour être enregistré en ligne (200 000 caractères maximum).'; return; }
       const row = {titre: titre.value.trim(), matiere: matiere.value, niveau: niveau.value, description: desc.value.trim(), contenu: text, nb_questions: parsed.total, public: pub.checked, updated_at: new Date().toISOString()};
       const q = isNew ? CP.sb.from('courses').insert(row) : CP.sb.from('courses').update(row).eq('id', course.id);
       const {error} = await q;
       if (error){ msg.className = 'msg err'; msg.textContent = 'Enregistrement impossible : ' + error.message; return; }
       onDone(); CP.toast(isNew ? 'Cours ajouté !' : 'Cours modifié !');
+      if (imgWarn) CP.modal({title: '🛡️ Contrôle des images', body: [el('p', {}, 'Ton cours est bien enregistré, mais certaines images n\'ont pas été gardées.'), el('p', {class: 'msg err'}, imgWarn), el('p', {class: 'small muted'}, 'Les images peuvent être refusées par le contrôle automatique (contenu choquant), ou retirées si elles sont trop lourdes ou si le lien ne fonctionne pas. Tu peux modifier le cours pour en mettre d\'autres.')]});
     };
     return {fields: [
       el('label', {class: 'field'}, el('span', {}, isNew ? 'Fichier de questions (.txt)' : 'Remplacer le fichier de questions (facultatif)'), file),
       el('p', {class: 'small muted'}, 'Ce fichier se crée dans le jeu : Mode prof > Ouvrir / Enregistrer > « Télécharger les questions (.txt) ». Tu peux aussi partir du ', el('a', {href: 'modele-questions.txt', download: true}, 'modèle à remplir'), '.'),
       info,
+      !CP.isAdmin() ? null : el('p', {class: 'small muted'}, '🧪 Labo · 🖼️ Les images des questions sont vérifiées automatiquement par une intelligence artificielle avant d\'être publiées. Les images refusées sont retirées du cours.'),
       el('label', {class: 'field'}, el('span', {}, 'Titre du cours'), titre),
       el('div', {class: 'grid2'}, el('label', {class: 'field'}, el('span', {}, 'Matière'), matiere), el('label', {class: 'field'}, el('span', {}, 'Niveau'), niveau)),
       el('label', {class: 'field'}, el('span', {}, 'Description'), desc),

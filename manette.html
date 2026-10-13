@@ -93,6 +93,8 @@ p{margin:0;font-weight:600;line-height:1.35}
 body.hw{--ink:#22102e;--ink-2:#4a2a63;--sun1:#3b2468;--sun2:#24133f;--crust:#ff7a1a;--c:#ff9a1f}
 body.hw .brand,body.hw header .brand{color:#fff}
 body.hw .foot,body.hw .foot button{color:#f3e9ff}
+.q-img{display:flex;justify-content:center}
+.q-img img{display:block;max-width:100%;max-height:34vh;object-fit:contain;background:#fff;border:3px solid var(--ink);border-radius:14px}
 </style>
 </head>
 <body>
@@ -297,6 +299,13 @@ body.hw .foot,body.hw .foot button{color:#f3e9ff}
       el('div', {class: 'names'}, S.players.map((p, i) => el('button', {type: 'button', class: 'name', onclick: () => choose(i)}, el('span', {class: 'dot', style: '--pc:' + p.color}), p.name))));
   }
 
+  function qBlock(q) {
+    const kids = [];
+    if (q.img && /^https:\/\//.test(q.img)) kids.push(el('div', {class: 'q-img'}, el('img', {src: q.img, alt: 'Image de la question'})));
+    else if (q.img === 'local') kids.push(el('p', {class: 'center muted'}, '🖼️ Regarde l\'image au tableau'));
+    if (q.text) kids.push(el('p', {class: 'qtext'}, q.text));
+    return el('div', {}, ...kids);
+  }
   function questionScreen(card, myTurn, who) {
     const q = card.q || {}; const key = (q.text || '') + '|' + S.turn;
     if (key !== lastQ) { lastQ = key; answered = null; if (myTurn || q.all) vib(50); }
@@ -307,15 +316,15 @@ body.hw .foot,body.hw .foot button{color:#f3e9ff}
       const right = q.right;
       const ok = mine !== null && mine === right;
       const rightTxt = q.vf ? (q.opts[right] || '') : ['A', 'B', 'C', 'D'][right] + '. ' + (q.opts[right] || '');
-      const kids = [head, el('p', {class: 'qtext'}, q.text)];
+      const kids = [head, qBlock(q)];
       if (mine === null) kids.push(el('p', {class: 'big'}, '⏱️'), el('p', {class: 'center'}, 'Tu n\'as pas répondu.'));
       else { kids.push(el('p', {class: 'big ' + (ok ? 'ok' : 'ko')}, ok ? 'BONNE RÉPONSE !' : 'RATÉ…')); if (ok && !myTurn && S.shop) kids.push(el('p', {class: 'center'}, '+1 pièce 🪙')); if (lastBuzz !== 'rev' + key) { lastBuzz = 'rev' + key; vib(ok ? [40, 40, 120] : 200); } }
       if (!ok) kids.push(el('p', {class: 'center'}, 'La bonne réponse : ', el('b', {}, rightTxt)));
       if (myTurn && card.cont) kids.push(el('button', {type: 'button', class: 'btn go', onclick: e => { e.currentTarget.disabled = true; act('cont'); }}, 'CONTINUER'));
       return show(...kids);
     }
-    if (!canAnswer) return show(head, el('p', {class: 'qtext'}, q.text), el('p', {class: 'center'}, '👀 Regarde le tableau.'));
-    if (answered !== null) return show(head, el('p', {class: 'qtext'}, q.text), el('div', {class: 'emoji'}, '✅'), el('p', {class: 'center'}, 'Réponse envoyée : ', el('b', {}, q.vf ? q.opts[answered] : ['A', 'B', 'C', 'D'][answered])), el('p', {class: 'center muted'}, 'Attends la correction au tableau.'));
+    if (!canAnswer) return show(head, qBlock(q), el('p', {class: 'center'}, '👀 Regarde le tableau.'));
+    if (answered !== null) return show(head, qBlock(q), el('div', {class: 'emoji'}, '✅'), el('p', {class: 'center'}, 'Réponse envoyée : ', el('b', {}, q.vf ? q.opts[answered] : ['A', 'B', 'C', 'D'][answered])), el('p', {class: 'center muted'}, 'Attends la correction au tableau.'));
     const pick = j => { answered = j; act('ans', {j}); render(); };
     const box = el('div', {class: 'answers' + (q.vf ? ' two' : '')});
     if (q.vf) {
@@ -325,8 +334,8 @@ body.hw .foot,body.hw .foot button{color:#f3e9ff}
     }
     if (q.hold && !myTurn) {
       if (holdKey !== key) { holdKey = key; holdAt = Date.now() + q.hold * 1000; vib([30, 30, 30]); }
-      show(el('p', {class: 'hold', id: 'holdBanner'}, '⏳'), head, el('p', {class: 'qtext'}, q.text), box); tickHold();
-    } else show(head, el('p', {class: 'qtext'}, q.text), box,
+      show(el('p', {class: 'hold', id: 'holdBanner'}, '⏳'), head, qBlock(q), box); tickHold();
+    } else show(head, qBlock(q), box,
       (myTurn && card.exit) ? el('button', {type: 'button', class: 'btn violet', onclick: e => { e.currentTarget.disabled = true; act('useexit'); }}, '🎟️ Je ne sais pas : carte Sortie de retenue') : null);
   }
 
