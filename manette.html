@@ -175,15 +175,21 @@ body.hw .foot,body.hw .foot button{color:#f3e9ff}
     const first = !S; S = st;
     if (first) { const saved = ss.get('pid'); if (saved !== null && saved >= 0 && saved < st.players.length && ss.get('code') === code) { pid = saved; track(); } }
     if (pid >= st.players.length) pid = -1;
+    /* la tablette suit le PRÉNOM choisi : si la liste change (ordre, nouvelle partie), on retrouve sa place */
+    const myName = ss.get('pname');
+    if (pid >= 0 && myName && (!st.players[pid] || st.players[pid].name !== myName)) {
+      const k = st.players.findIndex(p => p.name === myName);
+      pid = k; ss.set('pid', k); answered = null; track();
+    } else if (pid >= 0 && !myName && st.players[pid]) ss.set('pname', st.players[pid].name);
     render();
   }
-  function choose(i) { pid = i; ss.set('pid', i); answered = null; track(); vib(40); render(); }
+  function choose(i) { pid = i; ss.set('pid', i); ss.set('pname', S && S.players[i] ? S.players[i].name : null); answered = null; track(); vib(40); render(); }
   function rerender() { render(); }
 
   function render() {
     document.body.classList.toggle('hw', !!(S && S.theme === 'halloween'));
     if (!S) return;
-    $('#footBtns').replaceChildren(el('button', {type: 'button', onclick: () => { pid = -1; ss.del('pid'); track(); render(); }}, 'Changer de joueur'), el('button', {type: 'button', onclick: () => { leave(); ss.del('code'); ss.del('pid'); pid = -1; code = ''; codeScreen(); }}, 'Quitter'));
+    $('#footBtns').replaceChildren(el('button', {type: 'button', onclick: () => { pid = -1; ss.del('pid'); ss.del('pname'); track(); render(); }}, 'Changer de joueur'), el('button', {type: 'button', onclick: () => { leave(); ss.del('code'); ss.del('pid'); ss.del('pname'); pid = -1; code = ''; codeScreen(); }}, 'Quitter'));
     if (pid < 0) return pickScreen();
     const me = S.players[pid];
     syncAvatar(me);
@@ -329,7 +335,7 @@ body.hw .foot,body.hw .foot button{color:#f3e9ff}
     if (Date.now() - lastSeen > 25000) {
       lostShown = true;
       show(el('div', {class: 'emoji'}, '📡'), el('h2', {class: 'center'}, 'Plus de nouvelles du tableau'), el('p', {class: 'center'}, 'Le prof a peut-être fermé ou relancé la partie. Attends un instant, ou entre le nouveau code.'),
-        el('button', {type: 'button', class: 'btn violet', onclick: () => { leave(); ss.del('code'); ss.del('pid'); pid = -1; code = ''; codeScreen(); }}, 'Entrer un nouveau code'));
+        el('button', {type: 'button', class: 'btn violet', onclick: () => { leave(); ss.del('code'); ss.del('pid'); ss.del('pname'); pid = -1; code = ''; codeScreen(); }}, 'Entrer un nouveau code'));
     }
   }, 5000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden && ch && code) { send('hello', {dev: devId}); track(); } });

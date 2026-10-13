@@ -63,7 +63,8 @@
     catch (e) { return ''; }
   }
   function playerList() {
-    if (G && Array.isArray(G.players)) return G.players.map((p, i) => ({i, name: p.name, color: p.color}));
+    const ingame = !!(G && Array.isArray(G.players) && !document.getElementById('game').hidden);
+    if (ingame) return G.players.map((p, i) => ({i, name: p.name, color: p.color}));
     return [...document.querySelectorAll('#names input')].map((inp, i) => ({i, name: inp.value.trim() || ('Élève ' + (i + 1)), color: COLORS[i]}));
   }
   function phonesFor(i) { return Object.values(LAB.phones).filter(ph => ph.pid === i).length; }
