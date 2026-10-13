@@ -136,7 +136,16 @@
       el('h2', {}, '🛠️ Labo ', el('span', {class: 'chip', style: 'background:#efe6ff'}, 'réservé à l\'administrateur')),
       el('p', {class: 'muted'}, 'Les fonctions en test. Personne d\'autre ne les voit : elles ne sont liées nulle part sur le site et ne s\'activent que pour un compte administrateur.'),
       el('div', {class: 'paper stack', style: 'align-content:start'},
-        el('p', {class: 'muted', style: 'margin:0'}, 'Aucune fonction en test pour le moment. La version 1.11 (avatars et cartes spéciales) est publique depuis le 11 octobre 2026.'),
+        el('h3', {}, '🎃 Plateau Halloween (en test)'),
+        el('ul', {style: 'margin:0;padding-left:1.2em;display:grid;gap:4px'},
+          el('li', {}, el('b', {}, 'Choix du thème : '), 'sur l\'écran d\'accueil, « Thème du plateau » : Classique ou Halloween, avant de lancer la partie.'),
+          el('li', {}, el('b', {}, 'Le chemin du cimetière : '), 'un plateau en forme de chemin sinueux, de nuit, avec la lune, les tombes, les citrouilles et les chauves-souris. Les cases et les règles restent les mêmes.'),
+          el('li', {}, el('b', {}, '5 musiques d\'Halloween : '), 'La danse des squelettes, Le manoir hanté, La marche des citrouilles, Le bal des sorcières, La course des fantômes.'),
+          el('li', {}, el('b', {}, 'Tablettes : '), 'les manettes passent aussi aux couleurs d\'Halloween.')),
+        el('p', {class: 'small muted'}, 'Personne d\'autre ne voit ce thème : il ne s\'active qu\'avec ce bouton et ton compte administrateur.'),
+        el('div', {class: 'btn-row'}, el('a', {class: 'btn violet', href: 'jouer.html?test=halloween', target: '_blank', rel: 'noopener'}, '🎃 Lancer le jeu Halloween (test)'))),
+      el('div', {class: 'paper stack', style: 'align-content:start'},
+        el('p', {class: 'muted', style: 'margin:0'}, 'La version 1.11 (avatars et cartes spéciales) est publique depuis le 11 octobre 2026.'),
         el('div', {class: 'btn-row'}, el('a', {class: 'btn small grey', href: 'manette.html', target: '_blank', rel: 'noopener'}, 'Ouvrir une manette')))));
   showDone.addEventListener('change', load);
   async function open(r){

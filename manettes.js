@@ -111,7 +111,7 @@
         const gp = playing ? G.players[p.i] : null;
         return {name: p.name, color: p.color, coins: gp ? (gp.coins || 0) : null, tours: gp ? Math.floor(gp.progress / N) : null, jailed: gp ? !!gp.jailed : false, av: avGet(p.i)};
       }),
-      avatars: avOn() && !!window.CPAV, turn: playing ? G.turn : -1, phase: playing ? G.phase : 'setup', paused: playing ? !!G.paused : false,
+      theme: (typeof hwOn === 'function' && hwOn()) ? 'halloween' : 'classique', avatars: avOn() && !!window.CPAV, turn: playing ? G.turn : -1, phase: playing ? G.phase : 'setup', paused: playing ? !!G.paused : false,
       shop: typeof shopOn === 'function' ? shopOn() : true,
       card: playing ? modalInfo() : null
     };
