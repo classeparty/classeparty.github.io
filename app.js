@@ -168,6 +168,34 @@
     CP.profile = data || null; return CP.profile;
   };
   CP.isAdmin = () => !!(CP.profile && CP.profile.is_admin);
+  /* ---------- lettre des nouveautés : le choix du membre ----------
+     null = pas encore répondu (ou module pas installé), true / false = son choix */
+  CP.abo = undefined;
+  CP.loadAbo = async function () {
+    CP.abo = undefined; if (!sb || !CP.user) return null;
+    const {data, error} = await sb.from('abonnements').select('nouveautes').eq('user_id', CP.user.id).maybeSingle();
+    if (error) { CP.abo = undefined; return null; }          // table absente : on ne propose rien
+    CP.abo = data ? !!data.nouveautes : null; return CP.abo;
+  };
+  CP.setAbo = async function (oui) {
+    if (!sb || !CP.user) return false;
+    const {error} = await sb.from('abonnements').upsert({user_id: CP.user.id, nouveautes: !!oui, updated_at: new Date().toISOString()}, {onConflict: 'user_id'});
+    if (!error) CP.abo = !!oui; return !error;
+  };
+  function askAbo(page) {
+    const pg = String(page || '').replace(/\.html$/, '');
+    if (!CP.user || CP.abo !== null || pg === 'desinscription' || pg === 'connexion' || pg === 'jouer') return;
+    const meta = CP.user.user_metadata || {};
+    if (meta.nouveautes === true) { CP.setAbo(true); return; }   // coché à l'inscription
+    try { if (sessionStorage.getItem('cp-abo-plus-tard')) return; } catch (e) {}
+    const box = el('div', {class: 'abo-ask', role: 'dialog', 'aria-label': 'Recevoir les nouveautés par mail'},
+      el('p', {}, el('b', {}, '📬 Recevoir les nouveautés par mail ?'), el('br'), 'Un petit mail quand Classe Party s\'améliore : nouveaux plateaux, nouvelles fonctions… Pas de publicité, et tu peux te désinscrire en un clic.'),
+      el('div', {class: 'btn-row'},
+        el('button', {type: 'button', class: 'btn small go', onclick: async () => { const ok = await CP.setAbo(true); box.remove(); CP.toast(ok ? 'C\'est noté : tu recevras les nouveautés. Merci !' : 'Impossible d\'enregistrer ton choix pour l\'instant.'); }}, 'Oui, volontiers'),
+        el('button', {type: 'button', class: 'btn small grey', onclick: async () => { await CP.setAbo(false); box.remove(); CP.toast('Pas de souci ! Tu peux changer d\'avis dans « Mes cours », Mon profil.', 3500); }}, 'Non merci'),
+        el('button', {type: 'button', class: 'btn small', onclick: () => { try { sessionStorage.setItem('cp-abo-plus-tard', '1'); } catch (e) {} box.remove(); }}, 'Plus tard')));
+    document.body.append(box);
+  }
   CP.signOut = async function () { if (sb) await sb.auth.signOut(); location.href = 'index.html'; };
   CP.report = function (type, id) {
     if (!CP.user) { CP.toast('Connecte-toi pour signaler un contenu.'); return; }
@@ -236,7 +264,7 @@
       try {
         const {data} = await sb.auth.getSession();
         CP.user = data && data.session ? data.session.user : null;
-        if (CP.user) await CP.loadProfile();
+        if (CP.user) { await CP.loadProfile(); await CP.loadAbo(); }
       } catch (e) { CP.user = null; }
       sb.auth.onAuthStateChange(async (ev, session) => {
         const was = CP.user && CP.user.id; CP.user = session ? session.user : null;
@@ -244,6 +272,7 @@
       });
     }
     renderUserBox();
+    if (CP.user) setTimeout(() => askAbo(page), 1200);
     joinPresence(page);
     countVisit(page);
     return CP;

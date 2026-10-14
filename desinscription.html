@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Se désinscrire · Classe Party</title>
+<meta name="description" content="Ne plus recevoir les mails des nouveautés de Classe Party.">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="style.css?v=20261014n">
+</head>
+<body>
+<header id="site-head"></header>
+<main class="wrap" id="main">
+<div class="stack" id="zone"><section class="panel stack"><p class="muted">Un instant…</p></section></div>
+</main>
+<footer id="site-foot"></footer>
+<script src="lib/supabase.js"></script>
+<script src="config.js?v=20261014n"></script>
+<script src="format.js"></script>
+<script src="exemples.js"></script>
+<script src="app.js?v=20261014n"></script>
+<script>
+(async () => {
+  await CP.init('desinscription.html');
+  const {el, $} = CP; const zone = $('#zone');
+  const t = new URLSearchParams(location.search).get('t') || '';
+  const box = (titre, ...txt) => zone.replaceChildren(el('section', {class: 'panel stack'}, el('h1', {class: 'outline'}, titre), ...txt,
+    el('div', {class: 'btn-row'}, el('a', {class: 'btn go', href: 'index.html'}, 'Retour à l\'accueil'), el('a', {class: 'btn violet', href: 'nouveautes.html'}, 'Voir les nouveautés'))));
+  if (!/^[0-9a-f-]{36}$/i.test(t)) return box('Lien incomplet', el('p', {class: 'lead'}, 'Ce lien de désinscription est incomplet. Copie bien tout le lien du mail, ou connecte-toi et décoche « Recevoir les nouveautés par mail » dans « Mes cours », Mon profil.'));
+  if (!CP.online) return box('Désinscription', el('p', {class: 'lead'}, 'Le site n\'est pas joignable pour l\'instant. Réessaie dans quelques minutes.'));
+  const {data, error} = await CP.sb.rpc('lettre_desinscrire', {p_jeton: t});
+  if (error) return box('Oups', el('p', {class: 'lead'}, 'La désinscription n\'a pas pu se faire. Réessaie dans quelques minutes, ou écris-nous à ' + ((window.CP_CONFIG || {}).CONTACT_EMAIL || 'jeuclasse.party@gmail.com') + '.'));
+  if (!data) return box('Lien inconnu', el('p', {class: 'lead'}, 'Ce lien ne correspond à aucun abonnement (le compte a peut-être été supprimé). Tu ne recevras pas de mail.'));
+  box('C\'est fait 👋', el('p', {class: 'lead'}, 'Tu ne recevras plus les mails des nouveautés de Classe Party.'),
+    el('p', {}, 'Ton compte, tes cours et le forum ne changent pas. Tu as changé d\'avis ? Connecte-toi et coche « Recevoir les nouveautés par mail » dans « Mes cours », Mon profil.'));
+})();
+
+</script>
+</body>
+</html>

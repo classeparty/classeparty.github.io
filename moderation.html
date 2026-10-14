@@ -7,7 +7,7 @@
 <meta name="description" content="Espace de modération réservé aux administrateurs de Classe Party.">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="style.css?v=20261013i">
+<link rel="stylesheet" href="style.css?v=20261014n">
 </head>
 <body>
 <header id="site-head"></header>
@@ -16,10 +16,10 @@
 </main>
 <footer id="site-foot"></footer>
 <script src="lib/supabase.js"></script>
-<script src="config.js?v=20261013i"></script>
+<script src="config.js?v=20261014n"></script>
 <script src="format.js"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261013i"></script>
+<script src="app.js?v=20261014n"></script>
 <script>
 (async () => {
   await CP.init('moderation.html');
@@ -129,10 +129,15 @@
   }
   loadStats();
   const imgBox = el('div', {class: 'stack'});
+  const nlBox = el('div', {class: 'stack'});
   zone.replaceChildren(live, stats, el('section', {class: 'panel stack'},
     el('h1', {class: 'outline'}, 'Modération'),
     el('p', {class: 'lead'}, 'Les contenus signalés par les membres. Vérifie chaque signalement, puis supprime le contenu ou marque le signalement comme traité.'),
     el('label', {class: 'check'}, showDone, el('span', {}, 'Afficher aussi les signalements déjà traités')), list),
+    el('section', {class: 'panel stack'},
+      el('h1', {class: 'outline'}, '📬 Lettre des nouveautés'),
+      el('p', {class: 'lead'}, 'Un mail aux membres qui ont demandé à recevoir les nouveautés. Il part de l\'adresse Gmail du site, un mail par personne (personne ne voit l\'adresse des autres), avec un lien pour se désinscrire.'),
+      nlBox),
     el('section', {class: 'panel stack'},
       el('h1', {class: 'outline'}, '🖼️ Images des cours'),
       el('p', {class: 'lead'}, 'Chaque image envoyée par un prof est contrôlée par l\'IA (OpenAI) avant d\'être stockée. Les images refusées ne sont jamais publiées. Limites par prof : 40 images par jour, 400 en tout. Pour couper l\'envoi d\'images à tous, retire le secret IMAGES_OUVERT dans Supabase.'),
@@ -146,6 +151,94 @@
         el('p', {class: 'muted', style: 'margin:0'}, 'Versions publiques : 1.11 (avatars, cartes spéciales) le 11 octobre 2026, 1.12 (plateau Halloween) le 13 octobre 2026, 1.13 (images dans les questions) le 14 octobre 2026.'),
         el('div', {class: 'btn-row'}, el('a', {class: 'btn small grey', href: 'manette.html', target: '_blank', rel: 'noopener'}, 'Ouvrir une manette')))));
   showDone.addEventListener('change', load);
+  /* ---------- lettre des nouveautés ---------- */
+  const NL_DEF = {
+    sujet: 'Classe Party 1.13 : des images dans tes questions 🖼️',
+    corps: "Bonne nouvelle : tu peux maintenant ajouter une **image** à tes quiz, à tes vrai ou faux et à tes défis. Un outil, un produit, une carte, un schéma… La photo s'affiche en grand pendant la partie.\n\n- Dans le jeu : Mode prof, puis « 🖼️ Ajouter une image » sous la question (ou colle une image avec Ctrl+V).\n- Avec les tablettes : enregistre ton cours dans « Mes cours » pour que les élèves voient aussi l'image sur leur écran.\n- Chaque image envoyée sur le site est vérifiée par une intelligence artificielle, pour garder un site sûr pour nos élèves.\n\nEt le plateau Halloween de la version 1.12 est toujours là pour finir octobre en beauté 🎃",
+    lien: 'nouveautes.html', image: 'img/nouveaute-images-quiz.jpg'};
+  async function invokeLettre(body){
+    const {data, error} = await CP.sb.functions.invoke('lettre', {body});
+    if (data) return data;
+    let j = null; try { j = error && error.context && await error.context.json(); } catch (e) {}
+    return j || {ok: false, raison: /Failed to send|not found|404/i.test(String(error && error.message)) ? 'La fonction « lettre » n\'est pas encore installée dans Supabase.' : 'Erreur : ' + (error ? error.message : 'inconnue')};
+  }
+  async function loadLettre(){
+    nlBox.replaceChildren(el('p', {class: 'muted'}, 'Chargement…'));
+    const {data: res, error} = await CP.sb.rpc('lettre_resume');
+    if (error || !res) { nlBox.replaceChildren(el('div', {class: 'notice'}, el('b', {}, 'La lettre des nouveautés n\'est pas encore installée. '), 'Suis le guide GUIDE-LETTRE.txt : fichier newsletter.sql dans le SQL Editor, puis la fonction « lettre » et les secrets Gmail.')); return; }
+    let brouillon = null; try { brouillon = JSON.parse(localStorage.getItem('cp-lettre-brouillon') || 'null'); } catch (e) {}
+    const v = Object.assign({}, NL_DEF, brouillon || {});
+    const sujet = el('input', {class: 'in', id: 'nl-sujet', maxlength: '150', value: v.sujet});
+    const corps = el('textarea', {class: 'in', id: 'nl-corps', rows: '11'}); corps.value = v.corps;
+    const lien = el('input', {class: 'in', id: 'nl-lien', maxlength: '300', value: v.lien, placeholder: 'nouveautes.html'});
+    const image = el('input', {class: 'in', id: 'nl-image', maxlength: '300', value: v.image, placeholder: 'Facultatif : img/... ou https://...'});
+    const val = () => ({sujet: sujet.value.trim(), corps: corps.value.trim(), lien: lien.value.trim(), image: image.value.trim()});
+    [sujet, corps, lien, image].forEach(x => x.addEventListener('input', () => { try { localStorage.setItem('cp-lettre-brouillon', JSON.stringify(val())); } catch (e) {} }));
+    const msg = el('p', {class: 'msg', role: 'status'});
+    const apercu = el('div', {class: 'stack'});
+    const say = (t, kind) => { msg.className = 'msg' + (kind ? ' ' + kind : ''); msg.textContent = t; };
+    const bApercu = el('button', {type: 'button', class: 'btn small blue'}, '👀 Aperçu');
+    const bTest = el('button', {type: 'button', class: 'btn small violet'}, '✉️ M\'envoyer un essai');
+    const bGo = el('button', {type: 'button', class: 'btn small go'}, `🚀 Envoyer à ${res.abonnes} abonné${res.abonnes > 1 ? 's' : ''}`);
+    const lock = b => [bApercu, bTest, bGo].forEach(x => { x.disabled = b; });
+    bApercu.addEventListener('click', async () => {
+      lock(true); const r = await invokeLettre({action: 'apercu', ...val()}); lock(false);
+      if (!r.ok) return say(r.raison, 'err');
+      const fr = el('iframe', {class: 'mail-frame', title: 'Aperçu du mail', sandbox: ''}); fr.srcdoc = r.html.replace(/https:\/\/classeparty\.github\.io\//g, new URL('.', location.href).href);
+      apercu.replaceChildren(el('p', {class: 'small muted', style: 'margin:0'}, 'Aperçu (le prénom de chaque membre remplace le tien) :'), fr); say('');
+    });
+    bTest.addEventListener('click', async () => {
+      const x = val(); if (!x.sujet || !x.corps) return say('Écris un sujet et un texte.', 'err');
+      lock(true); say('Envoi de l\'essai…'); const r = await invokeLettre({action: 'test', ...x}); lock(false);
+      say(r.ok ? `Essai envoyé à ${r.a}. Regarde ta boîte mail (et les indésirables).` : r.raison, r.ok ? 'ok' : 'err');
+    });
+    async function envoyer(id, total){
+      lock(true); let n = 0;
+      for (let tour = 0; tour < 200; tour++) {
+        const r = await invokeLettre({action: 'envoyer', id});
+        if (!r.ok) { lock(false); say(r.raison + ' L\'envoi est en pause : tu pourras le reprendre plus bas.', 'err'); loadHisto(); return; }
+        n = r.nb_envoyes; say(`📬 Envoi en cours : ${n} / ${total}…` + (r.nb_erreurs ? ` (${r.nb_erreurs} adresse${r.nb_erreurs > 1 ? 's' : ''} en erreur)` : ''));
+        if (r.bloque) { lock(false); say(`${r.notes[0] || 'Gmail a bloqué l\'envoi.'} ${n} mail${n > 1 ? 's' : ''} envoyé${n > 1 ? 's' : ''} : reprends l'envoi plus tard, plus bas.`, 'err'); loadHisto(); return; }
+        if (!r.restants) break;
+        await new Promise(ok => setTimeout(ok, 400));
+      }
+      lock(false); say(`✅ Lettre envoyée à ${n} membre${n > 1 ? 's' : ''} !`, 'ok'); CP.toast('Lettre envoyée !'); loadHisto();
+    }
+    bGo.addEventListener('click', async () => {
+      const x = val(); if (!x.sujet || !x.corps) return say('Écris un sujet et un texte.', 'err');
+      if (!res.abonnes) return say('Personne n\'est encore abonné.', 'err');
+      if (!bGo.dataset.armed) { bGo.dataset.armed = '1'; bGo.textContent = `Sûr ? Re-clique pour envoyer à ${res.abonnes} membre${res.abonnes > 1 ? 's' : ''}`; return; }
+      delete bGo.dataset.armed; bGo.textContent = `🚀 Envoyer à ${res.abonnes} abonné${res.abonnes > 1 ? 's' : ''}`;
+      lock(true); say('Préparation de la lettre…');
+      const c = await invokeLettre({action: 'creer', ...x});
+      if (!c.ok) { lock(false); return say(c.raison, 'err'); }
+      try { localStorage.removeItem('cp-lettre-brouillon'); } catch (e) {}
+      envoyer(c.id, c.total);
+    });
+    const histo = el('div', {class: 'stack'});
+    async function loadHisto(){
+      const {data} = await CP.sb.from('lettres').select('id,sujet,statut,nb_total,nb_envoyes,nb_erreurs,created_at').order('created_at', {ascending: false}).limit(10);
+      const L = data || [];
+      histo.replaceChildren(el('h3', {style: 'margin:6px 0 0'}, 'Lettres envoyées'), L.length ? el('ul', {class: 'qlist'}, L.map(l => el('li', {},
+        el('b', {}, l.sujet), ' · ', CP.ago(l.created_at),
+        el('small', {}, l.statut === 'envoyee' ? `✅ envoyée à ${l.nb_envoyes} membre${l.nb_envoyes > 1 ? 's' : ''}` + (l.nb_erreurs ? ` · ${l.nb_erreurs} erreur${l.nb_erreurs > 1 ? 's' : ''}` : '') : `⏸️ en cours : ${l.nb_envoyes} / ${l.nb_total}`),
+        l.statut === 'envoi' ? el('button', {type: 'button', class: 'btn small go', style: 'margin-top:6px', onclick: () => envoyer(l.id, l.nb_total)}, 'Reprendre l\'envoi') : null))) : el('p', {class: 'muted'}, 'Aucune lettre pour le moment.'));
+    }
+    nlBox.replaceChildren(
+      el('div', {class: 'btn-row'},
+        el('span', {class: 'chip pub'}, `📬 ${res.abonnes} abonné${res.abonnes > 1 ? 's' : ''}`),
+        el('span', {class: 'chip'}, `🙅 ${res.refus} ne veu${res.refus > 1 ? 'lent' : 't'} pas`),
+        el('span', {class: 'chip'}, `👥 ${res.membres} membre${res.membres > 1 ? 's' : ''}`)),
+      el('label', {class: 'field'}, el('span', {}, 'Sujet du mail'), sujet),
+      el('label', {class: 'field'}, el('span', {}, 'Texte (le « Bonjour » et la signature sont ajoutés tout seuls)'), corps),
+      el('p', {class: 'small muted', style: 'margin:0'}, 'Mise en forme : **mot** = gras · une ligne qui commence par « - » = liste · « ## » = petit titre · une ligne vide = nouveau paragraphe.'),
+      el('div', {class: 'grid2'}, el('label', {class: 'field'}, el('span', {}, 'Lien du bouton « Voir les nouveautés »'), lien), el('label', {class: 'field'}, el('span', {}, 'Image (facultatif)'), image)),
+      el('div', {class: 'btn-row'}, bApercu, bTest, bGo,
+        el('button', {type: 'button', class: 'btn small grey', onclick: () => { try { localStorage.removeItem('cp-lettre-brouillon'); } catch (e) {} loadLettre(); }}, 'Revenir au modèle')),
+      msg, apercu, histo);
+    loadHisto();
+  }
+  loadLettre();
   /* ---------- images (Labo) ---------- */
   async function loadImages(){
     imgBox.replaceChildren(el('p', {class: 'muted'}, 'Chargement des images…'));

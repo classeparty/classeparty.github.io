@@ -7,7 +7,7 @@
 <meta name="description" content="Connecte-toi ou crée ton compte gratuit de professeur sur Classe Party.">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="style.css?v=20261013i">
+<link rel="stylesheet" href="style.css?v=20261014n">
 </head>
 <body>
 <header id="site-head"></header>
@@ -35,6 +35,7 @@
       <label class="field"><span>Adresse mail</span><input class="in" id="s-mail" type="email" autocomplete="email" required></label>
       <label class="field"><span>Mot de passe (8 caractères minimum)</span><input class="in" id="s-pass" type="password" minlength="8" autocomplete="new-password" required></label>
       <label class="check"><input type="checkbox" id="s-charte" required> <span>J'ai lu et j'accepte la <a href="deontologie.html" target="_blank">charte de déontologie</a> et la <a href="confidentialite.html" target="_blank">politique de confidentialité</a>.</span></label>
+      <label class="check"><input type="checkbox" id="s-news"> <span>📬 Je veux recevoir un mail quand il y a des <b>nouveautés</b> (facultatif, désinscription en un clic).</span></label>
       <button class="btn go big" type="submit">Créer mon compte</button>
       <p class="msg" id="s-msg" role="status"></p>
     </form>
@@ -57,10 +58,10 @@
 </main>
 <footer id="site-foot"></footer>
 <script src="lib/supabase.js"></script>
-<script src="config.js?v=20261013i"></script>
+<script src="config.js?v=20261014n"></script>
 <script src="format.js"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261013i"></script>
+<script src="app.js?v=20261014n"></script>
 <script>
 (async () => {
   await CP.init('connexion.html');
@@ -98,7 +99,7 @@
     if (!$('#s-charte').checked){ say('#s-msg', 'Merci d\'accepter la charte de déontologie.'); return; }
     busy(e.target, true);
     const {data, error} = await CP.sb.auth.signUp({email: $('#s-mail').value.trim(), password: $('#s-pass').value,
-      options: {data: {display_name: $('#s-name').value.trim()}, emailRedirectTo: here.replace(/connexion\.html$/, 'mes-cours.html')}});
+      options: {data: {display_name: $('#s-name').value.trim(), nouveautes: $('#s-news').checked}, emailRedirectTo: here.replace(/connexion\.html$/, 'mes-cours.html')}});
     busy(e.target, false);
     if (error){ say('#s-msg', /registered|exists/i.test(error.message) ? 'Un compte existe déjà avec cette adresse. Connecte-toi.' : /password/i.test(error.message) ? 'Mot de passe trop faible : 8 caractères minimum.' : 'L\'inscription n\'a pas pu se faire : ' + error.message); return; }
     if (data.session){ location.href = 'mes-cours.html'; return; }

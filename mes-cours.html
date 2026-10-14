@@ -7,7 +7,7 @@
 <meta name="description" content="Sauvegarde tes cours Classe Party en ligne et partage-les avec les autres enseignants.">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="style.css?v=20261013i">
+<link rel="stylesheet" href="style.css?v=20261014n">
 </head>
 <body>
 <header id="site-head"></header>
@@ -18,10 +18,10 @@
 </main>
 <footer id="site-foot"></footer>
 <script src="lib/supabase.js"></script>
-<script src="config.js?v=20261013i"></script>
+<script src="config.js?v=20261014n"></script>
 <script src="format.js"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261013i"></script>
+<script src="app.js?v=20261014n"></script>
 <script>
 (async () => {
   await CP.init('mes-cours.html');
@@ -43,7 +43,13 @@
       pMsg.className = 'msg ' + (error ? 'err' : 'ok'); pMsg.textContent = error ? 'Enregistrement impossible.' : 'Profil enregistré.';
       if (!error){ await CP.loadProfile(); }
     }}, el('div', {class: 'grid2'}, el('label', {class: 'field'}, el('span', {}, 'Nom affiché'), pName), el('label', {class: 'field'}, el('span', {}, 'École (facultatif)'), pEcole)),
-      el('div', {class: 'btn-row'}, el('button', {class: 'btn small go', type: 'submit'}, 'Enregistrer mon profil')), pMsg));
+      el('div', {class: 'btn-row'}, el('button', {class: 'btn small go', type: 'submit'}, 'Enregistrer mon profil')), pMsg),
+    CP.abo === undefined ? null : (() => {
+      const cb = el('input', {type: 'checkbox', id: 'p-news', checked: CP.abo ? true : null});
+      const m = el('span', {class: 'small muted'});
+      cb.addEventListener('change', async () => { const ok = await CP.setAbo(cb.checked); m.textContent = ok ? (cb.checked ? ' ✔ Tu recevras les nouveautés par mail.' : ' ✔ Tu ne recevras plus de mail.') : ' Impossible d\'enregistrer.'; if (!ok) cb.checked = !cb.checked; });
+      return el('label', {class: 'check', style: 'margin-top:12px'}, cb, el('span', {}, el('b', {}, '📬 Recevoir les nouveautés par mail'), ' (un mail par nouvelle version, sans publicité)', m));
+    })());
 
   /* ---------- formulaire cours ---------- */
   function courseForm(course, onDone){
