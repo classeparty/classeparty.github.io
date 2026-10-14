@@ -130,7 +130,23 @@
   const head = el('section', {class: 'panel'}, el('div', {class: 'btn-row', style: 'justify-content:space-between'},
     el('div', {class: 'stack', style: 'gap:6px'}, el('h1', {class: 'outline'}, 'Mes cours'), el('p', {class: 'lead'}, 'Tes fichiers de questions, sauvegardés en ligne et disponibles sur tous tes ordinateurs.')),
     el('button', {type: 'button', class: 'btn go big', onclick: () => openForm(null)}, '+ Ajouter un cours')));
-  zone.replaceChildren(head, profil, list);
+  /* ---------- le jeu pour Windows (réservé aux membres) ---------- */
+  const dlMsg = el('p', {class: 'msg', role: 'status'});
+  const dlBtn = el('button', {type: 'button', class: 'btn go'}, '💻 Télécharger Classe Party pour Windows');
+  dlBtn.addEventListener('click', async () => {
+    dlBtn.disabled = true; dlMsg.className = 'msg'; dlMsg.textContent = 'Préparation du téléchargement…';
+    const {data, error} = await CP.sb.storage.from('telechargements').createSignedUrl('Classe-Party.zip', 300, {download: 'Classe-Party.zip'});
+    dlBtn.disabled = false;
+    if (error || !data || !data.signedUrl) { dlMsg.className = 'msg err'; dlMsg.textContent = 'Le téléchargement n\'est pas disponible pour l\'instant. Réessaie plus tard.'; return; }
+    dlMsg.className = 'msg ok'; dlMsg.textContent = 'C\'est parti ! Le fichier Classe-Party.zip arrive dans tes téléchargements.';
+    location.href = data.signedUrl;
+  });
+  const windows = el('section', {class: 'panel stack'},
+    el('h2', {}, '💻 Le jeu à installer sur ton ordinateur'),
+    el('p', {}, 'Pour jouer en classe même sans internet : le programme pour Windows (Classe-Party.exe), le fichier du jeu à ouvrir dans n\'importe quel navigateur, les cours d\'exemple et le mode d\'emploi. ', el('b', {}, 'Réservé aux membres.')),
+    el('div', {class: 'btn-row'}, dlBtn), dlMsg,
+    el('p', {class: 'small muted', style: 'margin:0'}, 'Après le téléchargement : clic droit sur le fichier .zip > « Extraire tout », puis double-clic sur Classe-Party.exe. Si Windows affiche « Windows a protégé votre ordinateur », clique sur « Informations complémentaires » puis « Exécuter quand même ».'));
+  zone.replaceChildren(head, profil, windows, list);
 
   async function loadCourses(){
     list.replaceChildren(el('p', {class: 'muted'}, 'Chargement…'));

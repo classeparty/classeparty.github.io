@@ -84,7 +84,20 @@
     return 'le ' + CP.fmtDate(iso);
   };
   CP.slug = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'cours';
+  /* ---------- réservé aux membres (compte gratuit) ---------- */
+  CP.DEMO_TITRE = "Plus intelligent qu'un enfant de primaire ?";
+  CP.memberOnly = function (what) {
+    if (!ONLINE || CP.user) return false;
+    const ici = encodeURIComponent(location.pathname.split('/').pop() + location.search);
+    CP.modal({title: 'Réservé aux membres', body: [
+      el('p', {class: 'lead'}, `Pour ${what}, crée ton compte gratuit (une minute) ou connecte-toi.`),
+      el('ul', {}, el('li', {}, '📚 jouer avec tous les cours de la bibliothèque et les télécharger ;'), el('li', {}, '✏️ préparer tes propres cours avec le mode prof ;'), el('li', {}, '💻 télécharger le jeu pour Windows, qui marche sans internet.')),
+      el('p', {class: 'small muted'}, 'Sans compte, tu peux déjà essayer le jeu avec « ' + CP.DEMO_TITRE + ' ».')],
+      foot: [el('a', {class: 'btn go', href: 'connexion.html?mode=signup&retour=' + ici}, 'Créer mon compte gratuit'), el('a', {class: 'btn blue', href: 'connexion.html?retour=' + ici}, 'Me connecter'), el('a', {class: 'btn grey', href: 'jouer.html'}, 'Essayer la démo')]});
+    return true;
+  };
   CP.download = function (name, text) {
+    if (CP.memberOnly('télécharger les cours')) return;
     const url = URL.createObjectURL(new Blob([text.startsWith('﻿') ? text : '﻿' + text], {type: 'text/plain;charset=utf-8'}));
     const a = el('a', {href: url, download: name}); document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
@@ -135,6 +148,7 @@
     return parts.join(' · ') || 'aucune question';
   };
   CP.play = function (text, titre) {
+    if (!String(titre || '').startsWith('Plus intelligent qu') && CP.memberOnly('jouer avec les cours de la bibliothèque')) return;
     try { localStorage.setItem('classeparty-import', JSON.stringify({text, titre, at: Date.now()})); }
     catch (e) { CP.toast('Impossible de préparer le cours dans ce navigateur.'); return; }
     location.href = 'jouer.html';

@@ -23,6 +23,7 @@
       <label class="field"><span>Trier par</span><select class="in" id="fs"><option value="recent">Les plus récents</option><option value="likes">Les plus aimés</option><option value="titre">Ordre alphabétique</option></select></label>
     </form>
     <p class="muted small" id="count" role="status"></p>
+    <div class="notice" id="visitor" hidden><b>🔒 Réservé aux membres :</b> tu peux parcourir les cours et voir leur aperçu. Pour <b>jouer</b> ou <b>télécharger</b> un cours, <a href="connexion.html?mode=signup&amp;retour=bibliotheque.html">crée ton compte gratuit</a> ou <a href="connexion.html?retour=bibliotheque.html">connecte-toi</a>.</div>
   </section>
   <div class="grid3" id="list"></div>
   <section class="panel btn-row" style="justify-content:space-between">
@@ -41,6 +42,7 @@
 (async () => {
   await CP.init('bibliotheque.html');
   const {el, $} = CP;
+  const visiteur = CP.online && !CP.user; if (visiteur) $('#visitor').hidden = false;
   $('#fm').append(...CP.groupedOptions(CP.MATIERES_GROUPS, ''));
   $('#fn').append(...CP.groupedOptions(CP.NIVEAUX_GROUPS, ''));
   const params = new URLSearchParams(location.search);
@@ -72,9 +74,9 @@
       c.description ? el('p', {class: 'small'}, c.description) : null,
       el('p', {class: 'stat'}, `${c.nb_questions} questions · par ${author}` + (c.created_at ? ' · ' + CP.ago(c.created_at) : '')),
       el('div', {class: 'foot'},
-        el('button', {type: 'button', class: 'btn small go', onclick: async () => { const x = await getContent(c); if (x) CP.play(x.contenu, x.titre); }}, 'Jouer'),
+        el('button', {type: 'button', class: 'btn small go', onclick: async () => { const x = await getContent(c); if (x) CP.play(x.contenu, x.titre); }}, visiteur && !String(c.titre).startsWith('Plus intelligent qu') ? '🔒 Jouer' : 'Jouer'),
         el('button', {type: 'button', class: 'btn small blue', onclick: async () => { const x = await getContent(c); if (x) CP.preview(x); }}, 'Aperçu'),
-        el('button', {type: 'button', class: 'btn small violet', onclick: async () => { const x = await getContent(c); if (x) CP.download('Questions-' + CP.slug(x.titre) + '.txt', x.contenu); }}, '.txt'),
+        el('button', {type: 'button', class: 'btn small violet', onclick: async () => { const x = await getContent(c); if (x) CP.download('Questions-' + CP.slug(x.titre) + '.txt', x.contenu); }}, visiteur ? '🔒 .txt' : '.txt'),
         likeBtn,
         CP.online && !c.exemple ? el('button', {type: 'button', class: 'linklike small', onclick: () => CP.report('cours', c.id)}, 'Signaler') : null));
   }
