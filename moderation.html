@@ -128,21 +128,22 @@
     rows = data || []; renderStats();
   }
   loadStats();
-  const imgBox = el('div', {class: 'paper stack', style: 'align-content:start'});
+  const imgBox = el('div', {class: 'stack'});
   zone.replaceChildren(live, stats, el('section', {class: 'panel stack'},
     el('h1', {class: 'outline'}, 'Modération'),
     el('p', {class: 'lead'}, 'Les contenus signalés par les membres. Vérifie chaque signalement, puis supprime le contenu ou marque le signalement comme traité.'),
     el('label', {class: 'check'}, showDone, el('span', {}, 'Afficher aussi les signalements déjà traités')), list),
+    el('section', {class: 'panel stack'},
+      el('h1', {class: 'outline'}, '🖼️ Images des cours'),
+      el('p', {class: 'lead'}, 'Chaque image envoyée par un prof est contrôlée par l\'IA (OpenAI) avant d\'être stockée. Les images refusées ne sont jamais publiées. Limites par prof : 40 images par jour, 400 en tout. Pour couper l\'envoi d\'images à tous, retire le secret IMAGES_OUVERT dans Supabase.'),
+      imgBox),
     el('section', {class: 'panel stack', style: 'border-style:dashed'},
       el('h2', {}, '🛠️ Labo ', el('span', {class: 'chip', style: 'background:#efe6ff'}, 'réservé à l\'administrateur')),
       el('p', {class: 'muted'}, 'Les fonctions en test. Personne d\'autre ne les voit : elles ne sont liées nulle part sur le site et ne s\'activent que pour un compte administrateur.'),
       el('div', {class: 'paper stack', style: 'align-content:start'},
-        el('h3', {style: 'margin:0'}, '🖼️ Images dans les questions ', el('span', {class: 'chip', style: 'background:#efe6ff'}, 'en test')),
-        el('p', {class: 'muted', style: 'margin:0'}, 'Une ligne « I: » sous une question affiche une image. Dans le jeu : Mode prof, chaque question a un champ « Image ». Sur le site : les images d\'un cours sont contrôlées par l\'IA (OpenAI) puis stockées dans Supabase. Pour l\'instant, seul ton compte peut en envoyer.'),
-        el('div', {class: 'btn-row'}, el('a', {class: 'btn small violet', href: 'jouer.html?test=images', target: '_blank', rel: 'noopener'}, 'Tester les images dans le jeu'))),
-      imgBox,
+        el('p', {class: 'muted', style: 'margin:0'}, 'Aucune fonction en test pour le moment.')),
       el('div', {class: 'paper stack', style: 'align-content:start'},
-        el('p', {class: 'muted', style: 'margin:0'}, 'Versions publiques : 1.11 (avatars, cartes spéciales) le 11 octobre 2026, 1.12 (plateau Halloween) le 13 octobre 2026.'),
+        el('p', {class: 'muted', style: 'margin:0'}, 'Versions publiques : 1.11 (avatars, cartes spéciales) le 11 octobre 2026, 1.12 (plateau Halloween) le 13 octobre 2026, 1.13 (images dans les questions) le 14 octobre 2026.'),
         el('div', {class: 'btn-row'}, el('a', {class: 'btn small grey', href: 'manette.html', target: '_blank', rel: 'noopener'}, 'Ouvrir une manette')))));
   showDone.addEventListener('change', load);
   /* ---------- images (Labo) ---------- */

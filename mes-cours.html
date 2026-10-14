@@ -107,7 +107,7 @@
       el('label', {class: 'field'}, el('span', {}, isNew ? 'Fichier de questions (.txt)' : 'Remplacer le fichier de questions (facultatif)'), file),
       el('p', {class: 'small muted'}, 'Ce fichier se crée dans le jeu : Mode prof > Ouvrir / Enregistrer > « Télécharger les questions (.txt) ». Tu peux aussi partir du ', el('a', {href: 'modele-questions.txt', download: true}, 'modèle à remplir'), '.'),
       info,
-      !CP.isAdmin() ? null : el('p', {class: 'small muted'}, '🧪 Labo · 🖼️ Les images des questions sont vérifiées automatiquement par une intelligence artificielle avant d\'être publiées. Les images refusées sont retirées du cours.'),
+      el('p', {class: 'small muted'}, '🖼️ Les images des questions sont vérifiées automatiquement par une intelligence artificielle avant d\'être publiées, puis rangées sur le site : les tablettes peuvent alors les afficher. Les images refusées sont retirées du cours. Utilise tes propres photos ou des images libres de droits, jamais de photo d\'élève.'),
       el('label', {class: 'field'}, el('span', {}, 'Titre du cours'), titre),
       el('div', {class: 'grid2'}, el('label', {class: 'field'}, el('span', {}, 'Matière'), matiere), el('label', {class: 'field'}, el('span', {}, 'Niveau'), niveau)),
       el('label', {class: 'field'}, el('span', {}, 'Description'), desc),

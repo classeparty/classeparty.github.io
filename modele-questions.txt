@@ -1,5 +1,5 @@
 ﻿# =====================================================================
-# MODÈLE DE FICHIER DE QUESTIONS  -  Classe Party v1.1
+# MODÈLE DE FICHIER DE QUESTIONS  -  Classe Party v1.13
 # Remplis ce fichier dans le Bloc-notes, enregistre-le sous un nouveau
 # nom (ex. : Questions-Geographie.txt), puis charge-le dans le jeu :
 # Mode prof > Ouvrir / Enregistrer > Charger un fichier de questions
@@ -16,6 +16,9 @@
 #              E: explication (facultatif)
 #   ACTIONS    A: le défi
 #              R: la réponse attendue (facultatif)
+#   IMAGE      I: lien https d'une image (facultatif, sous une question)
+#              Plus simple : ajoute les images dans le jeu (Mode prof,
+#              champ « Image »), puis télécharge le fichier.
 #   MIMES      un mime par ligne
 #   CHANCE et MALCHANCE   effet | texte de la carte (facultatif :
 #              sans ces sections, le jeu garde ses cartes habituelles)
