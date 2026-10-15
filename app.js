@@ -86,6 +86,9 @@
   CP.slug = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'cours';
   /* ---------- réservé aux membres (compte gratuit) ---------- */
   CP.DEMO_TITRE = "Plus intelligent qu'un enfant de primaire ?";
+  /* cours « vitrines » jouables sans compte (début du titre, sans accents) */
+  CP.GRATUITS = ["plus intelligent qu'un enfant", "j'apprends a lire l'heure"];
+  CP.isFree = titre => { const t = String(titre || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’`]/g, "'").toLowerCase().trim(); return CP.GRATUITS.some(g => t.startsWith(g)); };
   CP.memberOnly = function (what) {
     if (!ONLINE || CP.user) return false;
     const ici = encodeURIComponent(location.pathname.split('/').pop() + location.search);
@@ -148,7 +151,7 @@
     return parts.join(' · ') || 'aucune question';
   };
   CP.play = function (text, titre) {
-    if (!String(titre || '').startsWith('Plus intelligent qu') && CP.memberOnly('jouer avec les cours de la bibliothèque')) return;
+    if (!CP.isFree(titre) && CP.memberOnly('jouer avec les cours de la bibliothèque')) return;
     try { localStorage.setItem('classeparty-import', JSON.stringify({text, titre, at: Date.now()})); }
     catch (e) { CP.toast('Impossible de préparer le cours dans ce navigateur.'); return; }
     location.href = 'jouer.html';
@@ -170,7 +173,10 @@
       ],
       foot: [
         el('button', {type: 'button', class: 'btn go', onclick: () => CP.play(course.contenu, course.titre)}, 'Jouer avec ce cours'),
-        el('button', {type: 'button', class: 'btn violet', onclick: () => CP.download('Questions-' + CP.slug(course.titre) + '.txt', course.contenu)}, 'Télécharger (.txt)')
+        el('button', {type: 'button', class: 'btn violet', onclick: () => CP.download('Questions-' + CP.slug(course.titre) + '.txt', course.contenu)}, 'Télécharger (.txt)'),
+        course.id && !course.exemple ? el('button', {type: 'button', class: 'btn grey', onclick: async e => {
+          const url = new URL('bibliotheque.html?cours=' + course.id, location.href).href;
+          try { await navigator.clipboard.writeText(url); e.target.textContent = '✔ Lien copié !'; } catch (er) { window.prompt('Copie ce lien :', url); } }}, '🔗 Copier le lien') : null
       ]
     });
   };

@@ -23,7 +23,7 @@
       <label class="field"><span>Trier par</span><select class="in" id="fs"><option value="recent">Les plus récents</option><option value="likes">Les plus aimés</option><option value="titre">Ordre alphabétique</option></select></label>
     </form>
     <p class="muted small" id="count" role="status"></p>
-    <div class="notice" id="visitor" hidden><b>🔒 Réservé aux membres :</b> tu peux parcourir les cours et voir leur aperçu. Pour <b>jouer</b> ou <b>télécharger</b> un cours, <a href="connexion.html?mode=signup&amp;retour=bibliotheque.html">crée ton compte gratuit</a> ou <a href="connexion.html?retour=bibliotheque.html">connecte-toi</a>.</div>
+    <div class="notice" id="visitor" hidden><b>🔒 Réservé aux membres :</b> tu peux parcourir les cours et voir leur aperçu, et jouer gratuitement aux cours marqués 🎁. Pour <b>jouer</b> aux autres ou <b>télécharger</b> un cours, <a href="connexion.html?mode=signup&amp;retour=bibliotheque.html">crée ton compte gratuit</a> ou <a href="connexion.html?retour=bibliotheque.html">connecte-toi</a>.</div>
   </section>
   <div class="grid3" id="list"></div>
   <section class="panel btn-row" style="justify-content:space-between">
@@ -37,7 +37,7 @@
 <script src="config.js?v=20261014n"></script>
 <script src="format.js"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261014n"></script>
+<script src="app.js?v=20261014r"></script>
 <script>
 (async () => {
   await CP.init('bibliotheque.html');
@@ -70,11 +70,11 @@
     const author = c.auteur || (c.profiles && c.profiles.display_name) || 'Un prof';
     return el('article', {class: 'card'},
       el('h3', {}, c.titre),
-      el('div', {class: 'meta'}, el('span', {class: 'chip m'}, c.matiere), el('span', {class: 'chip n'}, c.niveau), c.exemple ? el('span', {class: 'chip'}, 'Exemple') : null),
+      el('div', {class: 'meta'}, el('span', {class: 'chip m'}, c.matiere), el('span', {class: 'chip n'}, c.niveau), c.exemple ? el('span', {class: 'chip'}, 'Exemple') : null, CP.isFree(c.titre) ? el('span', {class: 'chip', style: 'background:#d6f5d6'}, '🎁 Gratuit sans compte') : null),
       c.description ? el('p', {class: 'small'}, c.description) : null,
       el('p', {class: 'stat'}, `${c.nb_questions} questions · par ${author}` + (c.created_at ? ' · ' + CP.ago(c.created_at) : '')),
       el('div', {class: 'foot'},
-        el('button', {type: 'button', class: 'btn small go', onclick: async () => { const x = await getContent(c); if (x) CP.play(x.contenu, x.titre); }}, visiteur && !String(c.titre).startsWith('Plus intelligent qu') ? '🔒 Jouer' : 'Jouer'),
+        el('button', {type: 'button', class: 'btn small go', onclick: async () => { const x = await getContent(c); if (x) CP.play(x.contenu, x.titre); }}, visiteur && !CP.isFree(c.titre) ? '🔒 Jouer' : 'Jouer'),
         el('button', {type: 'button', class: 'btn small blue', onclick: async () => { const x = await getContent(c); if (x) CP.preview(x); }}, 'Aperçu'),
         el('button', {type: 'button', class: 'btn small violet', onclick: async () => { const x = await getContent(c); if (x) CP.download('Questions-' + CP.slug(x.titre) + '.txt', x.contenu); }}, visiteur ? '🔒 .txt' : '.txt'),
         likeBtn,
@@ -111,7 +111,18 @@
   ['#fm', '#fn', '#fs'].forEach(s => $(s).addEventListener('change', load));
   $('#filters').addEventListener('submit', e => { e.preventDefault(); load(); });
   CP.onAuthChange = load;
-  load();
+  await load();
+  /* lien direct vers un cours : bibliotheque.html?cours=ID (et &jouer=1 pour lancer la partie) */
+  const direct = params.get('cours');
+  const RACCOURCIS = {heure: 'lire l%heure'};   // bibliotheque.html?cours=heure
+  if (direct && CP.online && (/^[0-9a-f-]{36}$/i.test(direct) || RACCOURCIS[direct])) {
+    const req = CP.sb.from('courses').select('id,titre,matiere,niveau,description,contenu,public').eq('public', true);
+    const {data: lst} = RACCOURCIS[direct] ? await req.ilike('titre', '%' + RACCOURCIS[direct] + '%').order('created_at', {ascending: false}).limit(1) : await req.eq('id', direct).limit(1);
+    const c = (lst || [])[0];
+    if (!c) CP.toast('Ce cours n\'existe plus ou n\'est plus partagé.');
+    else if (params.get('jouer') === '1' && (CP.user || CP.isFree(c.titre))) CP.play(c.contenu, c.titre);
+    else CP.preview(c);
+  }
 })();
 
 </script>
