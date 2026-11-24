@@ -459,6 +459,48 @@ body.hw.noel .overlay{background:rgba(8,24,44,.7)}
 .noel-flake{position:absolute;top:-6%;color:#fff;text-shadow:0 0 4px rgba(255,255,255,.6);animation:snowfall linear infinite}
 @keyframes snowfall{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(3vw,55vh) rotate(180deg)}100%{transform:translate(-1vw,112vh) rotate(360deg)}}
 @media (prefers-reduced-motion: reduce){.noel-flake{display:none}}
+.nl-scene{position:absolute;inset:0;overflow:hidden}
+.nl-scene .nl-at{position:absolute}
+.nl-scene svg{display:block;width:100%;height:100%;overflow:visible}
+.nl-tw{animation:nltw 2.4s ease-in-out infinite}
+@keyframes nltw{0%,100%{opacity:1}50%{opacity:.35}}
+.nl-star{transform-box:fill-box;transform-origin:50% 50%;animation:nlstar 2.6s ease-in-out infinite;filter:drop-shadow(0 0 3px #ffe14a)}
+@keyframes nlstar{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.nl-win{animation:nlwin 5s ease-in-out infinite}
+@keyframes nlwin{0%,100%{fill:#ffd86a}50%{fill:#ffeaa0}80%{fill:#ffc94a}}
+.nl-smoke{animation:nlsmoke 3.6s ease-out infinite}
+@keyframes nlsmoke{0%{transform:translate(0,4px);opacity:0}30%{opacity:1}100%{transform:translate(4px,-10px);opacity:0}}
+.nl-walker{position:absolute;width:2.2%;height:7%;animation-timing-function:linear;animation-iteration-count:infinite}
+.nl-walker .nl-face{width:100%;height:100%;animation:inherit;animation-name:nlface}
+.nl-walker.nl-walkD,.nl-walker.nl-walkE{width:1.5%;height:4.8%}
+.nl-walkA{animation-name:nlwA}.nl-walkB{animation-name:nlwB}.nl-walkC{animation-name:nlwC}.nl-walkD{animation-name:nlwD}.nl-walkE{animation-name:nlwE}
+@keyframes nlwA{0%{left:21%}50%{left:39%}100%{left:21%}}
+@keyframes nlwB{0%{left:40%}50%{left:22%}100%{left:40%}}
+@keyframes nlwC{0%{left:24%}50%{left:35%}100%{left:24%}}
+@keyframes nlwD{0%{left:42%}50%{left:62%}100%{left:42%}}
+@keyframes nlwE{0%{left:84%}50%{left:66%}100%{left:84%}}
+@keyframes nlface{0%,49.9%{transform:scaleX(1)}50%,100%{transform:scaleX(-1)}}
+.nl-walkB .nl-face,.nl-walkE .nl-face{animation-name:nlfaceR}
+@keyframes nlfaceR{0%,49.9%{transform:scaleX(-1)}50%,100%{transform:scaleX(1)}}
+.nl-leg1{animation:nlleg .5s ease-in-out infinite alternate;transform-origin:10px 31px}
+.nl-leg2{animation:nlleg .5s ease-in-out infinite alternate-reverse;transform-origin:14px 31px}
+@keyframes nlleg{from{transform:rotate(-16deg)}to{transform:rotate(16deg)}}
+.nl-bob{animation:nlbob .5s ease-in-out infinite alternate}
+@keyframes nlbob{from{transform:translateY(0)}to{transform:translateY(-1px)}}
+.nl-skater{position:absolute;width:2%;height:6.5%;left:64%;top:70.5%;animation:nlskate 9s ease-in-out infinite}
+.nl-skater .nl-face{width:100%;height:100%;animation:nlskface 9s steps(1) infinite}
+.nl-skater .nl-leg1,.nl-skater .nl-leg2{animation-duration:1.2s}
+@keyframes nlskate{0%{left:61%;top:70.5%;transform:rotate(-8deg)}25%{left:67%;top:71.6%;transform:rotate(6deg)}50%{left:75%;top:70.5%;transform:rotate(8deg)}75%{left:68%;top:69.6%;transform:rotate(-6deg)}100%{left:61%;top:70.5%;transform:rotate(-8deg)}}
+@keyframes nlskface{0%{transform:scaleX(1)}50%{transform:scaleX(-1)}}
+.nl-train{position:absolute;left:0;top:76.6%;width:100%;height:7%;pointer-events:none}
+.nl-train-in{position:absolute;top:0;height:100%;width:30%;left:-34%;animation:nltrain 42s linear infinite}
+@keyframes nltrain{0%{left:-34%}38%{left:104%}100%{left:104%}}
+.nl-wheel{animation:nlwheel .6s linear infinite}
+@keyframes nlwheel{to{transform:rotate(360deg)}}
+.nl-puff{animation:nlsmoke 1.4s ease-out infinite}
+body.hw.noel .center{left:44.5%;right:21%;top:25.5%;bottom:27%}
+@media (prefers-reduced-motion: reduce){.nl-scene *{animation:none!important}.nl-train{display:none}}
+
 
 
 /* ================= IMAGES DANS LES QUESTIONS ================= */
@@ -997,21 +1039,66 @@ ${tomb(4, 75, 1, -4)}${pump(10, 76.5, 1.15)}${pump(93, 74, 1.3)}${tomb(86.5, 75,
 <path d="M0 0 L9 0 M0 0 L0 9 M0 0 L7 6 M0 0 L4 8.5 M0 0 L8.5 3.5 M2.5 0 Q2.3 2.2 0 2.5 M5 0 Q4.6 3.6 2.1 4.8 Q.6 4.6 0 5 M7.5 0 Q7 3 6 4.6 Q4 7 2.8 7.3 Q1 7.3 0 7.5" stroke="#ffffff" stroke-width=".22" fill="none" opacity=".55" transform="translate(100 80) rotate(180)"/>
 </svg>`;
 }
+/* ---------- le village de Noël vivant (v1.14) ---------- */
+function nlSvg(vb, inner, cls, style){ return `<svg class="${cls || ''}" style="${style || ''}" viewBox="${vb}" preserveAspectRatio="xMidYMax meet" aria-hidden="true">${inner}</svg>`; }
+function nlTree(){
+  const tiers = [[80, 140, 62], [80, 108, 50], [80, 78, 38], [80, 50, 26]].map(([cx, y, w], k) => `<path d="M${cx} ${y - 44 + k * 2} L${cx + w} ${y} Q${cx} ${y + 9} ${cx - w} ${y} Z" fill="url(#nlG)" stroke="#0b3a22" stroke-width="1.6"/><path d="M${cx - w} ${y} Q${cx - w / 2} ${y + 6} ${cx} ${y + 3} Q${cx + w / 2} ${y + 6} ${cx + w} ${y}" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" opacity=".9"/>`).join('');
+  const garl = `<path d="M40 70 Q80 86 120 64 M30 98 Q80 116 130 92 M22 128 Q80 148 140 122" fill="none" stroke="#ffd23f" stroke-width="2.2" stroke-dasharray="1 4" stroke-linecap="round"/>`;
+  const cols = ['#ff4b3e', '#ffd23f', '#3fa9f5', '#ff7ad9', '#7dff8a', '#ffffff'];
+  const balls = [[66, 52], [94, 60], [56, 80], [104, 84], [80, 70], [46, 108], [72, 102], [98, 112], [118, 104], [36, 134], [62, 130], [90, 138], [116, 132], [140, 128], [20, 128], [80, 40]]
+    .map(([x, y], k) => `<circle class="nl-tw" style="animation-delay:-${(k * .37) % 2.4}s" cx="${x}" cy="${y}" r="${k % 3 ? 4 : 5.2}" fill="${cols[k % cols.length]}" stroke="rgba(0,0,0,.25)" stroke-width=".8"/>`).join('');
+  const star = `<g class="nl-star"><path d="M80 -2 l6 13 14 1.6 -10.5 9.6 3 14 -12.5 -7.2 -12.5 7.2 3 -14 -10.5 -9.6 14 -1.6 Z" fill="#ffe14a" stroke="#c99a00" stroke-width="1.5"/></g>`;
+  const gifts = `<rect x="34" y="150" width="22" height="18" rx="2" fill="#e8413b" stroke="#6b1a12" stroke-width="1.2"/><rect x="43" y="150" width="4" height="18" fill="#ffd23f"/><rect x="100" y="146" width="26" height="22" rx="2" fill="#3fa9f5" stroke="#173a5e" stroke-width="1.2"/><rect x="111" y="146" width="4" height="22" fill="#fff"/><rect x="60" y="156" width="16" height="12" rx="2" fill="#9b5de5" stroke="#3b1d5e" stroke-width="1.2"/><rect x="128" y="156" width="16" height="12" rx="2" fill="#4cc94c" stroke="#1b5e20" stroke-width="1.2"/>`;
+  return nlSvg('0 -6 160 176', `<defs><linearGradient id="nlG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2fae63"/><stop offset="1" stop-color="#167a3e"/></linearGradient></defs><rect x="72" y="138" width="16" height="22" fill="#6b3f1f" stroke="#3a1d0e" stroke-width="1.2"/>${tiers}${garl}${balls}${star}${gifts}`, 'nl-tree');
+}
+function nlHouse(wall, roof, k){
+  return nlSvg('0 0 60 70', `<g class="nl-smoke" style="animation-delay:-${k * 1.3}s"><circle cx="45" cy="6" r="4" fill="#fff" opacity=".7"/><circle cx="48" cy="-2" r="5" fill="#fff" opacity=".5"/></g><rect x="40" y="10" width="8" height="16" fill="#8a3b2a" stroke="#3a1d0e" stroke-width="1"/><rect x="8" y="30" width="44" height="38" fill="${wall}" stroke="#3a1d0e" stroke-width="1.4"/><path d="M2 32 L30 8 L58 32 Z" fill="${roof}" stroke="#3a1d0e" stroke-width="1.4"/><path d="M2 32 L30 8 L58 32 L54 34 Q30 18 6 34 Z" fill="#f4f9ff"/><rect class="nl-win" style="animation-delay:-${k * .9}s" x="13" y="38" width="10" height="10" fill="#ffd86a" stroke="#3a1d0e" stroke-width="1"/><rect class="nl-win" style="animation-delay:-${k * 1.7}s" x="37" y="38" width="10" height="10" fill="#ffd86a" stroke="#3a1d0e" stroke-width="1"/><rect x="25" y="50" width="10" height="18" rx="5" fill="#6b3a1c" stroke="#3a1d0e" stroke-width="1"/><circle cx="30" cy="44" r="3.4" fill="none" stroke="#1f7a4a" stroke-width="2"/><circle cx="30" cy="41" r="1" fill="#e8413b"/>`, 'nl-house');
+}
+function nlChalet(k){
+  const lights = [8, 16, 24, 32, 40, 48, 56].map((x, i) => `<circle class="nl-tw" style="animation-delay:-${(i * .3 + k) % 2}s" cx="${x}" cy="${17 + (i % 2) * 2}" r="1.8" fill="${['#ff4b3e', '#ffd23f', '#3fa9f5'][i % 3]}"/>`).join('');
+  return nlSvg('0 0 64 54', `<path d="M2 18 L32 2 L62 18 Z" fill="#9c5a2c" stroke="#3a1d0e" stroke-width="1.4"/><path d="M2 18 L32 2 L62 18 L58 19 Q32 8 6 19 Z" fill="#f4f9ff"/>${lights}<rect x="6" y="20" width="52" height="32" fill="#c98a4b" stroke="#3a1d0e" stroke-width="1.4"/><rect x="10" y="24" width="44" height="14" fill="#3a1d0e" opacity=".85"/><rect x="6" y="38" width="52" height="5" fill="#8a5a2b" stroke="#3a1d0e" stroke-width="1"/><circle cx="18" cy="35" r="3" fill="#e8413b"/><circle cx="26" cy="35" r="3" fill="#ffd23f"/><rect x="34" y="31" width="7" height="7" fill="#9b5de5"/><rect x="44" y="30" width="7" height="8" fill="#3fa9f5"/><rect x="22" y="44" width="20" height="6" rx="1" fill="#fff4d6" stroke="#3a1d0e" stroke-width=".8"/>`, 'nl-chalet');
+}
+function nlPerson(coat, hat, k){
+  return nlSvg('0 0 24 48', `<g class="nl-bob" style="animation-delay:-${k * .2}s"><circle cx="12" cy="9" r="6" fill="#ffd9b8" stroke="#3a1d0e" stroke-width="1"/><path d="M5 8 Q12 -4 19 8 Z" fill="${hat}" stroke="#3a1d0e" stroke-width="1"/><circle cx="12" cy="0" r="2.4" fill="#fff"/><circle cx="14.5" cy="9" r=".9" fill="#3a1d0e"/><rect x="5" y="15" width="14" height="17" rx="5" fill="${coat}" stroke="#3a1d0e" stroke-width="1"/><path d="M6 16 H18" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M17 17 L21 26" stroke="${coat}" stroke-width="3.4" stroke-linecap="round"/></g><g class="nl-leg1" style="animation-delay:-${k * .2}s"><path d="M10 31 L9 45" stroke="#3a2a4a" stroke-width="3.6" stroke-linecap="round"/></g><g class="nl-leg2" style="animation-delay:-${k * .2}s"><path d="M14 31 L15 45" stroke="#3a2a4a" stroke-width="3.6" stroke-linecap="round"/></g>`, 'nl-person');
+}
+function nlTrain(){
+  const wheel = (x) => `<g class="nl-wheel" style="transform-origin:${x}px 34px"><circle cx="${x}" cy="34" r="5" fill="#3a1d0e"/><path d="M${x - 4} 34 H${x + 4} M${x} 30 V38" stroke="#ffd23f" stroke-width="1.4"/></g>`;
+  const wagon = (x, body) => `<rect x="${x}" y="14" width="44" height="18" rx="3" fill="${body}" stroke="#3a1d0e" stroke-width="1.4"/><rect x="${x - 2}" y="29" width="48" height="4" fill="#3a1d0e"/>${wheel(x + 10)}${wheel(x + 34)}<path d="M${x - 6} 28 H${x}" stroke="#3a1d0e" stroke-width="2"/>`;
+  const load1 = `<rect x="58" y="4" width="12" height="11" fill="#e8413b" stroke="#3a1d0e"/><rect x="63" y="4" width="2.5" height="11" fill="#ffd23f"/><rect x="72" y="7" width="14" height="8" fill="#4cc94c" stroke="#3a1d0e"/><rect x="88" y="2" width="10" height="13" fill="#3fa9f5" stroke="#3a1d0e"/>`;
+  const load2 = `<path d="M118 14 L126 -2 L134 14 Z M134 14 L141 1 L148 14 Z" fill="#1f9a55" stroke="#0b3a22"/><circle cx="126" cy="-3" r="1.6" fill="#ffd23f"/>`;
+  const load3 = `<circle cx="180" cy="8" r="6" fill="#fff" stroke="#9db8d6"/><circle cx="180" cy="-2" r="4" fill="#fff" stroke="#9db8d6"/><path d="M180 -2 L185 -1" stroke="#ff8c1a" stroke-width="1.4"/><rect x="176" y="-8" width="8" height="3" fill="#22102e"/>`;
+  const loco = `<g class="nl-puff"><circle cx="210" cy="-4" r="4" fill="#fff" opacity=".8"/><circle cx="216" cy="-11" r="5.5" fill="#fff" opacity=".55"/></g><rect x="200" y="0" width="8" height="12" fill="#3a1d0e"/><rect x="194" y="10" width="34" height="22" rx="4" fill="#d62e3a" stroke="#3a1d0e" stroke-width="1.4"/><rect x="214" y="2" width="16" height="16" rx="2" fill="#1f7a4a" stroke="#3a1d0e" stroke-width="1.4"/><rect x="218" y="5" width="8" height="7" fill="#ffd86a"/><circle cx="232" cy="24" r="3" fill="#ffe14a" stroke="#3a1d0e"/><rect x="192" y="29" width="40" height="4" fill="#3a1d0e"/>${wheel(202)}${wheel(222)}`;
+  return nlSvg('0 -14 240 54', `${wagon(54, '#9c5a2c')}${load1}${wagon(110, '#c98a4b')}${load2}${wagon(158, '#3fa9f5')}${load3}${loco}`, 'nl-train-svg');
+}
 function noelDecor(){
-  const tree = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-.5" y="2.2" width="1" height="1.4" fill="#6b3f1f"/><path d="M0 -4.2 L2.6 -.4 H1.4 L3.2 2.4 H-3.2 L-1.4 -.4 H-2.6 Z" fill="#1f7a4a" stroke="#0c3320" stroke-width=".3"/><path d="M-1.9 -.5 Q0 .2 1.9 -.5 M-2.9 2.3 Q0 3 2.9 2.3" stroke="#fff" stroke-width=".45" fill="none" stroke-linecap="round"/><circle cx="-.9" cy=".9" r=".35" fill="#e8413b"/><circle cx="1.1" cy="1.5" r=".35" fill="#ffd23f"/><circle cx=".3" cy="-1.6" r=".3" fill="#3fa9f5"/><path d="M0 -5.3 l.35 .75 .8 .1 -.6 .55 .15 .8 -.7 -.4 -.7 .4 .15 -.8 -.6 -.55 .8 -.1 Z" fill="#ffd23f"/></g>`;
-  const house = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-3" y="-1.5" width="6" height="4.5" fill="#c4553d" stroke="#3a1d0e" stroke-width=".3"/><path d="M-3.8 -1.3 L0 -4.6 L3.8 -1.3 Z" fill="#f4f9ff" stroke="#9db8d6" stroke-width=".3"/><rect x="1.6" y="-4.4" width="1" height="1.8" fill="#8a3b2a"/><rect x="-2.3" y="-.4" width="1.6" height="1.4" fill="#ffd86a"/><rect x=".7" y=".2" width="1.5" height="2.8" fill="#6b3a1c"/><circle cx="1.9" cy="1.7" r=".15" fill="#ffd23f"/></g>`;
-  const snowman = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><circle cx="0" cy="1.6" r="2" fill="#fff" stroke="#9db8d6" stroke-width=".25"/><circle cx="0" cy="-1.2" r="1.35" fill="#fff" stroke="#9db8d6" stroke-width=".25"/><path d="M-.15 -1.1 L1.3 -.9 L-.15 -.8 Z" fill="#ff8c1a"/><circle cx="-.45" cy="-1.5" r=".16" fill="#22102e"/><circle cx=".35" cy="-1.55" r=".16" fill="#22102e"/><path d="M-1.4 -.2 H1.4" stroke="#e8413b" stroke-width=".55" stroke-linecap="round"/><path d="M-1 -2.4 H1 V-3.6 H-1 Z M-1.5 -2.4 H1.5" stroke="#22102e" stroke-width=".4" fill="#22102e"/></g>`;
-  const stars = Array.from({length: 30}, (_, i) => `<circle cx="${(i * 37.3) % 100}" cy="${(i * 13.7) % 26}" r="${i % 3 ? .18 : .3}" fill="#fff" opacity="${.45 + (i % 4) * .14}"/>`).join('');
-  return `<svg class="hw-decor" viewBox="0 0 100 80" preserveAspectRatio="none" aria-hidden="true">
-<defs><linearGradient id="nlSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1d3a"/><stop offset=".6" stop-color="#1c4777"/><stop offset="1" stop-color="#3b6f9e"/></linearGradient>
-<radialGradient id="nlHalo"><stop offset="0" stop-color="#fff3b0" stop-opacity=".55"/><stop offset="1" stop-color="#fff3b0" stop-opacity="0"/></radialGradient></defs>
+  const stars = Array.from({length: 26}, (_, i) => `<circle cx="${(i * 37.3) % 100}" cy="${(i * 7.7) % 15}" r="${i % 3 ? .18 : .3}" fill="#fff" opacity="${.45 + (i % 4) * .14}"/>`).join('');
+  const lamp = x => `<g transform="translate(${x} 0)"><rect x="-.25" y="44" width=".5" height="11" fill="#2b2b3a"/><circle cx="0" cy="44" r="2" fill="#fff3b0" opacity=".35"/><circle cx="0" cy="44" r=".85" fill="#ffe9a0"/></g>`;
+  const bg = `<svg class="hw-decor" viewBox="0 0 100 80" preserveAspectRatio="none" aria-hidden="true">
+<defs><linearGradient id="nlSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1d3a"/><stop offset=".3" stop-color="#1c4777"/><stop offset=".31" stop-color="#e2eefa"/><stop offset="1" stop-color="#f4f9ff"/></linearGradient>
+<radialGradient id="nlPond"><stop offset="0" stop-color="#d9f1ff"/><stop offset="1" stop-color="#8fc3ea"/></radialGradient>
+<radialGradient id="nlGlow"><stop offset="0" stop-color="#fff3b0" stop-opacity=".55"/><stop offset="1" stop-color="#fff3b0" stop-opacity="0"/></radialGradient></defs>
 <rect width="100" height="80" fill="url(#nlSky)"/>${stars}
-<circle cx="92" cy="9" r="11" fill="url(#nlHalo)"/><path d="M92 3.5 l1.4 3.4 3.6 .4 -2.7 2.4 .8 3.5 -3.1 -1.8 -3.1 1.8 .8 -3.5 -2.7 -2.4 3.6 -.4 Z" fill="#ffe14a" stroke="#c99a00" stroke-width=".25"/>
-<path d="M0 64 Q18 56 36 62 T70 59 T100 60 V80 H0 Z" fill="#d6e8f8"/><path d="M0 71 Q22 65 48 70 T100 68 V80 H0 Z" fill="#f4f9ff"/>
-${tree(15, 30, 1)}${tree(13.5, 46, .85)}${house(15, 57, .9)}${tree(85, 31, .9)}${house(85.5, 45, .85)}${tree(86, 58, 1)}
-${house(9, 77, 1.1)}${tree(3, 76, .9)}${snowman(40, 76.5, .9)}${tree(60, 77, .8)}${house(92, 76.5, 1)}${tree(73, 77.5, .7)}
-<g fill="#ffffff" opacity=".18"><ellipse cx="25" cy="73" rx="20" ry="1.6"/><ellipse cx="78" cy="74" rx="22" ry="1.5"/></g>
+<path d="M0 24.5 Q25 20 50 24 T100 23 V26 H0 Z" fill="#cfe2f5"/>
+<ellipse cx="31" cy="54" rx="12.5" ry="4" fill="#d7d2cc"/><ellipse cx="31" cy="54" rx="12.5" ry="4" fill="none" stroke="#b9b1a8" stroke-width=".3" stroke-dasharray=".8 .8"/>
+<circle cx="31" cy="30" r="20" fill="url(#nlGlow)"/>
+<ellipse cx="69" cy="61.4" rx="9.5" ry="2.3" fill="url(#nlPond)" stroke="#9db8d6" stroke-width=".3"/><path d="M62 61 Q66 60.4 68 61.2 M71 61.8 Q74 61.3 76 61.9" stroke="#fff" stroke-width=".25" fill="none"/>
+${Array.from({length: 50}, (_, i) => `<rect x="${i * 2}" y="65.5" width=".7" height="1.9" fill="#8a6a4a"/>`).join('')}<rect x="0" y="65.7" width="100" height=".35" fill="#6b4a2b"/><rect x="0" y="66.9" width="100" height=".35" fill="#6b4a2b"/>
+${lamp(19.8)}${lamp(42.2)}
 </svg>`;
+  const at = (l, t, w, hh, html, cls) => `<div class="nl-at ${cls || ''}" style="left:${l}%;top:${t}%;width:${w}%;height:${hh}%">${html}</div>`;
+  const houses = [['#c4553d', '#7a3324'], ['#e8c98a', '#7a5a3a'], ['#5b8fc9', '#2c4f7a'], ['#d6806a', '#7a3324'], ['#8fbf7a', '#3e6b2f'], ['#c4553d', '#5a2a1a']]
+    .map(([w, r], k) => at(41 + k * 7.6, 11.5 + (k % 2) * 1.2, 7.2, 11, nlHouse(w, r, k))).join('');
+  const people = [
+    ['#e8413b', '#1f7a4a', 22, 63.5, 'nl-walkA', 16], ['#3fa9f5', '#e8413b', 38, 66, 'nl-walkB', 21], ['#9b5de5', '#ffd23f', 26, 68, 'nl-walkC', 25],
+    ['#ff8c1a', '#3fa9f5', 44, 20.5, 'nl-walkD', 30], ['#4cc94c', '#e8413b', 70, 20.8, 'nl-walkE', 27]]
+    .map(([c, hcol, l, t, anim, dur], k) => `<div class="nl-walker ${anim}" style="left:${l}%;top:${t}%;animation-duration:${dur}s"><div class="nl-face">${nlPerson(c, hcol, k)}</div></div>`).join('');
+  const skater = `<div class="nl-skater"><div class="nl-face">${nlPerson('#ff5fa2', '#fff', 7)}</div></div>`;
+  return `<div class="nl-scene">${bg}
+${at(20.5, 13, 21, 54, nlTree())}
+${at(19, 57.5, 7.6, 10, nlChalet(0))}${at(35.8, 57.5, 7.6, 10, nlChalet(1))}
+${houses}${people}${skater}
+<div class="nl-train"><div class="nl-train-in">${nlTrain()}</div></div>
+</div>`;
 }
 function noelPathSvg(){
   const d = hwPathD(NOEL_PATH);
