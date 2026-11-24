@@ -49,6 +49,7 @@
   @keyframes podShine{0%{transform:scale(.6) rotate(0);opacity:.4}50%{transform:scale(1.2) rotate(180deg);opacity:1}100%{transform:scale(.6) rotate(360deg);opacity:.4}}
   @media (prefers-reduced-motion: reduce){.pod-av,.pod-av-1,.pod-shine{animation:none}}
   .answers.lab-wait .ans{opacity:.55;pointer-events:none}
+  .answers.lab-wait .ord-list{opacity:.6;pointer-events:none}
   .lab-big{display:grid;justify-items:center;gap:12px;text-align:center}
   .lab-big .lab-qr{width:min(320px,70vw)}
   .lab-big .lab-code{font-size:3.6rem}
@@ -78,7 +79,7 @@
     if (LAB.q && m.querySelector('.ans')) {
       const hold = (LAB.q.hold && !LAB.q.revealed) ? Math.max(0, Math.ceil((LAB.q.hold.until - Date.now()) / 1000)) : 0;
       const ex = m.querySelector('.lab-exit');
-      return {type: 'q', title, exit: !!(ex && !ex.hidden), q: {text: LAB.q.text, img: LAB.q.img || '', vf: LAB.q.vf, opts: LAB.q.opts, revealed: LAB.q.revealed, right: LAB.q.revealed ? LAB.q.right : null, all: LAB.q.all, hold, results: LAB.q.revealed ? LAB.q.results : null}, cont: LAB.q.revealed};
+      return {type: 'q', title, exit: !!(ex && !ex.hidden), q: {text: LAB.q.text, img: LAB.q.img || '', vf: LAB.q.vf, opts: LAB.q.opts, ord: LAB.q.ord ? {items: LAB.q.ord.items, show: LAB.q.ord.show} : null, revealed: LAB.q.revealed, right: LAB.q.revealed ? LAB.q.right : null, all: LAB.q.all, hold, results: LAB.q.revealed ? LAB.q.results : null}, cont: LAB.q.revealed};
     }
     const foot = [...m.querySelectorAll('.card-foot .btn')].filter(b => !b.hidden);
     if (m.querySelector('.shop-wrap')) return {type: 'shop', title, shop: shopInfo(m)};
@@ -112,7 +113,7 @@
         const gp = playing ? G.players[p.i] : null;
         return {name: p.name, color: p.color, coins: gp ? (gp.coins || 0) : null, tours: gp ? Math.floor(gp.progress / N) : null, jailed: gp ? !!gp.jailed : false, av: avGet(p.i)};
       }),
-      theme: (typeof hwOn === 'function' && hwOn()) ? 'halloween' : 'classique', avatars: avOn() && !!window.CPAV, turn: playing ? G.turn : -1, phase: playing ? G.phase : 'setup', paused: playing ? !!G.paused : false,
+      theme: (typeof noelOn === 'function' && noelOn()) ? 'noel' : ((typeof hwOn === 'function' && hwOn()) ? 'halloween' : 'classique'), avatars: avOn() && !!window.CPAV, turn: playing ? G.turn : -1, phase: playing ? G.phase : 'setup', paused: playing ? !!G.paused : false,
       shop: typeof shopOn === 'function' ? shopOn() : true,
       card: playing ? modalInfo() : null
     };
@@ -139,8 +140,16 @@
       if (isTurn && G.phase === 'roll' && !G.paused && m.hidden) roll();
       return;
     }
+    if (a.a === 'ord') {
+      const q = LAB.q; if (!q || !q.ord || q.revealed) return;
+      const n = q.ord.items.length; const ord = Array.isArray(a.order) ? a.order.map(x => parseInt(x, 10)) : [];
+      if (ord.length !== n || new Set(ord).size !== n || ord.some(x => !(x >= 0 && x < n))) return;
+      if (isTurn) { if (!q.hold) { if (q.ord.list && q.ord.list._apply) q.ord.list._apply(ord); q.btns[0].click(); } return; }
+      if (q.all && !LAB.sideAns.has(pid)) { LAB.sideAns.set(pid, ord); refreshCounters(); push(); }
+      return;
+    }
     if (a.a === 'ans') {
-      if (!LAB.q || LAB.q.revealed) return;
+      if (!LAB.q || LAB.q.revealed || LAB.q.ord) return;
       const j = parseInt(a.j, 10);
       if (!(j >= 0 && j < LAB.q.btns.length)) return;
       if (isTurn) { if (!LAB.q.hold) LAB.q.btns[j].click(); return; }
@@ -220,6 +229,8 @@
       right: btns.findIndex(b => b.dataset.right === '1'), revealed: false,
       all: LAB.on && LAB.all && nPhones() > 0, player: p, results: null
     };
+    const ol = m.querySelector('.ord-list');
+    if (ol) { const lis = [...ol.children]; const items = []; lis.forEach(li => { items[parseInt(li.dataset.i, 10)] = (li.querySelector('.ord-txt') || li).textContent; }); LAB.q.ord = {items, show: lis.map(li => parseInt(li.dataset.i, 10)), list: ol}; LAB.q.opts = ['Valider']; }
     if (LAB.q.all) {
       const line = document.createElement('p'); line.className = 'lab-count'; line.id = 'labCount';
       const body = m.querySelector('.card-body'); if (body) body.append(line);
@@ -270,13 +281,14 @@
     let good = 0, total = 0;
     const res = {};
     if (q.all) {
-      const rightTxt = q.opts[q.right] || '';
+      const isOrd = !!q.ord;
+      const rightTxt = isOrd ? q.ord.items.join(' → ') : (q.opts[q.right] || '');
       LAB.sideAns.forEach((j, pid) => {
         const pl = G.players[pid]; if (!pl || pl === q.player) return;
-        const ok = j === q.right; total++; if (ok) good++;
+        const ok = isOrd ? (Array.isArray(j) && j.every((v, k) => v === k)) : j === q.right; total++; if (ok) good++;
         res[pid] = ok;
         if (ok && shopOn()) { ensurePlayerFields(pl); addCoins(pl, 1); }
-        logAnswer(pl, q.kind, q.text, ok, rightTxt, q.opts[j] || '', {side: true});
+        logAnswer(pl, q.kind, q.text, ok, rightTxt, isOrd ? (Array.isArray(j) ? j.map(k => q.ord.items[k]).join(' → ') : '') : (q.opts[j] || ''), {side: true});
       });
       q.results = res;
       const line = document.getElementById('labCount');

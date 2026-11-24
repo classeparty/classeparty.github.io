@@ -278,6 +278,29 @@ textarea.in{resize:vertical;line-height:1.3}
 .ans:active{transform:translateY(3px);box-shadow:0 3px 0 var(--ink)}
 .ans .tag2{flex:none;display:grid;place-items:center;width:1.8em;height:1.8em;border-radius:10px;background:var(--white);color:var(--ink);text-shadow:none;border:3px solid var(--ink);font-family:var(--f-display);font-weight:400}
 .ans span:last-child{min-width:0;overflow-wrap:anywhere}
+.answers.ord-wrap{grid-template-columns:minmax(0,1fr);gap:12px}
+.ord-list{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:ord}
+.ord-item{counter-increment:ord;display:flex;align-items:center;gap:10px;background:#fffdf7;color:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:8px 10px;font-weight:800;font-size:clamp(1rem,1.9vw,1.3rem);line-height:1.15;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 4px 0 var(--ink);position:relative}
+.ord-item::before{content:counter(ord);flex:0 0 auto;display:grid;place-items:center;width:1.8em;height:1.8em;border-radius:50%;background:var(--q);color:#fff;font-family:var(--f-display);text-shadow:0 1px 0 rgba(0,0,0,.35)}
+.ord-item.drag{cursor:grabbing;transform:scale(1.03);box-shadow:0 9px 0 var(--ink);z-index:3}
+.ord-grip{opacity:.45;font-size:1.1em}
+.ord-txt{flex:1;min-width:0}
+.ord-arrows{display:flex;gap:6px}
+.ord-b{width:2.1em;height:2.1em;border:2px solid var(--ink);border-radius:10px;background:#ffe7b0;color:var(--ink);font-weight:900;cursor:pointer}
+.ord-b:hover{background:#ffd27a}
+.ord-list.done .ord-item{cursor:default}
+.ord-list.done .ord-b{visibility:hidden}
+.ord-item.right{background:#d9f7d9;border-color:#1f7a32}
+.ord-item.right::before{background:#2e9e45}
+.ord-item.wrong{background:#ffe1de;border-color:#b3261e}
+.ord-item.wrong::before{background:#d64545}
+.ans.ord-ok{--bc:#3aa83a;justify-content:center;text-align:center}
+.ord-sol{background:#fff4d6;border:3px dashed var(--ink);border-radius:14px;padding:10px 14px;font-weight:700}
+.ord-sol ol{margin:.3em 0 0;padding-left:1.4em}
+.opt-type{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ord-edit{display:grid;gap:6px;counter-reset:oe}
+.ord-edit .oe{display:flex;gap:8px;align-items:center}
+.ord-edit .oe::before{counter-increment:oe;content:counter(oe) '.';font-weight:900;min-width:1.6em}
 .ans.a0{--bc:#e8413b}.ans.a1{--bc:#2f8fe0}.ans.a2{--bc:#e8a412}.ans.a3{--bc:#3aa83a}
 .ans.vrai{--bc:var(--go);justify-content:center;font-family:var(--f-display);font-weight:400;font-size:clamp(1.8rem,4.4vw,2.8rem);padding:18px}
 .ans.faux{--bc:var(--x);justify-content:center;font-family:var(--f-display);font-weight:400;font-size:clamp(1.8rem,4.4vw,2.8rem);padding:18px}
@@ -424,6 +447,19 @@ body.hw .token{--s:3.2cqw;left:calc((100% - 9 * var(--gap)) / 10 * (var(--c) + .
 body.hw .card-head{background:linear-gradient(180deg,rgba(255,255,255,.35) 0 46%,rgba(255,255,255,0) 47%),var(--hc)}
 body.hw .overlay{background:rgba(20,8,35,.7)}
 @media (prefers-reduced-motion: reduce){.hw-bat{display:none}}
+body.hw.noel{--ink:#0f2740;--ink-2:#1d4466;--sun1:#2a5b8a;--sun2:#173a5e;--crust:#d62e3a;--c:#ffcf4a;--muted:#5a7390;background:#0f2a47}
+body.hw.noel .glow{background:radial-gradient(ellipse at 50% 42%,rgba(255,225,130,.3) 0,rgba(255,225,130,0) 55%)}
+body.hw.noel .board{background:#173b63;box-shadow:0 10px 0 var(--ink-2),0 0 40px rgba(255,215,110,.35)}
+body.hw.noel .ring .cell{border-radius:1.2cqw;background:linear-gradient(90deg,rgba(255,255,255,0) 0 44%,rgba(255,240,170,.5) 44% 56%,rgba(255,255,255,0) 56%),linear-gradient(180deg,rgba(255,255,255,.4) 0 30%,rgba(255,255,255,0) 31%),var(--cc);box-shadow:inset 0 -.5cqw 0 rgba(0,0,0,.2),0 .45cqw 0 var(--ink),0 -.35cqw 0 #f4f9ff}
+body.hw.noel .ring .cell .n{color:rgba(15,39,64,.65)}
+body.hw.noel .center{background:radial-gradient(ellipse at 50% 30%,#ffffff,#e6f1fc);box-shadow:0 .6cqw 0 var(--ink),0 0 2.5cqw rgba(255,225,130,.55)}
+body.hw.noel .c-logo{color:#d62e3a}
+body.hw.noel .overlay{background:rgba(8,24,44,.7)}
+.noel-snow{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.noel-flake{position:absolute;top:-6%;color:#fff;text-shadow:0 0 4px rgba(255,255,255,.6);animation:snowfall linear infinite}
+@keyframes snowfall{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(3vw,55vh) rotate(180deg)}100%{transform:translate(-1vw,112vh) rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.noel-flake{display:none}}
+
 
 /* ================= IMAGES DANS LES QUESTIONS ================= */
 .q-img{display:flex;justify-content:center;margin:0 0 10px}
@@ -543,6 +579,7 @@ body.hw .overlay{background:rgba(20,8,35,.7)}
         <div class="mode-btns" role="radiogroup" aria-label="Thème du plateau">
           <button type="button" class="mode-btn on" id="themeClassic" role="radio" aria-checked="true"><b>🎲 Classique</b><small>Le plateau habituel</small></button>
           <button type="button" class="mode-btn" id="themeHw" role="radio" aria-checked="false"><b>🎃 Halloween</b><small>Le chemin du cimetière</small></button>
+          <button type="button" class="mode-btn" id="themeNoel" role="radio" aria-checked="false" hidden><b>🎄 Noël</b><small>Le village enneigé</small></button>
         </div>
       </div>
       <div class="form-btns">
@@ -669,7 +706,7 @@ function h(tag, props, ...kids){
   return el;
 }
 function shuffle(a){ for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-function cellPos(i){ if (typeof hwOn === 'function' && hwOn()){ const q = HW_PATH[i % HW_PATH.length]; return {c:q[0], r:q[1]}; } if (i <= 8) return {c:i, r:0}; if (i <= 14) return {c:8, r:i - 8}; if (i <= 22) return {c:8 - (i - 14), r:6}; return {c:0, r:6 - (i - 22)}; }
+function cellPos(i){ if (typeof pathOn === 'function' && pathOn()){ const PP = noelOn() ? NOEL_PATH : HW_PATH; const q = PP[i % PP.length]; return {c:q[0], r:q[1]}; } if (i <= 8) return {c:i, r:0}; if (i <= 14) return {c:8, r:i - 8}; if (i <= 22) return {c:8 - (i - 14), r:6}; return {c:0, r:6 - (i - 22)}; }
 function plural(n, s, p){ return Math.abs(n) > 1 ? p : s; }
 function initials(name){ const parts = String(name).trim().split(/\s+/).filter(Boolean); if (!parts.length) return '?'; if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase(); return (parts[0][0] + parts[1][0]).toUpperCase(); }
 function lsGet(k){ try { const s = localStorage.getItem(k); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
@@ -749,10 +786,30 @@ const TRACKS_HW = [
    roots:[48,44,46,43,48,44,43,48], chords:[[60,63,67],[56,60,63],[58,62,65],[55,59,62],[60,63,67],[56,60,63],[55,59,62],[60,63,67]],
    melody:[72,75,79,84,79,75,72,75, 68,72,75,80,75,72,68,72, 70,74,77,82,77,74,70,74, 71,74,79,83,86,83,79,74, 84,83,84,79,75,79,72,75, 80,79,80,75,72,75,68,72, 79,78,79,74,71,74,67,71, 72,0,79,0,84,0,0,0]}
 ];
+/* ================= MUSIQUES DE NOËL (airs traditionnels du domaine public, arrangés) - v1.14 ================= */
+const TRACKS_NOEL = [
+  {name:'Vive le vent', bpm:120, lead:'square', leadVol:.05, bass:'pump', comp:'stab', drums:'pop', swing:0,
+   roots:[48,48,48,41,50,43,43,48, 48,48,48,48,41,48,50,43],
+   chords:[[60,64,67],[60,64,67],[60,64,67],[53,57,60],[62,65,69],[55,59,62],[55,59,62],[60,64,67], [60,64,67],[60,64,67],[60,64,67],[60,64,67],[65,69,72],[60,64,67],[62,66,69],[55,59,62]],
+   melody:[67,0,76,0,74,0,72,0, 67,0,0,0,0,0,67,67, 67,0,76,0,74,0,72,0, 69,0,0,0,0,0,0,0, 69,0,77,0,76,0,74,0, 71,0,0,0,0,0,0,0, 79,0,79,0,77,0,74,0, 76,0,0,0,0,0,0,0,
+           76,0,76,0,76,0,0,0, 76,0,76,0,76,0,0,0, 76,0,79,0,72,0,0,74, 76,0,0,0,0,0,0,0, 77,0,77,0,77,0,0,77, 77,0,76,0,76,0,76,76, 76,0,74,0,74,0,76,0, 74,0,0,0,79,0,0,0]},
+  {name:'Fa la la la la', bpm:116, lead:'triangle', leadVol:.09, bass:'pump', comp:'stab', drums:'pop', swing:0,
+   roots:[48,48,43,48,48,48,41,48], chords:[[60,64,67],[60,64,67],[55,59,62],[60,64,67],[60,64,67],[60,64,67],[53,57,60],[60,64,67]],
+   melody:[79,0,0,77,76,0,74,0, 72,0,74,0,76,0,72,0, 74,76,77,74,76,0,0,74, 72,0,71,0,72,0,0,0, 79,0,0,77,76,0,74,0, 72,0,74,0,76,0,72,0, 81,81,81,81,79,0,0,77, 76,0,74,0,72,0,0,0]},
+  {name:'Douce nuit', bpm:80, spb:6, lead:'sine', leadVol:.12, bass:'soft', comp:'pad', drums:'soft', swing:0,
+   roots:[48,48,48,48,43,43,48,48], chords:[[60,64,67],[60,64,67],[60,64,67],[60,64,67],[55,59,62],[55,59,62],[60,64,67],[60,64,67]],
+   melody:[79,0,0,81,79,0, 76,0,0,0,0,0, 79,0,0,81,79,0, 76,0,0,0,0,0, 86,0,0,0,86,0, 83,0,0,0,0,0, 84,0,0,0,84,0, 79,0,0,0,0,0]},
+  {name:'Joyeux Noël à tous', bpm:126, spb:6, lead:'square', leadVol:.05, bass:'pump', comp:'stab', drums:'pop', swing:0,
+   roots:[43,48,45,50,40,48,50,43], chords:[[55,59,62],[60,64,67],[57,60,64],[62,66,69],[64,67,71],[60,64,67],[62,66,69],[55,59,62]],
+   melody:[79,0,79,81,79,78, 76,0,72,0,76,0, 81,0,81,83,81,79, 78,0,74,0,74,0, 83,0,83,84,83,81, 79,0,76,0,74,74, 76,0,81,0,78,0, 79,0,0,0,74,0]},
+  {name:'Les lutins du Père Noël', bpm:136, lead:'square', leadVol:.045, bass:'pump', comp:'stab', drums:'rock', swing:0,
+   roots:[41,48,48,41,41,46,48,41], chords:[[65,69,72],[60,64,67],[60,64,67],[65,69,72],[65,69,72],[58,62,65],[60,64,67],[65,69,72]],
+   melody:[84,0,81,0,77,81,84,0, 86,84,82,81,79,0,0,0, 82,0,79,0,76,79,82,0, 84,82,81,79,77,0,0,0, 77,81,84,89,88,86,84,0, 82,84,86,82,81,0,79,0, 77,79,81,82,84,0,76,0, 77,0,84,0,77,0,0,0]}
+];
 const MUSIC = (() => {
   let on = false, timer = null, step = 0, nextT = 0, master = null, cur = 0, loops = 0, trackStart = 0, mode = 'all', vol = 0.5;
   const hz = m => 440 * Math.pow(2, (m - 69) / 12);
-  const LIST = () => (typeof hwOn === 'function' && hwOn()) ? TRACKS_HW : TRACKS;
+  const LIST = () => (typeof noelOn === 'function' && noelOn()) ? TRACKS_NOEL : ((typeof hwOn === 'function' && hwOn()) ? TRACKS_HW : TRACKS);
   const T = () => LIST()[cur % LIST().length];
   function bpm(){ return T().bpm * ((G && G.rushOn && !G.over) ? 1.25 : 1); }
   function note(a, freq, t, dur, type, v){
@@ -775,25 +832,25 @@ const MUSIC = (() => {
     o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.2);
   }
   function maybeRotate(a){
-    if (mode !== 'all' || step % 64 !== 0 || step === 0) return;
+    if (mode !== 'all' || step % T().melody.length !== 0 || step === 0) return;
     if (a.currentTime - trackStart >= 150){ cur = (cur + 1) % LIST().length; trackStart = a.currentTime; step = 0; loops = 0; syncAudioButtons(); }
   }
   function schedule(){
     const a = AC; if (!a || !on) return;
     while (nextT < a.currentTime + 0.15){
       maybeRotate(a);
-      const tr = T(), e = 60 / bpm() / 2, i = step % 64, bar = Math.floor(i / 8), beat = i % 8;
+      const tr = T(), spb = tr.spb || 8, e = 60 / bpm() / 2, i = step % tr.melody.length, bar = Math.floor(i / spb), beat = i % spb;
       const t = nextT + (beat % 2 === 1 ? tr.swing * e : 0);
       const m = tr.melody[i]; if (m) note(a, hz(m), t, e * (tr.bass === 'soft' ? 1.8 : 0.9), tr.lead, tr.leadVol);
       const r = tr.roots[bar], ch = tr.chords[bar];
-      if (tr.bass === 'pump'){ if (beat % 2 === 0) note(a, hz(beat % 4 === 0 ? r - 12 : r), t, e * 1.6, 'triangle', 0.22); }
-      else if (tr.bass === 'soft'){ if (beat === 0 || beat === 4) note(a, hz(r - 12), t, e * 3.6, 'sine', 0.2); }
+      if (tr.bass === 'pump'){ if (spb === 6 ? beat === 0 : beat % 2 === 0) note(a, hz(beat % 4 === 0 ? r - 12 : r), t, e * 1.6, 'triangle', 0.22); }
+      else if (tr.bass === 'soft'){ if (beat === 0 || beat === spb / 2) note(a, hz(r - 12), t, e * 3.6, 'sine', 0.2); }
       else if (tr.bass === 'walk'){ if (beat % 2 === 0){ const third = (ch[1] - ch[0]) === 3 ? 3 : 4; note(a, hz(r - 12 + [0, third, 7, 9][beat / 2]), t, e * 1.7, 'triangle', 0.22); } }
-      if (tr.comp === 'stab' && (beat === 2 || beat === 6)) ch.forEach(c => note(a, hz(c), t, e * 1.3, 'triangle', 0.032));
+      if (tr.comp === 'stab' && (spb === 6 ? (beat === 2 || beat === 4) : (beat === 2 || beat === 6))) ch.forEach(c => note(a, hz(c), t, e * 1.3, 'triangle', 0.032));
       if (tr.comp === 'pad' && beat === 0) ch.forEach(c => note(a, hz(c), t, e * 7.5, 'sine', 0.03));
       if (tr.drums === 'pop'){ if (beat % 2 === 1) noiseHit(a, t, 0.05, 'highpass', 6000, 0.04); if (beat === 4) noiseHit(a, t, 0.08, 'highpass', 6000, 0.04); }
       else if (tr.drums === 'rock'){ if (beat === 0 || beat === 4) kick(a, t, 0.35); if (beat === 2 || beat === 6) noiseHit(a, t, 0.16, 'bandpass', 1800, 0.12); noiseHit(a, t, 0.035, 'highpass', 7000, 0.03); }
-      else if (tr.drums === 'soft'){ if (beat === 2 || beat === 6) noiseHit(a, t, 0.035, 'highpass', 5000, 0.06); }
+      else if (tr.drums === 'soft'){ if (spb === 6 ? beat === 3 : (beat === 2 || beat === 6)) noiseHit(a, t, 0.035, 'highpass', 5000, 0.06); }
       else if (tr.drums === 'swing'){ if (beat % 2 === 0 || beat === 3 || beat === 7) noiseHit(a, t, beat % 2 ? 0.035 : 0.05, 'highpass', 7000, 0.07); if (beat === 2 || beat === 6) noiseHit(a, t, 0.04, 'bandpass', 2500, 0.05); }
       nextT += e; step++;
     }
@@ -830,10 +887,10 @@ function renderMusicMenu(){
   const opt = (label, active, onclick, sub) => h('button', {type:'button', class:'mm-opt' + (active ? ' on' : ''), onclick}, h('span', {class:'mm-dot'}), h('span', {}, label, sub ? h('small', {}, sub) : null));
   const pick = m => { musicOn = true; musicCfg.mode = m; MUSIC.setMode(m); saveMusicCfg(); if (!MUSIC.playing) MUSIC.start(); SFX.click(); syncAudioButtons(); };
   menu.replaceChildren(
-    h('div', {class:'mm-h'}, (typeof hwOn === 'function' && hwOn()) ? 'Musique d\'Halloween 🎃' : 'Musique d\'ambiance'),
+    h('div', {class:'mm-h'}, (typeof noelOn === 'function' && noelOn()) ? 'Musique de Noël 🎄' : ((typeof hwOn === 'function' && hwOn()) ? 'Musique d\'Halloween 🎃' : 'Musique d\'ambiance')),
     opt('Pas de musique', !musicOn, () => { musicOn = false; saveMusicCfg(); MUSIC.stop(); syncAudioButtons(); }),
     opt('Enchaîner les 5 airs', musicOn && musicCfg.mode === 'all', () => pick('all'), 'Change d\'air toutes les 2 à 3 minutes (conseillé)'),
-    ...((typeof hwOn === 'function' && hwOn()) ? TRACKS_HW : TRACKS).map((t, i) => opt(`${i + 1}. ${t.name}`, musicOn && musicCfg.mode === i, () => pick(i), musicOn && musicCfg.mode === 'all' && MUSIC.playing && MUSIC.current === i ? 'en cours' : '')),
+    ...((typeof noelOn === 'function' && noelOn()) ? TRACKS_NOEL : ((typeof hwOn === 'function' && hwOn()) ? TRACKS_HW : TRACKS)).map((t, i) => opt(`${i + 1}. ${t.name}`, musicOn && musicCfg.mode === i, () => pick(i), musicOn && musicCfg.mode === 'all' && MUSIC.playing && MUSIC.current === i ? 'en cours' : '')),
     h('div', {class:'mm-h'}, 'Volume'),
     h('div', {class:'mm-vol'}, MUSIC_VOLS.map(([l], i) => h('button', {type:'button', class:'mm-v' + (musicCfg.vol === i ? ' on' : ''), onclick:() => { musicCfg.vol = i; MUSIC.setVol(MUSIC_VOLS[i][1]); saveMusicCfg(); syncAudioButtons(); }}, l))));
 }
@@ -895,7 +952,7 @@ function say(t){ if (G){ G.msg = t; const m = $('#msg'); if (m) m.textContent = 
 /* ================= SETUP SCREEN ================= */
 let nPlayers = 7;
 const APP_VERSION = '1.13';
-const BUILD = '20261014a';
+const BUILD = '20261124a';
 /* v1.11 : cartes spéciales et avatars pour tout le monde (désactivables dans Réglages) */
 let TEST111 = true;
 function enableTest111(){}
@@ -903,12 +960,16 @@ window.enableTest111 = enableTest111;
 
 /* ================= THÈME DU PLATEAU (Classique / Halloween) - v1.12 ================= */
 const HW_PATH = [[4.5, 6.6], [3.52, 6.38], [2.56, 6.13], [1.59, 6.38], [0.65, 6.27], [0.71, 5.29], [0.6, 4.34], [0.29, 3.38], [0.02, 2.43], [0.23, 1.53], [1.21, 1.35], [1.72, 0.54], [2.53, 0.04], [3.52, 0.22], [4.6, 0.4], [5.48, 0.62], [6.44, 0.87], [7.41, 0.62], [8.35, 0.73], [8.29, 1.71], [8.4, 2.66], [8.71, 3.62], [8.98, 4.57], [8.77, 5.47], [7.79, 5.65], [7.28, 6.46], [6.47, 6.96], [5.48, 6.78]];
-let THEME = 'classique', HW_LAB = true;
+let THEME = 'classique', HW_LAB = true, NOEL_LAB = false;
 function hwOn(){ return THEME === 'halloween'; }
-window.hwOn = hwOn;
-function hwPathD(){
+function noelOn(){ return THEME === 'noel'; }
+function pathOn(){ return THEME === 'halloween' || THEME === 'noel'; }
+window.hwOn = hwOn; window.noelOn = noelOn;
+/* v1.14 : le village enneigé (28 cases, même repère que le cimetière) */
+const NOEL_PATH = [[4.6, 7.0], [3.6, 6.85], [2.6, 7.05], [1.6, 6.85], [0.6, 7.0], [0.3, 5.85], [0.9, 4.9], [0.3, 3.95], [0.9, 3.0], [0.3, 2.05], [0.75, 1.1], [1.65, 0.3], [2.6, 0.12], [3.55, 0.42], [4.5, 0.15], [5.45, 0.42], [6.4, 0.12], [7.35, 0.42], [8.3, 0.25], [9.0, 1.2], [8.4, 2.15], [9.0, 3.1], [8.4, 4.05], [9.0, 5.0], [8.55, 5.95], [7.6, 6.85], [6.6, 7.05], [5.6, 6.85]];
+function hwPathD(PTS){
   const g = 0.6 / 97.6 * 100, H = 77.6 / 97.6 * 100;
-  const P = HW_PATH.map(([c, r]) => [((100 - 9 * g) / 10) * (c + .5) + g * c, ((H - 7 * g) / 8) * (r + .5) + g * r]);
+  const P = (PTS || HW_PATH).map(([c, r]) => [((100 - 9 * g) / 10) * (c + .5) + g * c, ((H - 7 * g) / 8) * (r + .5) + g * r]);
   const n = P.length; let d = 'M' + P[0][0].toFixed(2) + ' ' + P[0][1].toFixed(2);
   for (let i = 0; i < n; i++){
     const p0 = P[(i - 1 + n) % n], p1 = P[i], p2 = P[(i + 1) % n], p3 = P[(i + 2) % n];
@@ -936,11 +997,40 @@ ${tomb(4, 75, 1, -4)}${pump(10, 76.5, 1.15)}${pump(93, 74, 1.3)}${tomb(86.5, 75,
 <path d="M0 0 L9 0 M0 0 L0 9 M0 0 L7 6 M0 0 L4 8.5 M0 0 L8.5 3.5 M2.5 0 Q2.3 2.2 0 2.5 M5 0 Q4.6 3.6 2.1 4.8 Q.6 4.6 0 5 M7.5 0 Q7 3 6 4.6 Q4 7 2.8 7.3 Q1 7.3 0 7.5" stroke="#ffffff" stroke-width=".22" fill="none" opacity=".55" transform="translate(100 80) rotate(180)"/>
 </svg>`;
 }
+function noelDecor(){
+  const tree = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-.5" y="2.2" width="1" height="1.4" fill="#6b3f1f"/><path d="M0 -4.2 L2.6 -.4 H1.4 L3.2 2.4 H-3.2 L-1.4 -.4 H-2.6 Z" fill="#1f7a4a" stroke="#0c3320" stroke-width=".3"/><path d="M-1.9 -.5 Q0 .2 1.9 -.5 M-2.9 2.3 Q0 3 2.9 2.3" stroke="#fff" stroke-width=".45" fill="none" stroke-linecap="round"/><circle cx="-.9" cy=".9" r=".35" fill="#e8413b"/><circle cx="1.1" cy="1.5" r=".35" fill="#ffd23f"/><circle cx=".3" cy="-1.6" r=".3" fill="#3fa9f5"/><path d="M0 -5.3 l.35 .75 .8 .1 -.6 .55 .15 .8 -.7 -.4 -.7 .4 .15 -.8 -.6 -.55 .8 -.1 Z" fill="#ffd23f"/></g>`;
+  const house = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-3" y="-1.5" width="6" height="4.5" fill="#c4553d" stroke="#3a1d0e" stroke-width=".3"/><path d="M-3.8 -1.3 L0 -4.6 L3.8 -1.3 Z" fill="#f4f9ff" stroke="#9db8d6" stroke-width=".3"/><rect x="1.6" y="-4.4" width="1" height="1.8" fill="#8a3b2a"/><rect x="-2.3" y="-.4" width="1.6" height="1.4" fill="#ffd86a"/><rect x=".7" y=".2" width="1.5" height="2.8" fill="#6b3a1c"/><circle cx="1.9" cy="1.7" r=".15" fill="#ffd23f"/></g>`;
+  const snowman = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><circle cx="0" cy="1.6" r="2" fill="#fff" stroke="#9db8d6" stroke-width=".25"/><circle cx="0" cy="-1.2" r="1.35" fill="#fff" stroke="#9db8d6" stroke-width=".25"/><path d="M-.15 -1.1 L1.3 -.9 L-.15 -.8 Z" fill="#ff8c1a"/><circle cx="-.45" cy="-1.5" r=".16" fill="#22102e"/><circle cx=".35" cy="-1.55" r=".16" fill="#22102e"/><path d="M-1.4 -.2 H1.4" stroke="#e8413b" stroke-width=".55" stroke-linecap="round"/><path d="M-1 -2.4 H1 V-3.6 H-1 Z M-1.5 -2.4 H1.5" stroke="#22102e" stroke-width=".4" fill="#22102e"/></g>`;
+  const stars = Array.from({length: 30}, (_, i) => `<circle cx="${(i * 37.3) % 100}" cy="${(i * 13.7) % 26}" r="${i % 3 ? .18 : .3}" fill="#fff" opacity="${.45 + (i % 4) * .14}"/>`).join('');
+  return `<svg class="hw-decor" viewBox="0 0 100 80" preserveAspectRatio="none" aria-hidden="true">
+<defs><linearGradient id="nlSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1d3a"/><stop offset=".6" stop-color="#1c4777"/><stop offset="1" stop-color="#3b6f9e"/></linearGradient>
+<radialGradient id="nlHalo"><stop offset="0" stop-color="#fff3b0" stop-opacity=".55"/><stop offset="1" stop-color="#fff3b0" stop-opacity="0"/></radialGradient></defs>
+<rect width="100" height="80" fill="url(#nlSky)"/>${stars}
+<circle cx="92" cy="9" r="11" fill="url(#nlHalo)"/><path d="M92 3.5 l1.4 3.4 3.6 .4 -2.7 2.4 .8 3.5 -3.1 -1.8 -3.1 1.8 .8 -3.5 -2.7 -2.4 3.6 -.4 Z" fill="#ffe14a" stroke="#c99a00" stroke-width=".25"/>
+<path d="M0 64 Q18 56 36 62 T70 59 T100 60 V80 H0 Z" fill="#d6e8f8"/><path d="M0 71 Q22 65 48 70 T100 68 V80 H0 Z" fill="#f4f9ff"/>
+${tree(15, 30, 1)}${tree(13.5, 46, .85)}${house(15, 57, .9)}${tree(85, 31, .9)}${house(85.5, 45, .85)}${tree(86, 58, 1)}
+${house(9, 77, 1.1)}${tree(3, 76, .9)}${snowman(40, 76.5, .9)}${tree(60, 77, .8)}${house(92, 76.5, 1)}${tree(73, 77.5, .7)}
+<g fill="#ffffff" opacity=".18"><ellipse cx="25" cy="73" rx="20" ry="1.6"/><ellipse cx="78" cy="74" rx="22" ry="1.5"/></g>
+</svg>`;
+}
+function noelPathSvg(){
+  const d = hwPathD(NOEL_PATH);
+  return `<svg class="hw-decor" viewBox="0 0 100 ${(77.6 / 97.6 * 100).toFixed(3)}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="#7f9fc2" stroke-width="9.6" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#eef6ff" stroke-width="8.2" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#b9d2ec" stroke-width=".9" stroke-dasharray="1.6 3.2" stroke-linecap="round" opacity=".9"/></svg>`;
+}
 function hwPathSvg(){
   const d = hwPathD();
   return `<svg class="hw-decor" viewBox="0 0 100 ${(77.6 / 97.6 * 100).toFixed(3)}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="#3a2617" stroke-width="9.6" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#7b5a3c" stroke-width="8.2" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#9c7a55" stroke-width=".9" stroke-dasharray="1.6 3.2" stroke-linecap="round" opacity=".7"/></svg>`;
 }
 const BAT_SVG = '<svg viewBox="0 0 64 32"><path d="M32 12 C28 4 20 2 12 6 C16 8 16 12 14 16 C10 13 5 13 0 16 C8 18 12 24 14 30 C18 24 24 22 28 24 L32 20 L36 24 C40 22 46 24 50 30 C52 24 56 18 64 16 C59 13 54 13 50 16 C48 12 48 8 52 6 C44 2 36 4 32 12 Z" fill="#160a24"/><circle cx="30" cy="13" r="1.2" fill="#ff9a1f"/><circle cx="34" cy="13" r="1.2" fill="#ff9a1f"/></svg>';
+function noelSky(on){
+  const bg = document.querySelector('.bg'); if (!bg) return;
+  let sky = bg.querySelector('.noel-snow');
+  if (!on){ if (sky) sky.remove(); return; }
+  if (sky) return;
+  sky = h('div', {class:'noel-snow'});
+  for (let i = 0; i < 34; i++) sky.append(h('span', {class:'noel-flake', style:`left:${(i * 29.7) % 100}%;font-size:${10 + (i * 7) % 16}px;animation-duration:${9 + (i * 5) % 11}s;animation-delay:-${(i * 3.1) % 14}s;opacity:${.45 + (i % 5) * .1}`}, '❄'));
+  bg.append(sky);
+}
 function hwSky(on){
   const bg = document.querySelector('.bg'); if (!bg) return;
   let sky = bg.querySelector('.hw-sky');
@@ -951,13 +1041,12 @@ function hwSky(on){
   bg.append(sky);
 }
 function setTheme(t, silent){
-  THEME = (t === 'halloween' && HW_LAB) ? 'halloween' : 'classique';
-  if (HW_LAB) lsSet('classeparty-theme', THEME);
-  const on = hwOn();
-  document.body.classList.toggle('hw', on); hwSky(on);
-  const bc = document.getElementById('themeClassic'), bh = document.getElementById('themeHw');
-  if (bc){ bc.classList.toggle('on', !on); bc.setAttribute('aria-checked', String(!on)); }
-  if (bh){ bh.classList.toggle('on', on); bh.setAttribute('aria-checked', String(on)); }
+  THEME = (t === 'halloween' && HW_LAB) ? 'halloween' : ((t === 'noel' && NOEL_LAB) ? 'noel' : 'classique');
+  if (THEME === t) lsSet('classeparty-theme', THEME);
+  const on = hwOn(), nl = noelOn();
+  document.body.classList.toggle('hw', on || nl); document.body.classList.toggle('noel', nl); hwSky(on); noelSky(nl);
+  const sets = [['themeClassic', THEME === 'classique'], ['themeHw', on], ['themeNoel', nl]];
+  sets.forEach(([id, v]) => { const b = document.getElementById(id); if (b){ b.classList.toggle('on', v); b.setAttribute('aria-checked', String(v)); } });
   if (!silent){ MUSIC.setMode(musicCfg.mode); syncAudioButtons(); }
   if (G && Array.isArray(G.players) && !$('#game').hidden){ buildBoard(); }
 }
@@ -969,9 +1058,19 @@ function enableTestHalloween(){
   setTheme(lsGet('classeparty-theme') || 'classique');
 }
 window.enableTestHalloween = enableTestHalloween;
-window.enableTest = name => { if (name === 'halloween') enableTestHalloween(); else if (name === 'images') enableTestImages(); else enableTest111(); };
+function enableTestV114(){
+  if (NOEL_LAB && ORD_LAB) return; NOEL_LAB = true; ORD_LAB = true;
+  const bn = document.getElementById('themeNoel'); if (bn) bn.hidden = false;
+  const b = h('span', {class:'hw-badge', style:'background:#9b5de5', title:'Nouveautés en test (plateau de Noël, questions « dans l\'ordre ») : visibles seulement depuis le Labo'}, '🧪 LABO 1.14');
+  const bar = document.querySelector('.tb-btns'); if (bar) bar.prepend(b);
+  setTheme(lsGet('classeparty-theme') || 'classique');
+  if (!$('#admin').hidden) renderAdmin();
+}
+window.enableTestV114 = enableTestV114;
+window.enableTest = name => { if (name === 'v114' || name === 'noel' || name === 'ordre') enableTestV114(); else if (name === 'halloween') enableTestHalloween(); else if (name === 'images') enableTestImages(); else enableTest111(); };
 document.getElementById('themeClassic').addEventListener('click', () => { SFX.click(); setTheme('classique'); });
 document.getElementById('themeHw').addEventListener('click', () => { SFX.click(); setTheme('halloween'); });
+document.getElementById('themeNoel').addEventListener('click', () => { SFX.click(); setTheme('noel'); });
 setTheme(lsGet('classeparty-theme') || 'classique');
 
 function specialOn(){ return bank.settings.specialCards !== false; }
@@ -1085,8 +1184,8 @@ function showScreen(which){
 /* ================= BOARD ================= */
 function buildBoard(){
   const board = $('#board'); board.replaceChildren();
-  const ring = h('div', {class:'ring'}); const HW = hwOn();
-  if (HW) board.append(h('div', {html:hwDecor(), style:'position:absolute;inset:0'}), h('div', {html:hwPathSvg(), style:'position:absolute;inset:var(--pad)'}));
+  const ring = h('div', {class:'ring'}); const HW = pathOn();
+  if (HW) board.append(h('div', {html:noelOn() ? noelDecor() : hwDecor(), style:'position:absolute;inset:0'}), h('div', {html:noelOn() ? noelPathSvg() : hwPathSvg(), style:'position:absolute;inset:var(--pad)'}));
   BOARD.forEach((t, i) => {
     const {c, r} = cellPos(i); const def = CELL[t];
     const g = def.svg ? h('span', {class:'g', html:SVG[def.svg]}) : h('span', {class:'g' + (def.sm ? ' sm' : '')}, def.glyph);
@@ -1376,6 +1475,7 @@ function casesTxt(n){ return `${n} ${plural(n, 'case', 'cases')}`; }
 function askQuestion(p, kind, jail){
   const item = draw(kind);
   if (!item){ say("Il n'y a pas de question dans cette catégorie."); return jail ? freeFromJail(p) : endTurn(); }
+  if (item.type === 'ordre' && Array.isArray(item.items) && item.items.length > 1) return askOrder(p, kind, jail, item);
   const m = mult(); const isVF = kind === 'vf';
   const fb = h('p', {class:'feedback', hidden:true});
   const ex = h('p', {class:'expl', hidden:true});
@@ -1434,6 +1534,77 @@ function askQuestion(p, kind, jail){
   if (exitBtn) buttons.forEach(b => b.addEventListener('click', () => { exitBtn.hidden = true; }));
   openModal(card({type: jail ? 'P' : (isVF ? 'V' : 'Q'), title, player:p,
     body:[h('p', {class:'rule'}, rule), qImg(item), h('p', {class:'qtext'}, item.q), answers, fb, ex], foot:[exitBtn, cont]}));
+}
+/* ---------- « Remettre dans l'ordre » (v1.14) : on glisse les cases, ou on utilise les flèches ---------- */
+function ordShuffle(n){ const a = [...Array(n).keys()]; if (n < 2) return a; do { shuffle(a); } while (a.every((v, k) => v === k)); return a; }
+function ordDrag(list, canMove){
+  list.addEventListener('pointerdown', e => {
+    const li = e.target.closest('.ord-item');
+    if (!li || !canMove() || e.target.closest('button') || list.closest('.lab-wait')) return;
+    e.preventDefault(); const pidr = e.pointerId;
+    li.classList.add('drag');
+    const move = ev => {
+      if (ev.pointerId !== pidr) return; ev.preventDefault();
+      const y = ev.clientY; let before = null;
+      for (const o of list.children){ if (o === li) continue; const r = o.getBoundingClientRect(); if (y < r.top + r.height / 2){ before = o; break; } }
+      if (before){ if (li.nextElementSibling !== before) list.insertBefore(li, before); } else if (list.lastElementChild !== li) list.append(li);
+    };
+    const up = ev => { if (ev && ev.pointerId !== pidr) return; li.classList.remove('drag'); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up); SFX.click(); };
+    window.addEventListener('pointermove', move, {passive:false}); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+  });
+}
+function askOrder(p, kind, jail, item){
+  const m = mult(), n = item.items.length;
+  const fb = h('p', {class:'feedback', hidden:true});
+  const ex = h('p', {class:'expl', hidden:true});
+  const sol = h('div', {class:'ord-sol', hidden:true}, h('b', {}, 'Le bon ordre : '), h('ol', {}, item.items.map(t => h('li', {}, t))));
+  const cont = btn('CONTINUER', 'big go', null); cont.hidden = true;
+  let ok = false, done = false, given = '';
+  const list = h('ol', {class:'ord-list'});
+  const mv = (li, d) => { if (done) return; const sib = d < 0 ? li.previousElementSibling : li.nextElementSibling; if (!sib) return; if (d < 0) list.insertBefore(li, sib); else list.insertBefore(sib, li); SFX.click(); };
+  ordShuffle(n).forEach(k => {
+    const li = h('li', {class:'ord-item', 'data-i':String(k)}, h('span', {class:'ord-grip', 'aria-hidden':'true'}, '☰'), h('span', {class:'ord-txt'}, item.items[k]));
+    li.append(h('span', {class:'ord-arrows'},
+      h('button', {type:'button', class:'ord-b', 'aria-label':'Monter', onclick:() => mv(li, -1)}, '▲'),
+      h('button', {type:'button', class:'ord-b', 'aria-label':'Descendre', onclick:() => mv(li, 1)}, '▼')));
+    list.append(li);
+  });
+  ordDrag(list, () => !done);
+  list._apply = arr => { arr.forEach(k => { const li = list.querySelector(`[data-i="${k}"]`); if (li) list.append(li); }); };
+  const order = () => [...list.children].map(li => parseInt(li.dataset.i, 10));
+  const valid = h('button', {type:'button', class:'ans ord-ok'}, '✔ VALIDER L\'ORDRE');
+  valid.dataset.txt = 'Valider'; valid.dataset.right = '1';
+  valid.addEventListener('click', () => {
+    if (done) return; done = true;
+    const got = order(); ok = got.every((v, k) => v === k);
+    given = got.map(k => item.items[k]).join(' → ');
+    valid.disabled = true; list.classList.add('done');
+    [...list.children].forEach((li, pos) => li.classList.add(parseInt(li.dataset.i, 10) === pos ? 'right' : 'wrong'));
+    if (ok) SFX.good(); else SFX.bad();
+    fb.hidden = false; fb.className = 'feedback ' + (ok ? 'ok' : 'ko');
+    fb.textContent = jail ? (ok ? 'BON ORDRE ! Tu sors de retenue !' : 'RATÉ… Tu restes en retenue.')
+                          : (ok ? `BON ORDRE ! +${casesTxt(m)}` : `RATÉ… −${casesTxt(m)}`);
+    if (!ok) sol.hidden = false;
+    if (item.expl){ ex.textContent = item.expl; ex.hidden = false; }
+    cont.hidden = false; setTimeout(() => cont.focus(), 50);
+  });
+  const answers = h('div', {class:'answers ord-wrap'}, list, valid);
+  cont.addEventListener('click', async () => {
+    closeModal();
+    if (ok) p.stats.correct++; else p.stats.wrong++;
+    logAnswer(p, kind, item.q, ok, item.items.join(' → '), given);
+    if (jail){ if (ok) return freeFromJail(p); say(`${p.name} reste en retenue.`); return endTurn(); }
+    say(ok ? `Bravo ${p.name} ! +${casesTxt(m)}` : `Dommage ${p.name}… −${casesTxt(m)}`);
+    await moveBy(G.turn, ok ? m : -m);
+    endTurn();
+  });
+  const title = jail ? 'QUESTION DE RETENUE' : 'DANS L\'ORDRE !';
+  const rule = (jail ? 'Remets dans le bon ordre pour sortir de retenue.' : `Bon ordre : +${casesTxt(m)} · Erreur : −${casesTxt(m)}`) + ' Glisse les cases (ou utilise les flèches), puis valide.';
+  ensurePlayerFields(p);
+  const exitBtn = (jail && specialOn() && p.cards.exit > 0) ? btn('🎟️ Je ne sais pas : carte Sortie de retenue', 'small violet lab-exit', () => useExitCard(p)) : null;
+  if (exitBtn) valid.addEventListener('click', () => { exitBtn.hidden = true; });
+  openModal(card({type: jail ? 'P' : 'Q', title, player:p,
+    body:[h('p', {class:'rule'}, rule), qImg(item), h('p', {class:'qtext'}, item.q), answers, fb, sol, ex], foot:[exitBtn, cont]}));
 }
 function freeFromJail(p){
   p.jailed = false; SFX.lap();
@@ -1905,7 +2076,7 @@ function showPodium(){
 function confetti(){
   if (reduced) return;
   const box = h('div', {class:'confetti', 'aria-hidden':'true'});
-  const cols = hwOn() ? ['#ff7a1a', '#9b5de5', '#7ad36b', '#22102e', '#ffb13b', '#c58bff'] : ['#ef3e36', '#3fa9f5', '#4cc94c', '#ffc82e', '#9b5de5', '#ff5fa2'];
+  const cols = noelOn() ? ['#e8413b', '#1f9a55', '#ffd23f', '#ffffff', '#3fa9f5', '#c4553d'] : hwOn() ? ['#ff7a1a', '#9b5de5', '#7ad36b', '#22102e', '#ffb13b', '#c58bff'] : ['#ef3e36', '#3fa9f5', '#4cc94c', '#ffc82e', '#9b5de5', '#ff5fa2'];
   for (let i = 0; i < 70; i++){
     box.append(h('i', {style:`left:${Math.random() * 100}%;background:${cols[i % cols.length]};animation-duration:${2.2 + Math.random() * 2.2}s;animation-delay:${Math.random() * .8}s;transform:rotate(${Math.random() * 360}deg)`}));
   }
@@ -2208,6 +2379,8 @@ function bankToTxt(b, course){
   L.push('#              * la bonne réponse');
   L.push('#              - une mauvaise réponse   (2 à 4 réponses en tout)');
   L.push('#              E: explication (facultatif)');
+  L.push('#   ORDRE      O: la consigne (dans la section QUIZ), puis les éléments');
+  L.push('#              dans le BON ordre : 1. premier  2. deuxième  3. …  (2 à 8)');
   L.push('#   VRAI-FAUX  V: une affirmation VRAIE   ou   F: une affirmation FAUSSE');
   L.push('#              E: explication (facultatif)');
   L.push('#   ACTIONS    A: le défi');
@@ -2226,6 +2399,12 @@ function bankToTxt(b, course){
   L.push(`[QUIZ]   # ${b.quiz.length} questions`);
   b.quiz.forEach(q => {
     L.push('');
+    if (q.type === 'ordre'){
+      L.push('O: ' + oneLine(q.q)); if (q.img) L.push('I: ' + q.img);
+      (q.items || []).filter(x => oneLine(x)).forEach((x, k) => L.push(`${k + 1}. ${oneLine(x)}`));
+      if (oneLine(q.expl)) L.push('E: ' + oneLine(q.expl));
+      return;
+    }
     L.push('Q: ' + oneLine(q.q)); if (q.img) L.push('I: ' + q.img);
     (q.options || []).forEach((o, j) => { if (oneLine(o)) L.push((j === q.correct ? '* ' : '- ') + oneLine(o)); });
     if (oneLine(q.expl)) L.push('E: ' + oneLine(q.expl));
@@ -2281,6 +2460,14 @@ function txtToBank(text){
       return;
     }
     if (section === 'quiz'){
+      if ((m = t.match(/^O\s*[:.)]\s*(.*)$/i))){ cur = {type:'ordre', q:m[1].trim(), items:[], options:[], correct:-1, expl:'', line:i}; out.quiz.push(cur); return; }
+      if (cur && cur.type === 'ordre'){
+        if ((m = t.match(IMG_LINE))){ setImg(cur, m[1], i, err); return; }
+        if ((m = t.match(/^E\s*[:.)]\s*(.*)$/i))){ cur.expl = m[1].trim(); return; }
+        if ((m = t.match(/^(?:\d+\s*[.):-]|[-–—•*])\s*(.+)$/))){ cur.items.push(m[1].trim()); return; }
+        if (!cur.items.length){ cur.q += ' ' + t; return; }
+        err(i, 'ligne non comprise dans « remettre dans l\'ordre » : écris les éléments dans le bon ordre (1. … 2. … 3. …).'); return;
+      }
       if ((m = t.match(/^Q\s*[:.)]\s*(.*)$/i))){ cur = {q:m[1].trim(), options:[], correct:-1, expl:'', line:i}; out.quiz.push(cur); return; }
       if (!cur){ err(i, 'une question de quiz doit commencer par « Q: ».'); return; }
       if ((m = t.match(IMG_LINE))){ setImg(cur, m[1], i, err); return; }
@@ -2319,6 +2506,13 @@ function txtToBank(text){
     }
   });
   out.quiz = out.quiz.filter(q => {
+    if (q.type === 'ordre'){
+      const n = q.line + 1; q.items = q.items.filter(Boolean); delete q.line;
+      if (!q.q && !q.img){ errors.push(`Ligne ${n} : consigne « dans l'ordre » vide, ignorée.`); return false; }
+      if (q.items.length < 2){ errors.push(`Ligne ${n} : « ${q.q.slice(0, 40)} » : il faut au moins 2 éléments à remettre dans l'ordre, ignorée.`); return false; }
+      if (q.items.length > 8){ errors.push(`Ligne ${n} : « ${q.q.slice(0, 40)} » a plus de 8 éléments, seuls les 8 premiers sont gardés.`); q.items = q.items.slice(0, 8); }
+      return true;
+    }
     const n = q.line + 1; q.options = q.options.filter(o => o);
     if (!q.q && !q.img){ errors.push(`Ligne ${n} : question vide, ignorée.`); return false; }
     if (q.options.length < 2){ errors.push(`Ligne ${n} : « ${q.q.slice(0, 40)} » a moins de 2 réponses, ignorée.`); return false; }
@@ -2475,6 +2669,7 @@ function txa(id, val, on, rows = 2){ const el = h('textarea', {class:'in', id, r
 function fld(label, ctrl){ return h('label', {class:'fld', for:ctrl.id}, h('span', {class:'fld-l'}, label), ctrl); }
 /* ---------- images dans les questions (public depuis v1.13) ---------- */
 let IMG_LAB = true;
+let ORD_LAB = false;   /* v1.14 : questions « dans l'ordre » dans l'éditeur (Labo) */
 function enableTestImages(){ if (IMG_LAB) return; IMG_LAB = true; const ab = document.getElementById('admin'); if (ab && !ab.hidden && typeof renderAdmin === 'function') renderAdmin(); }
 window.enableTestImages = enableTestImages;
 const IMG_MAX = 60;
@@ -2553,6 +2748,7 @@ function renderAdmin(){
 const ADD_LABELS = {quiz:'Ajouter une question', vf:'Ajouter un vrai ou faux', actions:'Ajouter une action', mimes:'Ajouter un mime', chance:'Ajouter une carte Chance', malchance:'Ajouter une carte Malchance'};
 let freshAdd = false;
 function addItem(tab){
+  if (tab === 'ordre'){ draft.quiz.unshift({type:'ordre', q:'', items:['', '', '', ''], options:[], correct:-1, expl:''}); markDirty(); freshAdd = true; SFX.click(); renderAdmin(); return; }
   const blank = {
     quiz:() => ({q:'', options:['', '', '', ''], correct:0, expl:''}),
     vf:() => ({q:'', a:true, expl:''}),
@@ -2570,9 +2766,27 @@ function fillAdminBody(body){
   const del = (list, i) => () => { list.splice(i, 1); markDirty(); rerender(); };
   if (adminTab === 'tuto'){ lsSet('classeparty-tuto-seen', true); fillTuto(body); }
   else if (adminTab === 'quiz'){
-    body.append(addBar('Ajouter une question', () => addItem('quiz'),
+    body.append(ORD_LAB
+      ? h('div', {class:'add-row'}, btn('+ Ajouter une question', 'go', () => addItem('quiz')), btn('+ Remettre dans l\'ordre', 'violet', () => addItem('ordre')),
+          h('p', {class:'admin-intro', style:'flex:1;min-width:200px'}, 'Question à choix : coche la bonne réponse. « Dans l\'ordre » : écris les éléments dans le BON ordre, le jeu les mélange. 🧪 Labo'))
+      : addBar('Ajouter une question', () => addItem('quiz'),
       'Écris la question et les réponses, puis coche la bonne réponse. Les réponses vides ne s\'affichent pas (minimum 2).'));
     draft.quiz.forEach((it, i) => {
+      if (it.type === 'ordre'){
+        if (!Array.isArray(it.items)) it.items = [];
+        while (it.items.length < 3) it.items.push('');
+        if (it.items.length < 8 && String(it.items[it.items.length - 1] || '').trim()) it.items.push('');
+        const ed = h('div', {class:'ord-edit'});
+        it.items.forEach((x, k) => ed.append(h('div', {class:'oe'}, inp(`quiz-${i}-it-${k}`, x, v => { it.items[k] = v; }, {placeholder:k === 0 ? 'Le premier' : (k === 1 ? 'Le deuxième' : 'Le suivant (facultatif)'), maxlength:'90'}))));
+        const more = it.items.length < 8 ? btn('+ un élément', 'mini blue', () => { it.items.push(''); markDirty(); rerender(); }) : null;
+        const toQcm = ORD_LAB ? btn('Changer en question à choix', 'mini grey', () => { const its = it.items.filter(x => String(x).trim()); delete it.type; delete it.items; it.options = [its[0] || '', its[1] || '', its[2] || '', its[3] || '']; it.correct = 0; markDirty(); rerender(); }) : null;
+        body.append(h('div', {class:'arow'}, rowHead(i + 1, del(draft.quiz, i)),
+          h('div', {class:'opt-type'}, h('span', {class:'hw-badge', style:'font-size:.8rem;background:#9b5de5'}, '🔢 DANS L\'ORDRE'), toQcm),
+          fld('Consigne', txa(`quiz-${i}-q`, it.q, v => { it.q = v; })), IMG_LAB ? imgField(it, `quiz-${i}-img`) : null,
+          h('div', {class:'fld'}, h('span', {class:'fld-l'}, 'Les éléments, dans le BON ordre (2 à 8)'), ed, more),
+          fld('Explication affichée après la réponse (facultatif)', inp(`quiz-${i}-e`, it.expl, v => { it.expl = v; }))));
+        return;
+      }
       if (!Array.isArray(it.options)) it.options = ['', '', '', ''];
       while (it.options.length < 4) it.options.push('');
       const opts = h('div', {class:'opts-edit'});
@@ -2581,7 +2795,8 @@ function fillAdminBody(body){
         r.checked = it.correct === j; r.addEventListener('change', () => { it.correct = j; markDirty(); });
         opts.append(h('div', {class:'optedit'}, r, inp(`quiz-${i}-o-${j}`, o, v => { it.options[j] = v; }, {placeholder:'Réponse ' + 'ABCD'[j], maxlength:'90'})));
       });
-      body.append(h('div', {class:'arow'}, rowHead(i + 1, del(draft.quiz, i)),
+      const toOrd = ORD_LAB ? h('div', {class:'opt-type'}, btn('Changer en « remettre dans l\'ordre »', 'mini grey', () => { const its = it.options.filter(x => String(x).trim()); it.type = 'ordre'; it.items = its.length ? its : ['', '', '']; it.options = []; it.correct = -1; markDirty(); rerender(); })) : null;
+      body.append(h('div', {class:'arow'}, rowHead(i + 1, del(draft.quiz, i)), toOrd,
         fld('Question', txa(`quiz-${i}-q`, it.q, v => { it.q = v; })), IMG_LAB ? imgField(it, `quiz-${i}-img`) : null,
         h('div', {class:'fld'}, h('span', {class:'fld-l'}, 'Réponses (coche la bonne)'), opts),
         fld('Explication affichée après la réponse (facultatif)', inp(`quiz-${i}-e`, it.expl, v => { it.expl = v; }))));
@@ -2668,7 +2883,7 @@ function fillAdminBody(body){
 }
 function validateDraft(){
   const d = draft; const isBlank = s => !String(s || '').trim();
-  d.quiz = d.quiz.filter(q => !(isBlank(q.q) && !q.img && q.options.every(isBlank)));
+  d.quiz = d.quiz.filter(q => q.type === 'ordre' ? !(isBlank(q.q) && !q.img && (q.items || []).every(isBlank)) : !(isBlank(q.q) && !q.img && q.options.every(isBlank)));
   d.vf = d.vf.filter(v => !isBlank(v.q));
   d.actions = d.actions.filter(a => !isBlank(a.text));
   d.mimes = d.mimes.map(m => String(m || '').trim()).filter(Boolean);
@@ -2676,6 +2891,12 @@ function validateDraft(){
   d.malchance = d.malchance.filter(c => !isBlank(c.text));
   for (let i = 0; i < d.quiz.length; i++){
     const q = d.quiz[i];
+    if (q.type === 'ordre'){
+      q.items = (q.items || []).map(x => String(x || '').trim()).filter(Boolean); q.options = []; q.correct = -1;
+      if (isBlank(q.q) && !q.img) return ['quiz', `Quiz #${i + 1} : la consigne est vide.`];
+      if (q.items.length < 2) return ['quiz', `Quiz #${i + 1} : il faut au moins 2 éléments à remettre dans l'ordre.`];
+      continue;
+    }
     if (isBlank(q.q) && !q.img) return ['quiz', `Quiz #${i + 1} : la question est vide (écris une question ou ajoute une image).`];
     if (q.options.filter(o => !isBlank(o)).length < 2) return ['quiz', `Quiz #${i + 1} : il faut au moins 2 réponses.`];
     if (isBlank(q.options[q.correct])) return ['quiz', `Quiz #${i + 1} : la réponse cochée est vide.`];
@@ -2813,6 +3034,8 @@ function importFromSite(){
     ['title','subtitle','bestStar','course'].forEach(k => { if (d.settings[k]) bank.settings[k] = d.settings[k]; });
     if (!d.settings.course && imp.titre) bank.settings.course = String(imp.titre);
     bank.savedAt = Date.now(); persistBank();
+    if (/halloween/i.test(bank.settings.course || imp.titre || '')) { try { setTheme('halloween'); } catch (e) {} }
+    else if (/no[eë]l/i.test(bank.settings.course || imp.titre || '') && NOEL_LAB) { try { setTheme('noel'); } catch (e) {} }
     setTimeout(() => bigToast('COURS CHARGÉ !', 'gold'), 700);
   } catch (e) {}
 }

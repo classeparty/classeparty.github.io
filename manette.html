@@ -95,6 +95,19 @@ body.hw .brand,body.hw header .brand{color:#fff}
 body.hw .foot,body.hw .foot button{color:#f3e9ff}
 .q-img{display:flex;justify-content:center}
 .q-img img{display:block;max-width:100%;max-height:34vh;object-fit:contain;background:#fff;border:3px solid var(--ink);border-radius:14px}
+.ord-list{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:ord}
+.ord-item{counter-increment:ord;display:flex;align-items:center;gap:8px;background:#fffdf7;color:#3a1d0e;border:3px solid #3a1d0e;border-radius:14px;padding:10px;font-weight:800;font-size:1.1rem;line-height:1.15;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 4px 0 #3a1d0e}
+.ord-item::before{content:counter(ord);flex:0 0 auto;display:grid;place-items:center;width:1.8em;height:1.8em;border-radius:50%;background:#3fa9f5;color:#fff}
+.ord-item.drag{transform:scale(1.03);box-shadow:0 9px 0 #3a1d0e;position:relative;z-index:3}
+.ord-txt{flex:1;min-width:0}
+.ord-arrows{display:flex;gap:6px}
+.ord-b{width:44px;height:44px;border:2px solid #3a1d0e;border-radius:10px;background:#ffe7b0;color:#3a1d0e;font-weight:900;font-size:1.1rem}
+.ord-b:disabled{opacity:.3}
+.ord-sol{background:#fff4d6;border:3px dashed #3a1d0e;border-radius:14px;padding:10px 14px;font-weight:700;color:#3a1d0e}
+.ord-sol ol{margin:.3em 0 0;padding-left:1.4em}
+body.noel{--ink:#0f2740;--ink-2:#1d4466;--sun1:#2a5b8a;--sun2:#173a5e;--crust:#d62e3a;--c:#ffcf4a}
+body.noel .brand,body.noel header .brand{color:#fff}
+body.noel .foot,body.noel .foot button{color:#e6f1fc}
 </style>
 </head>
 <body>
@@ -133,7 +146,7 @@ body.hw .foot,body.hw .foot button{color:#f3e9ff}
   try { const pc = sb.channel('cp-site', {config: {presence: {key: devId}}}); pc.subscribe(st => { if (st === 'SUBSCRIBED') { try { pc.track({p: 'manette'}); } catch (e) {} } }); } catch (e) {}
   try { sb.rpc('compter_visite', {p_page: 'manette', p_nouvelle: true}).then(() => {}, () => {}); } catch (e) {}
 
-  let ch = null, code = '', S = null, pid = -1, answered = null, lastQ = '', helloT = null, foundT = null, lastSig = '', lastBuzz = '', lastSeen = 0, lostShown = false, shopPick = -1, chronoAt = 0, refuseArm = false, holdKey = '', holdAt = 0;
+  let ch = null, code = '', S = null, pid = -1, answered = null, lastQ = '', helloT = null, foundT = null, lastSig = '', lastBuzz = '', lastSeen = 0, lostShown = false, ordDraft = null, ordDragging = false, ordPending = false, shopPick = -1, chronoAt = 0, refuseArm = false, holdKey = '', holdAt = 0;
 
   /* ---------- 1. code ---------- */
   function codeScreen(msg) {
@@ -189,7 +202,8 @@ body.hw .foot,body.hw .foot button{color:#f3e9ff}
   function rerender() { render(); }
 
   function render() {
-    document.body.classList.toggle('hw', !!(S && S.theme === 'halloween'));
+    if (ordDragging) { ordPending = true; return; }
+    document.body.classList.toggle('hw', !!(S && S.theme === 'halloween')); document.body.classList.toggle('noel', !!(S && S.theme === 'noel'));
     if (!S) return;
     $('#footBtns').replaceChildren(el('button', {type: 'button', onclick: () => { pid = -1; ss.del('pid'); ss.del('pname'); track(); render(); }}, 'Changer de joueur'), el('button', {type: 'button', onclick: () => { leave(); ss.del('code'); ss.del('pid'); ss.del('pname'); pid = -1; code = ''; codeScreen(); }}, 'Quitter'));
     if (pid < 0) return pickScreen();
@@ -311,6 +325,7 @@ body.hw .foot,body.hw .foot button{color:#f3e9ff}
     if (key !== lastQ) { lastQ = key; answered = null; if (myTurn || q.all) vib(50); }
     const canAnswer = myTurn || q.all;
     const head = el('p', {class: 'muted'}, myTurn ? 'C\'est ta question !' : (q.all ? 'Tout le monde répond ! Question de ' + (who.name || '') : 'Question de ' + (who.name || '')));
+    if (q.ord && Array.isArray(q.ord.items)) return orderScreen(card, q, key, myTurn, canAnswer, head);
     if (q.revealed) {
       const mine = answered;
       const right = q.right;
@@ -336,6 +351,50 @@ body.hw .foot,body.hw .foot button{color:#f3e9ff}
       if (holdKey !== key) { holdKey = key; holdAt = Date.now() + q.hold * 1000; vib([30, 30, 30]); }
       show(el('p', {class: 'hold', id: 'holdBanner'}, '⏳'), head, qBlock(q), box); tickHold();
     } else show(head, qBlock(q), box,
+      (myTurn && card.exit) ? el('button', {type: 'button', class: 'btn violet', onclick: e => { e.currentTarget.disabled = true; act('useexit'); }}, '🎟️ Je ne sais pas : carte Sortie de retenue') : null);
+  }
+
+  /* ---------- « remettre dans l'ordre » (v1.14) ---------- */
+  function orderScreen(card, q, key, myTurn, canAnswer, head) {
+    const items = q.ord.items, n = items.length;
+    if (!ordDraft || ordDraft.key !== key) ordDraft = {key, order: (q.ord.show || items.map((x, k) => k)).slice()};
+    if (q.revealed) {
+      const mine = Array.isArray(answered) ? answered : null;
+      const ok = !!mine && mine.every((v, k) => v === k);
+      const kids = [head, qBlock(q)];
+      if (!mine) kids.push(el('p', {class: 'big'}, '⏱️'), el('p', {class: 'center'}, 'Tu n\'as pas répondu.'));
+      else { kids.push(el('p', {class: 'big ' + (ok ? 'ok' : 'ko')}, ok ? 'BON ORDRE !' : 'RATÉ…')); if (ok && !myTurn && S.shop) kids.push(el('p', {class: 'center'}, '+1 pièce 🪙')); if (lastBuzz !== 'rev' + key) { lastBuzz = 'rev' + key; vib(ok ? [40, 40, 120] : 200); } }
+      if (!ok) kids.push(el('div', {class: 'ord-sol'}, el('b', {}, 'Le bon ordre :'), el('ol', {}, items.map(t => el('li', {}, t)))));
+      if (myTurn && card.cont) kids.push(el('button', {type: 'button', class: 'btn go', onclick: e => { e.currentTarget.disabled = true; act('cont'); }}, 'CONTINUER'));
+      return show(...kids);
+    }
+    if (!canAnswer) return show(head, qBlock(q), el('p', {class: 'center'}, '👀 Regarde le tableau.'));
+    if (answered !== null) return show(head, qBlock(q), el('div', {class: 'emoji'}, '✅'), el('p', {class: 'center'}, 'Ton ordre est envoyé !'), el('p', {class: 'center muted'}, 'Attends la correction au tableau.'));
+    const list = el('ol', {class: 'ord-list'});
+    const swap = (a, b) => { const o = ordDraft.order; if (b < 0 || b >= n) return; [o[a], o[b]] = [o[b], o[a]]; vib(15); draw(); };
+    function draw() {
+      list.replaceChildren(...ordDraft.order.map((k, pos) => el('li', {class: 'ord-item', 'data-i': String(k)},
+        el('span', {class: 'ord-txt'}, items[k]),
+        el('span', {class: 'ord-arrows'}, el('button', {type: 'button', class: 'ord-b', disabled: pos === 0, 'aria-label': 'Monter', onclick: () => swap(pos, pos - 1)}, '▲'),
+          el('button', {type: 'button', class: 'ord-b', disabled: pos === n - 1, 'aria-label': 'Descendre', onclick: () => swap(pos, pos + 1)}, '▼')))));
+    }
+    draw();
+    list.addEventListener('pointerdown', e => {
+      const li = e.target.closest('.ord-item'); if (!li || e.target.closest('button')) return;
+      e.preventDefault(); const pidr = e.pointerId;
+      ordDragging = true; li.classList.add('drag');
+      const move = ev => { if (ev.pointerId !== pidr) return; ev.preventDefault(); const y = ev.clientY; let before = null; for (const o of list.children) { if (o === li) continue; const r = o.getBoundingClientRect(); if (y < r.top + r.height / 2) { before = o; break; } } if (before) { if (li.nextElementSibling !== before) list.insertBefore(li, before); } else if (list.lastElementChild !== li) list.append(li); };
+      const up = ev => { if (ev && ev.pointerId !== pidr) return; window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
+        ordDraft.order = [...list.children].map(x => parseInt(x.dataset.i, 10)); ordDragging = false; vib(15);
+        if (ordPending) { ordPending = false; render(); } else draw(); };
+      window.addEventListener('pointermove', move, {passive: false}); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+    });
+    const send = el('button', {type: 'button', class: 'btn go', onclick: e => { e.currentTarget.disabled = true; answered = ordDraft.order.slice(); act('ord', {order: answered}); render(); }}, '✔ VALIDER MON ORDRE');
+    const tip = el('p', {class: 'center muted'}, 'Glisse les cases ou utilise les flèches ▲ ▼');
+    if (q.hold && !myTurn) {
+      if (holdKey !== key) { holdKey = key; holdAt = Date.now() + q.hold * 1000; vib([30, 30, 30]); }
+      show(el('p', {class: 'hold', id: 'holdBanner'}, '⏳'), head, qBlock(q), tip, list, send); tickHold();
+    } else show(head, qBlock(q), tip, list, send,
       (myTurn && card.exit) ? el('button', {type: 'button', class: 'btn violet', onclick: e => { e.currentTarget.disabled = true; act('useexit'); }}, '🎟️ Je ne sais pas : carte Sortie de retenue') : null);
   }
 

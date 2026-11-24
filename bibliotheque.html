@@ -35,9 +35,9 @@
 <footer id="site-foot"></footer>
 <script src="lib/supabase.js"></script>
 <script src="config.js?v=20261014n"></script>
-<script src="format.js"></script>
+<script src="format.js?v=20261124a"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261014r"></script>
+<script src="app.js?v=20261124a"></script>
 <script>
 (async () => {
   await CP.init('bibliotheque.html');
@@ -114,7 +114,7 @@
   await load();
   /* lien direct vers un cours : bibliotheque.html?cours=ID (et &jouer=1 pour lancer la partie) */
   const direct = params.get('cours');
-  const RACCOURCIS = {heure: 'lire l%heure'};   // bibliotheque.html?cours=heure
+  const RACCOURCIS = {heure: 'lire l%heure', halloween: 'sp_cial halloween'};   // bibliotheque.html?cours=heure ou ?cours=halloween
   if (direct && CP.online && (/^[0-9a-f-]{36}$/i.test(direct) || RACCOURCIS[direct])) {
     const req = CP.sb.from('courses').select('id,titre,matiere,niveau,description,contenu,public').eq('public', true);
     const {data: lst} = RACCOURCIS[direct] ? await req.ilike('titre', '%' + RACCOURCIS[direct] + '%').order('created_at', {ascending: false}).limit(1) : await req.eq('id', direct).limit(1);

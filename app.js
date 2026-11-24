@@ -87,7 +87,7 @@
   /* ---------- réservé aux membres (compte gratuit) ---------- */
   CP.DEMO_TITRE = "Plus intelligent qu'un enfant de primaire ?";
   /* cours « vitrines » jouables sans compte (début du titre, sans accents) */
-  CP.GRATUITS = ["plus intelligent qu'un enfant", "j'apprends a lire l'heure"];
+  CP.GRATUITS = ["plus intelligent qu'un enfant", "j'apprends a lire l'heure", "special halloween"];
   CP.isFree = titre => { const t = String(titre || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’`]/g, "'").toLowerCase().trim(); return CP.GRATUITS.some(g => t.startsWith(g)); };
   CP.memberOnly = function (what) {
     if (!ONLINE || CP.user) return false;
@@ -159,7 +159,7 @@
   CP.preview = function (course) {
     const p = CP.parse(course.contenu);
     const items = [];
-    p.data.quiz.forEach(q => items.push(['quiz', 'Quiz', q.q, 'Réponse : ' + (q.options[q.correct] || '')]));
+    p.data.quiz.forEach(q => items.push(q.type === 'ordre' ? ['quiz', 'Dans l\'ordre', q.q, 'Ordre : ' + (q.items || []).join(' → ')] : ['quiz', 'Quiz', q.q, 'Réponse : ' + (q.options[q.correct] || '')]));
     p.data.vf.forEach(v => items.push(['vf', 'Vrai/Faux', v.q, 'Réponse : ' + (v.a ? 'Vrai' : 'Faux')]));
     p.data.actions.forEach(a => items.push(['actions', 'Action', a.text, a.hint ? 'Attendu : ' + a.hint : '']));
     p.data.mimes.forEach(m => items.push(['mimes', 'Mime', m, '']));

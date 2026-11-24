@@ -36,6 +36,14 @@ function txtToBank(text){
       return;
     }
     if (section === 'quiz'){
+      if ((m = t.match(/^O\s*[:.)]\s*(.*)$/i))){ cur = {type:'ordre', q:m[1].trim(), items:[], options:[], correct:-1, expl:'', line:i}; out.quiz.push(cur); return; }
+      if (cur && cur.type === 'ordre'){
+        if ((m = t.match(IMG_LINE))){ setImg(cur, m[1], i, err); return; }
+        if ((m = t.match(/^E\s*[:.)]\s*(.*)$/i))){ cur.expl = m[1].trim(); return; }
+        if ((m = t.match(/^(?:\d+\s*[.):-]|[-–—•*])\s*(.+)$/))){ cur.items.push(m[1].trim()); return; }
+        if (!cur.items.length){ cur.q += ' ' + t; return; }
+        err(i, 'ligne non comprise dans « remettre dans l\'ordre » : écris les éléments dans le bon ordre (1. … 2. … 3. …).'); return;
+      }
       if ((m = t.match(/^Q\s*[:.)]\s*(.*)$/i))){ cur = {q:m[1].trim(), options:[], correct:-1, expl:'', line:i}; out.quiz.push(cur); return; }
       if (!cur){ err(i, 'une question de quiz doit commencer par « Q: ».'); return; }
       if ((m = t.match(IMG_LINE))){ setImg(cur, m[1], i, err); return; }
@@ -74,6 +82,13 @@ function txtToBank(text){
     }
   });
   out.quiz = out.quiz.filter(q => {
+    if (q.type === 'ordre'){
+      const n = q.line + 1; q.items = q.items.filter(Boolean); delete q.line;
+      if (!q.q && !q.img){ errors.push(`Ligne ${n} : consigne « dans l'ordre » vide, ignorée.`); return false; }
+      if (q.items.length < 2){ errors.push(`Ligne ${n} : « ${q.q.slice(0, 40)} » : il faut au moins 2 éléments à remettre dans l'ordre, ignorée.`); return false; }
+      if (q.items.length > 8){ errors.push(`Ligne ${n} : « ${q.q.slice(0, 40)} » a plus de 8 éléments, seuls les 8 premiers sont gardés.`); q.items = q.items.slice(0, 8); }
+      return true;
+    }
     const n = q.line + 1; q.options = q.options.filter(o => o);
     if (!q.q && !q.img){ errors.push(`Ligne ${n} : question vide, ignorée.`); return false; }
     if (q.options.length < 2){ errors.push(`Ligne ${n} : « ${q.q.slice(0, 40)} » a moins de 2 réponses, ignorée.`); return false; }

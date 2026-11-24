@@ -17,9 +17,9 @@
 <footer id="site-foot"></footer>
 <script src="lib/supabase.js"></script>
 <script src="config.js?v=20261014n"></script>
-<script src="format.js"></script>
+<script src="format.js?v=20261124a"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261014r"></script>
+<script src="app.js?v=20261124a"></script>
 <script>
 (async () => {
   await CP.init('moderation.html');
@@ -146,7 +146,10 @@
       el('h2', {}, '🛠️ Labo ', el('span', {class: 'chip', style: 'background:#efe6ff'}, 'réservé à l\'administrateur')),
       el('p', {class: 'muted'}, 'Les fonctions en test. Personne d\'autre ne les voit : elles ne sont liées nulle part sur le site et ne s\'activent que pour un compte administrateur.'),
       el('div', {class: 'paper stack', style: 'align-content:start'},
-        el('p', {class: 'muted', style: 'margin:0'}, 'Aucune fonction en test pour le moment.')),
+        el('h3', {style: 'margin:0'}, '🧪 Version 1.14 ', el('span', {class: 'chip', style: 'background:#efe6ff'}, 'en test')),
+        el('p', {style: 'margin:0'}, el('b', {}, '🎄 Le plateau de Noël'), ' : un village enneigé, des cases en paquets cadeaux, la neige qui tombe et 5 musiques de Noël. Choisis « 🎄 Noël » dans « Thème du plateau », sur l\'écran d\'accueil du jeu.'),
+        el('p', {style: 'margin:0'}, el('b', {}, '🔢 Les questions « Remettre dans l\'ordre »'), ' : le jeu mélange les éléments, on les glisse à leur place (ou avec les flèches ▲▼), au tableau et sur les tablettes. Mode prof > Quiz > « + Remettre dans l\'ordre ». Dans un fichier .txt : une ligne « O: la consigne », puis « 1. … 2. … 3. … » dans le bon ordre.'),
+        el('div', {class: 'btn-row'}, el('a', {class: 'btn small violet', href: 'jouer.html?test=v114', target: '_blank', rel: 'noopener'}, 'Tester la version 1.14 dans le jeu'))),
       el('div', {class: 'paper stack', style: 'align-content:start'},
         el('p', {class: 'muted', style: 'margin:0'}, 'Versions publiques : 1.11 (avatars, cartes spéciales) le 11 octobre 2026, 1.12 (plateau Halloween) le 13 octobre 2026, 1.13 (images dans les questions) le 14 octobre 2026.'),
         el('div', {class: 'btn-row'}, el('a', {class: 'btn small grey', href: 'manette.html', target: '_blank', rel: 'noopener'}, 'Ouvrir une manette')))));
