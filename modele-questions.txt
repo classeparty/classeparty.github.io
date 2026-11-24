@@ -1,5 +1,5 @@
 ﻿# =====================================================================
-# MODÈLE DE FICHIER DE QUESTIONS  -  Classe Party v1.13
+# MODÈLE DE FICHIER DE QUESTIONS  -  Classe Party v1.14
 # Remplis ce fichier dans le Bloc-notes, enregistre-le sous un nouveau
 # nom (ex. : Questions-Geographie.txt), puis charge-le dans le jeu :
 # Mode prof > Ouvrir / Enregistrer > Charger un fichier de questions
@@ -11,6 +11,12 @@
 #   QUIZ       Q: la question
 #              * la bonne réponse
 #              - une mauvaise réponse   (2 à 4 réponses en tout)
+#              E: explication (facultatif)
+#   DANS L'ORDRE  (dans la section [QUIZ])
+#              O: la consigne
+#              1. le premier élément
+#              2. le deuxième...  (2 à 8 éléments, dans le BON ordre :
+#                 le jeu les mélange)
 #              E: explication (facultatif)
 #   VRAI-FAUX  V: une affirmation VRAIE   ou   F: une affirmation FAUSSE
 #              E: explication (facultatif)
@@ -45,6 +51,13 @@ Q: Quel est le plus long fleuve de France ?
 * La Loire
 - La Seine
 - Le Rhône
+
+O: Remets ces pays du plus petit au plus grand.
+1. Luxembourg
+2. Belgique
+3. Italie
+4. France
+E: La France est le plus grand pays de l'Union européenne.
 
 [VRAI-FAUX]
 

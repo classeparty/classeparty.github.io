@@ -17,9 +17,9 @@
 <footer id="site-foot"></footer>
 <script src="lib/supabase.js"></script>
 <script src="config.js?v=20261014n"></script>
-<script src="format.js?v=20261124a"></script>
+<script src="format.js?v=20261124p"></script>
 <script src="exemples.js"></script>
-<script src="app.js?v=20261124a"></script>
+<script src="app.js?v=20261124p"></script>
 <script>
 (async () => {
   await CP.init('moderation.html');
@@ -145,20 +145,16 @@
     el('section', {class: 'panel stack', style: 'border-style:dashed'},
       el('h2', {}, '🛠️ Labo ', el('span', {class: 'chip', style: 'background:#efe6ff'}, 'réservé à l\'administrateur')),
       el('p', {class: 'muted'}, 'Les fonctions en test. Personne d\'autre ne les voit : elles ne sont liées nulle part sur le site et ne s\'activent que pour un compte administrateur.'),
+      el('p', {style: 'margin:0'}, 'Aucune version en test pour le moment.'),
       el('div', {class: 'paper stack', style: 'align-content:start'},
-        el('h3', {style: 'margin:0'}, '🧪 Version 1.14 ', el('span', {class: 'chip', style: 'background:#efe6ff'}, 'en test')),
-        el('p', {style: 'margin:0'}, el('b', {}, '🎄 Le plateau de Noël'), ' : un village enneigé, des cases en paquets cadeaux, la neige qui tombe et 5 musiques de Noël. Choisis « 🎄 Noël » dans « Thème du plateau », sur l\'écran d\'accueil du jeu.'),
-        el('p', {style: 'margin:0'}, el('b', {}, '🔢 Les questions « Remettre dans l\'ordre »'), ' : le jeu mélange les éléments, on les glisse à leur place (ou avec les flèches ▲▼), au tableau et sur les tablettes. Mode prof > Quiz > « + Remettre dans l\'ordre ». Dans un fichier .txt : une ligne « O: la consigne », puis « 1. … 2. … 3. … » dans le bon ordre.'),
-        el('div', {class: 'btn-row'}, el('a', {class: 'btn small violet', href: 'jouer.html?test=v114', target: '_blank', rel: 'noopener'}, 'Tester la version 1.14 dans le jeu'))),
-      el('div', {class: 'paper stack', style: 'align-content:start'},
-        el('p', {class: 'muted', style: 'margin:0'}, 'Versions publiques : 1.11 (avatars, cartes spéciales) le 11 octobre 2026, 1.12 (plateau Halloween) le 13 octobre 2026, 1.13 (images dans les questions) le 14 octobre 2026.'),
+        el('p', {class: 'muted', style: 'margin:0'}, 'Versions publiques : 1.11 (avatars, cartes spéciales) le 11 octobre 2026, 1.12 (plateau Halloween) le 13 octobre 2026, 1.13 (images dans les questions) le 14 octobre 2026, 1.14 (plateau de Noël, questions « dans l\'ordre ») le 24 novembre 2026.'),
         el('div', {class: 'btn-row'}, el('a', {class: 'btn small grey', href: 'manette.html', target: '_blank', rel: 'noopener'}, 'Ouvrir une manette')))));
   showDone.addEventListener('change', load);
   /* ---------- lettre des nouveautés ---------- */
   const NL_DEF = {
-    sujet: 'Classe Party 1.13 : des images dans tes questions 🖼️',
-    corps: "Bonne nouvelle : tu peux maintenant ajouter une **image** à tes quiz, à tes vrai ou faux et à tes défis. Un outil, un produit, une carte, un schéma… La photo s'affiche en grand pendant la partie.\n\n- Dans le jeu : Mode prof, puis « 🖼️ Ajouter une image » sous la question (ou colle une image avec Ctrl+V).\n- Avec les tablettes : enregistre ton cours dans « Mes cours » pour que les élèves voient aussi l'image sur leur écran.\n- Chaque image envoyée sur le site est vérifiée par une intelligence artificielle, pour garder un site sûr pour nos élèves.\n\nEt le plateau Halloween de la version 1.12 est toujours là pour finir octobre en beauté 🎃",
-    lien: 'nouveautes.html', image: 'img/nouveaute-images-quiz.jpg'};
+    sujet: 'Classe Party 1.14 : le village de Noël est arrivé 🎄',
+    corps: "Pour finir l'année en beauté, Classe Party passe en version 1.14 avec deux nouveautés :\n\n- 🎄 **Le village de Noël** : un nouveau plateau vivant, avec un grand sapin, des chalets, une patinoire, un petit train qui passe de temps en temps et des villageois qui se baladent. Les cases deviennent des paquets cadeaux et 5 musiques de Noël t'attendent. Sur l'écran d'accueil : « Thème du plateau », puis « 🎄 Noël ».\n- 🔢 **Les questions « Remettre dans l'ordre »** : les élèves glissent les étapes à leur place, au tableau ou sur leur tablette. Parfait pour une recette, une technique, une histoire ou des dates. Dans le Mode prof : onglet Quiz, puis « + Remettre dans l'ordre ».\n\nTout est expliqué en images sur la page des nouveautés. Bonnes fêtes et bon jeu avec tes élèves !",
+    lien: 'nouveautes.html', image: 'img/nouveaute-noel.jpg'};
   async function invokeLettre(body){
     const {data, error} = await CP.sb.functions.invoke('lettre', {body});
     if (data) return data;
@@ -169,14 +165,14 @@
     nlBox.replaceChildren(el('p', {class: 'muted'}, 'Chargement…'));
     const {data: res, error} = await CP.sb.rpc('lettre_resume');
     if (error || !res) { nlBox.replaceChildren(el('div', {class: 'notice'}, el('b', {}, 'La lettre des nouveautés n\'est pas encore installée. '), 'Suis le guide GUIDE-LETTRE.txt : fichier newsletter.sql dans le SQL Editor, puis la fonction « lettre » et les secrets Gmail.')); return; }
-    let brouillon = null; try { brouillon = JSON.parse(localStorage.getItem('cp-lettre-brouillon') || 'null'); } catch (e) {}
+    let brouillon = null; try { brouillon = JSON.parse(localStorage.getItem('cp-lettre-brouillon-114') || 'null'); } catch (e) {}
     const v = Object.assign({}, NL_DEF, brouillon || {});
     const sujet = el('input', {class: 'in', id: 'nl-sujet', maxlength: '150', value: v.sujet});
     const corps = el('textarea', {class: 'in', id: 'nl-corps', rows: '11'}); corps.value = v.corps;
     const lien = el('input', {class: 'in', id: 'nl-lien', maxlength: '300', value: v.lien, placeholder: 'nouveautes.html'});
     const image = el('input', {class: 'in', id: 'nl-image', maxlength: '300', value: v.image, placeholder: 'Facultatif : img/... ou https://...'});
     const val = () => ({sujet: sujet.value.trim(), corps: corps.value.trim(), lien: lien.value.trim(), image: image.value.trim()});
-    [sujet, corps, lien, image].forEach(x => x.addEventListener('input', () => { try { localStorage.setItem('cp-lettre-brouillon', JSON.stringify(val())); } catch (e) {} }));
+    [sujet, corps, lien, image].forEach(x => x.addEventListener('input', () => { try { localStorage.setItem('cp-lettre-brouillon-114', JSON.stringify(val())); } catch (e) {} }));
     const msg = el('p', {class: 'msg', role: 'status'});
     const apercu = el('div', {class: 'stack'});
     const say = (t, kind) => { msg.className = 'msg' + (kind ? ' ' + kind : ''); msg.textContent = t; };
@@ -215,7 +211,7 @@
       lock(true); say('Préparation de la lettre…');
       const c = await invokeLettre({action: 'creer', ...x});
       if (!c.ok) { lock(false); return say(c.raison, 'err'); }
-      try { localStorage.removeItem('cp-lettre-brouillon'); } catch (e) {}
+      try { localStorage.removeItem('cp-lettre-brouillon-114'); } catch (e) {}
       envoyer(c.id, c.total);
     });
     const histo = el('div', {class: 'stack'});
@@ -237,7 +233,7 @@
       el('p', {class: 'small muted', style: 'margin:0'}, 'Mise en forme : **mot** = gras · une ligne qui commence par « - » = liste · « ## » = petit titre · une ligne vide = nouveau paragraphe.'),
       el('div', {class: 'grid2'}, el('label', {class: 'field'}, el('span', {}, 'Lien du bouton « Voir les nouveautés »'), lien), el('label', {class: 'field'}, el('span', {}, 'Image (facultatif)'), image)),
       el('div', {class: 'btn-row'}, bApercu, bTest, bGo,
-        el('button', {type: 'button', class: 'btn small grey', onclick: () => { try { localStorage.removeItem('cp-lettre-brouillon'); } catch (e) {} loadLettre(); }}, 'Revenir au modèle')),
+        el('button', {type: 'button', class: 'btn small grey', onclick: () => { try { localStorage.removeItem('cp-lettre-brouillon-114'); } catch (e) {} loadLettre(); }}, 'Revenir au modèle')),
       msg, apercu, histo);
     loadHisto();
   }

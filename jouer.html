@@ -621,7 +621,7 @@ body.hw.noel .center{left:44.5%;right:21%;top:25.5%;bottom:27%}
         <div class="mode-btns" role="radiogroup" aria-label="Thème du plateau">
           <button type="button" class="mode-btn on" id="themeClassic" role="radio" aria-checked="true"><b>🎲 Classique</b><small>Le plateau habituel</small></button>
           <button type="button" class="mode-btn" id="themeHw" role="radio" aria-checked="false"><b>🎃 Halloween</b><small>Le chemin du cimetière</small></button>
-          <button type="button" class="mode-btn" id="themeNoel" role="radio" aria-checked="false" hidden><b>🎄 Noël</b><small>Le village enneigé</small></button>
+          <button type="button" class="mode-btn" id="themeNoel" role="radio" aria-checked="false"><b>🎄 Noël</b><small>Le village enneigé</small></button>
         </div>
       </div>
       <div class="form-btns">
@@ -662,7 +662,7 @@ body.hw.noel .center{left:44.5%;right:21%;top:25.5%;bottom:27%}
   <div class="tour-hole" id="tourHole"></div>
   <div class="tour-bubble" id="tourBubble" role="dialog" aria-modal="true" aria-label="Visite guidée"></div>
 </div>
-<div class="sig" id="sig">© Manderlier Jérôme · v1.13</div>
+<div class="sig" id="sig">© Manderlier Jérôme · v1.14</div>
 </div>
 <script type="application/json" id="gtm-bank">{"quiz":[],"vf":[],"actions":[],"mimes":[],"chance":[{"text":"Tu as aidé un camarade sans qu'on te le demande.","kind":"coins","value":3},{"text":"Ton classeur est parfaitement en ordre.","kind":"coins","value":2},{"text":"Tu as levé la main pour poser une super question.","kind":"coins","value":3},{"text":"Le prof te félicite pour ton travail.","kind":"coins","value":4},{"text":"Tu es arrivé à l'heure toute la semaine.","kind":"coins","value":2},{"text":"Tu as trouvé la réponse avant tout le monde !","kind":"coins","value":5},{"text":"Ton exposé a impressionné la classe.","kind":"coins","value":4},{"text":"Tu as rangé la classe à la fin du cours.","kind":"coins","value":2},{"text":"Ton voisin te prête son meilleur stylo.","kind":"coins","value":1},{"text":"Tu as eu une idée de génie !","kind":"replay","value":0},{"text":"Tu as révisé la veille : tout est clair.","kind":"move","value":2}],"malchance":[{"text":"Tu as oublié ton matériel à la maison.","kind":"coins","value":-2},{"text":"Ton téléphone a sonné pendant le cours.","kind":"coins","value":-3},{"text":"Tu as renversé ta bouteille d'eau sur ta feuille.","kind":"coins","value":-2},{"text":"Tu es arrivé en retard.","kind":"coins","value":-2},{"text":"Tu as perdu ta feuille de cours.","kind":"coins","value":-1},{"text":"Tu as oublié de faire ton devoir.","kind":"coins","value":-3},{"text":"Ton stylo n'a plus d'encre en plein contrôle.","kind":"coins","value":-1},{"text":"Tu bavardais pendant les explications.","kind":"move","value":-2},{"text":"Tu as copié sur ton voisin !","kind":"prison","value":0}],"settings":{"title":"Classe Party","subtitle":"Le jeu de plateau de la classe","bestStar":"Le Meilleur Élève","course":"","duration":40,"rushMinutes":5,"mimeBonus":5,"starBonus":28,"bigFrom":15,"bigMult":2,"shopOn":true,"specialCards":true,"avatarsOn":true,"startCoins":3,"lapCoins":3,"priceDie":3,"priceFish":8,"priceGlue":4,"pin":"1234"}}</script>
 <script id="gtm-main">
@@ -993,8 +993,8 @@ function say(t){ if (G){ G.msg = t; const m = $('#msg'); if (m) m.textContent = 
 
 /* ================= SETUP SCREEN ================= */
 let nPlayers = 7;
-const APP_VERSION = '1.13';
-const BUILD = '20261124a';
+const APP_VERSION = '1.14';
+const BUILD = '20261124p';
 /* v1.11 : cartes spéciales et avatars pour tout le monde (désactivables dans Réglages) */
 let TEST111 = true;
 function enableTest111(){}
@@ -1002,7 +1002,7 @@ window.enableTest111 = enableTest111;
 
 /* ================= THÈME DU PLATEAU (Classique / Halloween) - v1.12 ================= */
 const HW_PATH = [[4.5, 6.6], [3.52, 6.38], [2.56, 6.13], [1.59, 6.38], [0.65, 6.27], [0.71, 5.29], [0.6, 4.34], [0.29, 3.38], [0.02, 2.43], [0.23, 1.53], [1.21, 1.35], [1.72, 0.54], [2.53, 0.04], [3.52, 0.22], [4.6, 0.4], [5.48, 0.62], [6.44, 0.87], [7.41, 0.62], [8.35, 0.73], [8.29, 1.71], [8.4, 2.66], [8.71, 3.62], [8.98, 4.57], [8.77, 5.47], [7.79, 5.65], [7.28, 6.46], [6.47, 6.96], [5.48, 6.78]];
-let THEME = 'classique', HW_LAB = true, NOEL_LAB = false;
+let THEME = 'classique', HW_LAB = true, NOEL_LAB = true;   /* plateau de Noël : public depuis v1.14 */
 function hwOn(){ return THEME === 'halloween'; }
 function noelOn(){ return THEME === 'noel'; }
 function pathOn(){ return THEME === 'halloween' || THEME === 'noel'; }
@@ -1145,14 +1145,7 @@ function enableTestHalloween(){
   setTheme(lsGet('classeparty-theme') || 'classique');
 }
 window.enableTestHalloween = enableTestHalloween;
-function enableTestV114(){
-  if (NOEL_LAB && ORD_LAB) return; NOEL_LAB = true; ORD_LAB = true;
-  const bn = document.getElementById('themeNoel'); if (bn) bn.hidden = false;
-  const b = h('span', {class:'hw-badge', style:'background:#9b5de5', title:'Nouveautés en test (plateau de Noël, questions « dans l\'ordre ») : visibles seulement depuis le Labo'}, '🧪 LABO 1.14');
-  const bar = document.querySelector('.tb-btns'); if (bar) bar.prepend(b);
-  setTheme(lsGet('classeparty-theme') || 'classique');
-  if (!$('#admin').hidden) renderAdmin();
-}
+function enableTestV114(){}
 window.enableTestV114 = enableTestV114;
 window.enableTest = name => { if (name === 'v114' || name === 'noel' || name === 'ordre') enableTestV114(); else if (name === 'halloween') enableTestHalloween(); else if (name === 'images') enableTestImages(); else enableTest111(); };
 document.getElementById('themeClassic').addEventListener('click', () => { SFX.click(); setTheme('classique'); });
@@ -2363,10 +2356,23 @@ function sQr(x, y, s){
 }
 Object.assign(TUTO_IMG, {
   theme: () => sFrame(
-    `<rect x="14" y="16" width="100" height="86" rx="12" fill="#ffd36b" stroke="${TK.ink}" stroke-width="3"/>` + [0,1,2,3].map(k => `<rect x="${24 + k * 21}" y="26" width="17" height="15" rx="3" fill="${[TK.q, TK.v, TK.c, TK.m][k]}" stroke="${TK.ink}" stroke-width="2"/>`).join('') + sTxt(64, 70, 'Classique', 12, TK.ink, 'middle', true)
-    + `<rect x="126" y="16" width="100" height="86" rx="12" fill="#2d1d52" stroke="${TK.ink}" stroke-width="3"/><circle cx="208" cy="32" r="8" fill="#ffe9a8"/><path d="M134 70 Q160 50 176 64 T220 58" stroke="#7b5a3c" stroke-width="9" fill="none" stroke-linecap="round"/>`
-    + `<ellipse cx="148" cy="88" rx="9" ry="7" fill="#ff7a1a" stroke="${TK.ink}" stroke-width="2"/><path d="M144 86 l2 -2 2 2 Z M150 86 l2 -2 2 2 Z" fill="#ffe14a"/>` + sTxt(186, 92, 'Halloween', 12, '#ffffff', 'middle', true)
-    + sCursor(200, 78), 'Le choix du thème : classique ou Halloween'),
+    `<rect x="10" y="14" width="70" height="88" rx="11" fill="#ffd36b" stroke="${TK.ink}" stroke-width="3"/>` + [0,1,2,3].map(k => `<rect x="${17 + (k % 2) * 30}" y="${24 + Math.floor(k / 2) * 22}" width="26" height="18" rx="3" fill="${[TK.q, TK.v, TK.c, TK.m][k]}" stroke="${TK.ink}" stroke-width="2"/>`).join('') + sTxt(45, 92, 'Classique', 11, TK.ink, 'middle', true)
+    + `<rect x="85" y="14" width="70" height="88" rx="11" fill="#2d1d52" stroke="${TK.ink}" stroke-width="3"/><circle cx="140" cy="30" r="7" fill="#ffe9a8"/><path d="M90 62 Q108 46 120 58 T150 52" stroke="#7b5a3c" stroke-width="8" fill="none" stroke-linecap="round"/>`
+    + `<ellipse cx="104" cy="76" rx="8" ry="6.5" fill="#ff7a1a" stroke="${TK.ink}" stroke-width="2"/><path d="M100 74 l2 -2 2 2 Z M106 74 l2 -2 2 2 Z" fill="#ffe14a"/>` + sTxt(120, 92, 'Halloween', 11, '#ffffff', 'middle', true)
+    + `<rect x="160" y="14" width="70" height="88" rx="11" fill="#1e3a6e" stroke="${TK.go}" stroke-width="4"/><path d="M162 80 Q195 68 228 80 L228 90 Q228 100 218 100 L172 100 Q162 100 162 90 Z" fill="#eef5ff"/>`
+    + `<path d="M195 24 l-13 22 h7 l-10 16 h32 l-10 -16 h7 z" fill="#2f9e44" stroke="${TK.ink}" stroke-width="2" stroke-linejoin="round"/><rect x="192" y="62" width="6" height="7" fill="#8a4b1c"/><path d="M195 17 l2 4.5 4.8 .4 -3.7 3 1.2 4.7 -4.3 -2.6 -4.3 2.6 1.2 -4.7 -3.7 -3 4.8 -.4 z" fill="#ffd43b" stroke="${TK.ink}" stroke-width="1.2"/>`
+    + [[172, 30], [220, 40], [178, 56], [214, 22]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2" fill="#fff"/>`).join('') + sTxt(195, 92, 'Noël', 12, TK.ink, 'middle', true)
+    + sTxt(120, 128, 'Avant « C\'EST PARTI ! »', 10.5, TK.ink, 'middle', true)
+    + sCursor(214, 70), 'Le choix du thème : classique, Halloween ou Noël'),
+  ordre: () => {
+    const row = (y, n, t, lift) => `<g${lift ? ' transform="translate(10 -3) rotate(-2 100 ' + (y + 11) + ')"' : ''}>${lift ? `<rect x="16" y="${y + 4}" width="166" height="22" rx="7" fill="${TK.ink}" opacity=".25"/>` : ''}<rect x="14" y="${y}" width="166" height="22" rx="7" fill="${lift ? '#fffbe8' : TK.white}" stroke="${lift ? TK.q : TK.ink}" stroke-width="${lift ? 3 : 2}"/>`
+      + `<circle cx="27" cy="${y + 11}" r="7.5" fill="${TK.q}"/>` + sTxt(27, y + 15, String(n), 10, '#fff', 'middle', true) + sTxt(41, y + 15, t, 10, TK.ink, 'start', true)
+      + `<rect x="150" y="${y + 3}" width="13" height="16" rx="3" fill="#ffe7a8" stroke="${TK.ink}" stroke-width="1.5"/><rect x="164" y="${y + 3}" width="13" height="16" rx="3" fill="#ffe7a8" stroke="${TK.ink}" stroke-width="1.5"/>`
+      + sTxt(156.5, y + 15, '▲', 8, TK.ink, 'middle') + sTxt(170.5, y + 15, '▼', 8, TK.ink, 'middle') + `</g>`;
+    return sFrame(row(16, 1, 'Cueillir les cabosses') + row(72, 3, 'Sécher les fèves') + row(44, 2, 'Écabosser', true)
+      + `<path d="M204 30 v52" stroke="${TK.ink}" stroke-width="3" stroke-linecap="round"/><path d="M198 36 l6 -7 l6 7 M198 76 l6 7 l6 -7" fill="none" stroke="${TK.ink}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`
+      + sBtn(30, 108, 180, 26, TK.go, '✔ VALIDER L\'ORDRE', 12) + sCursor(122, 50), 'Une question à remettre dans l\'ordre : on glisse les cases');
+  },
   manJoin: () => sFrame(
     `<rect x="12" y="14" width="120" height="84" rx="8" fill="${TK.crumb}" stroke="${TK.ink}" stroke-width="3"/>` + sQr(20, 24, 50)
     + sTxt(100, 42, 'Code', 10, TK.brown, 'middle') + sTxt(100, 62, '48343', 17, TK.ink, 'middle', true)
@@ -2401,6 +2407,7 @@ const TUTO = [
   {img:'plus', title:'Ajouter des questions', text:['Choisis un onglet : Quiz, Vrai / Faux, Actions, Mimes, Chance ou Malchance.', 'Clique sur la grosse touche verte + en bas à droite. Une fiche vide apparaît en haut de la liste, entourée de vert.', 'Pour enlever une fiche, clique sur « Supprimer ».']},
   {img:'fill', title:'Remplir une question de quiz', text:['Écris la question, puis 2 à 4 réponses.', 'Coche le rond devant la bonne réponse.', 'L\'explication est facultative : elle s\'affiche après la réponse et aide à corriger devant la classe.']},
   {img:'image', title:'Ajouter une image', text:['Sous chaque quiz, vrai/faux ou action, le champ « Image » : clique sur « 🖼️ Ajouter une image » ou colle une image avec Ctrl+V. Elle est réduite automatiquement.', 'La question peut même rester vide : « Comment s\'appelle ce produit ? » devient une simple photo.', 'Prends tes propres photos (atelier, matériel, produits) ou des images libres de droits, et jamais d\'élève.', 'Pour que les tablettes voient aussi l\'image, enregistre le cours sur le site (Mes cours) : chaque image y est vérifiée par une intelligence artificielle. Sinon, l\'élève lit « Regarde l\'image au tableau ».']},
+  {img:'ordre', title:'Remettre dans l\'ordre', text:['Onglet Quiz : clique sur « + Remettre dans l\'ordre ». Écris la consigne, puis 2 à 8 éléments, toujours dans le BON ordre : le jeu les mélange tout seul.', 'En classe, l\'élève glisse les cases à leur place (ou utilise les flèches ▲▼), au tableau ou sur sa tablette, puis valide. Bon ordre : il avance d\'une case.', 'Parfait pour les étapes d\'une recette ou d\'une technique, une histoire, des dates, des nombres du plus petit au plus grand…', 'Le bouton gris en haut de la fiche transforme une question à choix en question « dans l\'ordre », et inversement.']},
   {img:'tips', title:'Écrire de bonnes questions', text:['Fais des phrases courtes : elles doivent se lire de loin, au tableau.', 'Une seule bonne réponse, sans discussion possible.', 'Pour les Vrai / Faux, mélange des vrais et des faux, sinon les élèves devinent.', 'Pour les Actions, écris la réponse attendue : elle reste cachée, elle est pour toi.']},
   {img:'count', title:'Combien de questions ?', text:['Il n\'y a pas de minimum : le jeu fonctionne même avec quelques questions. Quand tout a été posé, elles sont remélangées et reviennent dans un autre ordre.', 'Pas de vrai/faux, pas d\'actions ou pas de mimes ? Pas de souci : sur ces cases, le jeu propose une question d\'une autre catégorie.', 'Pour une partie bien variée de 40 minutes, une dizaine de quiz et de vrai/faux est confortable, mais ce n\'est pas obligatoire.']},
   {img:'settings', title:'Régler la partie', text:['Dans Réglages, choisis la durée de la partie, la durée du coup de feu et les bonus du mime et des étoiles.', 'Grand groupe : à partir de 15 joueurs, les cases gagnées et perdues comptent double, pour que le classement bouge plus. Tu peux changer le seuil et le multiplicateur.', 'Pour un cours de 50 minutes, compte 40 minutes de jeu : il reste le temps de s\'installer et de faire le podium.']},
@@ -2408,7 +2415,7 @@ const TUTO = [
   {img:'txt', title:'Un fichier de questions par cours', text:['Onglet « Ouvrir / Enregistrer » : écris le nom du cours et clique sur « Télécharger les questions (.txt) ». Fais-le pour chaque cours.', 'Pour changer de cours, clique sur « Charger un fichier de questions », choisis le fichier, puis « Remplacer mes questions ». Le titre change aussi.', 'Le matin les maths, l\'après-midi la géographie : quelques secondes, sans rien retaper.', 'Le fichier .txt s\'ouvre dans le Bloc-notes : tu peux y écrire des questions directement en suivant le modèle en haut du fichier.']},
   {img:'file', title:'Garder une copie du jeu', text:['Dans l\'onglet « Ouvrir / Enregistrer », clique sur « Télécharger le jeu (fichier) ».', 'Mets le fichier sur une clé USB ou dans ton drive. Il s\'ouvre d\'un double-clic, même sans internet, avec toutes tes questions.', 'Après de grosses modifications, télécharge-le à nouveau.']},
   {part:'En classe : lancer la partie'},
-  {img:'theme', title:'Choisir le thème du plateau', text:['Sur l\'écran d\'accueil, « Thème du plateau » : Classique ou Halloween, avant de cliquer sur « C\'EST PARTI ! ».', 'Halloween : le plateau devient un chemin dans un cimetière, de nuit, avec la lune, les tombes, les citrouilles et les chauves-souris. Les tablettes passent aussi aux couleurs d\'Halloween.', 'Le menu « Musique » propose alors 5 airs d\'Halloween : la danse des squelettes, le manoir hanté, la marche des citrouilles, le bal des sorcières et la course des fantômes.', 'Les cases, les règles, les cartes et le bilan restent exactement les mêmes. Le jeu retient ton choix pour la prochaine fois.']},
+  {img:'theme', title:'Choisir le thème du plateau', text:['Sur l\'écran d\'accueil, « Thème du plateau » : Classique, Halloween ou Noël, avant de cliquer sur « C\'EST PARTI ! ».', 'Noël : un village enneigé avec un grand sapin, des chalets, une patinoire, un petit train qui passe de temps en temps et des villageois qui se baladent. Les cases deviennent des paquets cadeaux, les tablettes passent aux couleurs de Noël et le menu « Musique » propose 5 airs de Noël.', 'Halloween : le plateau devient un chemin dans un cimetière, de nuit, avec la lune, les tombes, les citrouilles et les chauves-souris. Les tablettes passent aussi aux couleurs d\'Halloween.', 'Le menu « Musique » propose alors 5 airs d\'Halloween : la danse des squelettes, le manoir hanté, la marche des citrouilles, le bal des sorcières et la course des fantômes.', 'Les cases, les règles, les cartes et le bilan restent exactement les mêmes. Le jeu retient ton choix pour la prochaine fois.']},
   {img:'room', title:'Installer le jeu', text:['Branche le projecteur et ouvre le jeu.', 'Appuie sur F11 pour passer en plein écran (F11 à nouveau pour en sortir).', 'Vérifie le son avec le bouton « Son », en haut.']},
   {img:'players', title:'Entrer les joueurs', text:['Choisis le nombre de joueurs avec – et +, ou tape le nombre (de 2 à 30), puis écris les prénoms.', 'Plus de 10 élèves ? Formez des équipes de 3 ou 4 et écris le nom des équipes : chacun joue plus souvent et la classe reste active.', 'Chaque élève reçoit une couleur de pion. Clique sur « C\'EST PARTI ! ».']},
   {img:'avatars', title:'Les avatars', text:['Clique sur la pastille de couleur devant un prénom : l\'élève choisit son personnage (renard, dragon, robot, princesse…), ses yeux, sa bouche et ses accessoires.', '« Valider, joueur suivant » enchaîne toute la classe. Avec les manettes, chacun crée son avatar sur sa tablette en attendant le début.', 'L\'avatar remplace le pion sur le plateau, apparaît dans le classement et danse sur le podium. Il est retenu par prénom sur cet ordinateur.', 'En cours de partie, clique sur l\'avatar d\'un joueur dans le classement pour le changer. Pas d\'avatars ? Réglages > « Avatars des joueurs » : Non.']},
@@ -2756,7 +2763,7 @@ function txa(id, val, on, rows = 2){ const el = h('textarea', {class:'in', id, r
 function fld(label, ctrl){ return h('label', {class:'fld', for:ctrl.id}, h('span', {class:'fld-l'}, label), ctrl); }
 /* ---------- images dans les questions (public depuis v1.13) ---------- */
 let IMG_LAB = true;
-let ORD_LAB = false;   /* v1.14 : questions « dans l'ordre » dans l'éditeur (Labo) */
+let ORD_LAB = true;   /* questions « dans l'ordre » dans l'éditeur : public depuis v1.14 */
 function enableTestImages(){ if (IMG_LAB) return; IMG_LAB = true; const ab = document.getElementById('admin'); if (ab && !ab.hidden && typeof renderAdmin === 'function') renderAdmin(); }
 window.enableTestImages = enableTestImages;
 const IMG_MAX = 60;
@@ -2793,11 +2800,11 @@ function imgField(it, idp){
   const paste = h('input', {class:'in paste', type:'text', placeholder:'ou clique ici et colle une image (Ctrl+V)', 'aria-label':'Coller une image'});
   paste.addEventListener('paste', e => { const f = [...(e.clipboardData ? e.clipboardData.items : [])].find(x => x.type && x.type.startsWith('image/')); e.preventDefault(); if (f) set(f.getAsFile()); else status.textContent = 'Pas d\'image dans le presse-papiers.'; });
   function draw(){
-    wrap.replaceChildren(
+    wrap.replaceChildren(...[
       it.img ? h('img', {class:'thumb', src:it.img, alt:'Aperçu'}) : null,
       btn(it.img ? '🖼️ Changer l\'image' : '🖼️ Ajouter une image', 'mini blue', () => file.click()),
       it.img ? btn('Retirer', 'mini red', () => { delete it.img; markDirty(); draw(); }) : paste,
-      file, status);
+      file, status].filter(Boolean));
     status.textContent = it.img && /^https:/.test(it.img) ? 'Image en ligne' : (it.img ? `Image sur cet ordinateur (${Math.round(it.img.length * .75 / 1024)} Ko)` : '');
   }
   draw();
@@ -3042,7 +3049,7 @@ const TOUR = [
   {sel:'.stepper', title:'Le nombre de joueurs', text:'De 2 à 30. Au-delà de 10 élèves, joue en équipes de 3 ou 4 : chacun participe plus souvent. À partir de 15 joueurs, les cases gagnées et perdues comptent double.'},
   {sel:'#names', title:'Les prénoms ou les équipes', text:'Écris le prénom de chaque élève ou le nom de chaque équipe. Chacun reçoit une couleur de pion.'},
   {sel:'#dur', title:'La durée de la partie', text:'40 minutes conviennent bien pour un cours de 50 minutes. Les 5 dernières minutes, c\'est le « coup de feu » : tout compte double.'},
-  {sel:'#themeBox', title:'Le thème du plateau', text:'Classique : le plateau habituel. Halloween : un chemin dans un cimetière de nuit, avec 5 musiques d\'Halloween. Les règles sont les mêmes.'},
+  {sel:'#themeBox', title:'Le thème du plateau', text:'Classique : le plateau habituel. Halloween : un chemin dans un cimetière de nuit. Noël : un village enneigé avec son sapin et son petit train. Chaque thème a ses 5 musiques ; les règles sont les mêmes.'},
   {sel:'#modeBox', title:'Avec ou sans manettes', text:'Sans manettes : tout se joue au tableau. Avec manettes : les élèves rejoignent avec un QR code et jouent sur une tablette (internet nécessaire). Le tuto du mode prof explique tout.'},
   {sel:'#btnStart', title:'Lancer la partie', text:'Quand tout est prêt, clique ici. Astuce : appuie sur F11 pour passer en plein écran au projecteur.'},
   {sel:'.tb-audio', title:'Musique et sons', text:'Le bouton Musique ouvre un menu : 5 airs d\'ambiance à choisir, ou « Enchaîner les 5 » pour changer d\'air toutes les 2 à 3 minutes, et le volume. Le bouton Sons coupe les bruitages. La musique accélère pendant le coup de feu !'},
